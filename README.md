@@ -51,7 +51,7 @@ Grab the latest installer from the [Releases page](https://github.com/versus184-
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 18+
+- [Node.js](https://nodejs.org/)
 - [Rust toolchain](https://rustup.rs/) (for Tauri builds)
 - A [Mistral AI API key](https://console.mistral.ai/)
 
