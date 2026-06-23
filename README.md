@@ -1,6 +1,6 @@
 # Mosaic
 
-> **Beta** — feedback welcome! Report issues or suggest features [here](https://github.com/anomalyco/opencode/issues).
+> **Beta** — feedback welcome! Report issues or suggest features [here](https://github.com/versus184-py/Mosaic/issues).
 
 A spatial canvas for AI conversations — branch, explore, and run code inline.
 
