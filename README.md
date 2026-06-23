@@ -29,11 +29,15 @@ Right now Mosaic only supports **Mistral AI** because their API has a generous f
 
 | Canvas with conversation branches | Code execution inline |
 |:---:|:---:|
-| _Add screenshot of a branched conversation on the canvas_ | _Add screenshot showing Python/JS code running in a node_ |
+|<img width="1919" height="839" alt="image" src="https://github.com/user-attachments/assets/3278719d-aae8-4987-8930-aa079f4ca614" />
+|<img width="1248" height="819" alt="image" src="https://github.com/user-attachments/assets/4023b775-8892-4b7a-9f58-384c3f994136" />
+|
 
 | Settings & themes | Document RAG panel |
 |:---:|:---:|
-| _Add screenshot of the settings drawer with theme picker_ | _Add screenshot of the document upload panel_ |
+|<img width="804" height="984" alt="image" src="https://github.com/user-attachments/assets/43973c8d-24a1-4348-9e0b-10678652ec41" />
+|<img width="357" height="1031" alt="image" src="https://github.com/user-attachments/assets/0c2b74ef-d13f-413f-9234-e9d17a3ed8eb" />
+|
 
 ## Download
 
