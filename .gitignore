@@ -1,0 +1,12 @@
+node_modules/
+dist/
+src-tauri/target/
+
+.DS_Store
+*.log
+
+# Installers — upload these as GitHub Releases instead
+*.msi
+*.exe
+*.dmg
+*.AppImage
