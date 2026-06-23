@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ───── Shared ───── */
+:root {
+  --radius: 16px;
+  --radius-lg: 20px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ───── Void — dark, cold, minimal ───── */
+.theme-void {
+  --bg: #020204;
+  --bg-1: #06061a;
+  --bg-2: #08082a;
+  --bg-3: #0a0a3a;
+  --glass: rgba(59, 130, 255, 0.04);
+  --glass-hover: rgba(59, 130, 255, 0.08);
+  --glass-active: rgba(59, 130, 255, 0.14);
+  --glass-border: rgba(59, 130, 255, 0.08);
+  --glass-edge: rgba(59, 130, 255, 0.15);
+  --glass-content-bg: rgba(2, 2, 10, 0.3);
+  --glass-tint-a: rgba(59, 130, 255, 0.06);
+  --glass-tint-b: rgba(100, 180, 255, 0.06);
+  --glass-tint-c: rgba(30, 80, 200, 0.06);
+  --text: #e0e8f5;
+  --text-secondary: #8898ba;
+  --text-muted: #4a5670;
+  --shadow: rgba(0, 0, 0, 0.7);
+  --accent: #3a7cff;
+  --accent-alpha: rgba(58, 124, 255, 0.15);
+  --grid-color: rgba(59, 130, 255, 0.04);
+  --dialog-bg: rgba(2, 2, 10, 0.85);
+}
+
+/* ───── Dusk — dark, cosmic, rich ───── */
+.theme-dusk {
+  --bg: #06030e;
+  --bg-1: #0a0720;
+  --bg-2: #0e0a30;
+  --bg-3: #120d40;
+  --glass: rgba(160, 120, 255, 0.04);
+  --glass-hover: rgba(160, 120, 255, 0.08);
+  --glass-active: rgba(160, 120, 255, 0.14);
+  --glass-border: rgba(160, 120, 255, 0.08);
+  --glass-edge: rgba(220, 200, 255, 0.12);
+  --glass-content-bg: rgba(6, 3, 14, 0.3);
+  --glass-tint-a: rgba(160, 120, 255, 0.06);
+  --glass-tint-b: rgba(120, 200, 255, 0.06);
+  --glass-tint-c: rgba(220, 120, 255, 0.06);
+  --text: #e8e0f5;
+  --text-secondary: #9388ba;
+  --text-muted: #544870;
+  --shadow: rgba(0, 0, 0, 0.7);
+  --accent: #c49a3c;
+  --accent-alpha: rgba(196, 154, 60, 0.15);
+  --grid-color: rgba(160, 120, 255, 0.04);
+  --dialog-bg: rgba(6, 3, 14, 0.85);
+}
+
+/* ───── Sand — light, desert, warm ───── */
+.theme-sand {
+  --bg: #f0e6d4;
+  --bg-1: #e8dcc8;
+  --bg-2: #e0d2bc;
+  --bg-3: #d8c8b0;
+  --glass: rgba(180, 100, 60, 0.04);
+  --glass-hover: rgba(180, 100, 60, 0.07);
+  --glass-active: rgba(180, 100, 60, 0.12);
+  --glass-border: rgba(180, 100, 60, 0.08);
+  --glass-edge: rgba(255, 230, 210, 0.6);
+  --glass-content-bg: rgba(240, 230, 212, 0.25);
+  --glass-tint-a: rgba(220, 160, 100, 0.08);
+  --glass-tint-b: rgba(200, 180, 100, 0.08);
+  --glass-tint-c: rgba(180, 140, 200, 0.08);
+  --text: #1a1610;
+  --text-secondary: #605448;
+  --text-muted: #90846a;
+  --shadow: rgba(60, 40, 20, 0.08);
+  --accent: #c4694a;
+  --accent-alpha: rgba(196, 105, 74, 0.12);
+  --grid-color: rgba(120, 80, 40, 0.04);
+  --dialog-bg: rgba(240, 230, 212, 0.9);
+}
+
+/* ───── Snow — light, clean, crisp ───── */
+.theme-snow {
+  --bg: #eef2f6;
+  --bg-1: #e6ecf0;
+  --bg-2: #dee4ea;
+  --bg-3: #d6dce4;
+  --glass: rgba(60, 100, 160, 0.04);
+  --glass-hover: rgba(60, 100, 160, 0.07);
+  --glass-active: rgba(60, 100, 160, 0.12);
+  --glass-border: rgba(60, 100, 160, 0.07);
+  --glass-edge: rgba(255, 255, 255, 0.7);
+  --glass-content-bg: rgba(238, 242, 246, 0.25);
+  --glass-tint-a: rgba(90, 138, 204, 0.06);
+  --glass-tint-b: rgba(130, 180, 220, 0.06);
+  --glass-tint-c: rgba(60, 100, 180, 0.06);
+  --text: #101820;
+  --text-secondary: #48586a;
+  --text-muted: #7a8a9a;
+  --shadow: rgba(20, 40, 60, 0.08);
+  --accent: #5a8acc;
+  --accent-alpha: rgba(90, 138, 204, 0.12);
+  --grid-color: rgba(40, 80, 120, 0.04);
+  --dialog-bg: rgba(238, 242, 246, 0.9);
+}
+
+/* ───── Sunrise — light, golden, bright ───── */
+.theme-sunrise {
+  --bg: #faeddc;
+  --bg-1: #f5e5d0;
+  --bg-2: #f0ddc4;
+  --bg-3: #ebd5b8;
+  --glass: rgba(200, 130, 60, 0.04);
+  --glass-hover: rgba(200, 130, 60, 0.07);
+  --glass-active: rgba(200, 130, 60, 0.12);
+  --glass-border: rgba(200, 130, 60, 0.07);
+  --glass-edge: rgba(255, 240, 220, 0.6);
+  --glass-content-bg: rgba(250, 237, 220, 0.25);
+  --glass-tint-a: rgba(240, 180, 100, 0.08);
+  --glass-tint-b: rgba(220, 200, 120, 0.08);
+  --glass-tint-c: rgba(200, 160, 200, 0.08);
+  --text: #1a1410;
+  --text-secondary: #685448;
+  --text-muted: #98846a;
+  --shadow: rgba(80, 50, 20, 0.08);
+  --accent: #d4894a;
+  --accent-alpha: rgba(212, 137, 74, 0.12);
+  --grid-color: rgba(140, 100, 40, 0.04);
+  --dialog-bg: rgba(250, 237, 220, 0.9);
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+    system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background 0.4s var(--ease-out), color 0.4s var(--ease-out);
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  40% { transform: translateY(-7px) scale(1.2); opacity: 1; }
+}
+
+.search-match {
+  box-shadow: 0 0 0 2px var(--accent), 0 0 20px var(--accent-alpha) !important;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.settings-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.settings-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.settings-panel::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 2px;
+}

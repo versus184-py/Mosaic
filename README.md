@@ -1,12 +1,6 @@
 # Mosaic
-A spatial canvas for AI conversations
 
-<img width="501" height="353" alt="image" src="https://github.com/user-attachments/assets/76cb4aeb-5fa8-4ddb-95ee-f5a4fe323dc9" />
-
-
-# Mosaic
-
-> **Beta** — feedback welcome and requested
+> **Beta** — feedback welcome! Report issues or suggest features [here](https://github.com/anomalyco/opencode/issues).
 
 A spatial canvas for AI conversations — branch, explore, and run code inline.
 
@@ -35,17 +29,18 @@ Right now Mosaic only supports **Mistral AI** because their API has a generous f
 
 | Canvas with conversation branches | Code execution inline |
 |:---:|:---:|
-<img width="1711" height="772" alt="image" src="https://github.com/user-attachments/assets/33653092-0f3a-43c0-8084-9d3d9f54543b" />
-<img width="1431" height="842" alt="image" src="https://github.com/user-attachments/assets/b499b1d9-27a9-4e05-818a-845fe6ffe44b" />
-<img width="1434" height="563" alt="image" src="https://github.com/user-attachments/assets/bb14195f-e6e8-4d08-8b54-fb1e138c0dde" />
+| _Add screenshot of a branched conversation on the canvas_ | _Add screenshot showing Python/JS code running in a node_ |
 
 | Settings & themes | Document RAG panel |
-<img width="635" height="984" alt="image" src="https://github.com/user-attachments/assets/56196779-3563-4285-9e7d-fa30d8427c55" />
-
+|:---:|:---:|
+| _Add screenshot of the settings drawer with theme picker_ | _Add screenshot of the document upload panel_ |
 
 ## Download
 
-Grab the latest installer for Windows from the releases page
+Grab the latest installer for Windows:
+
+- [Mosaic_0.1.0_x64_en-US.msi](./Mosaic_0.1.0_x64_en-US.msi)
+- [Mosaic_0.1.0_x64_en-US.exe](./Mosaic_0.1.0_x64_en-US.exe)
 
 > No installer yet for macOS/Linux. Build from source (see below) or open an issue if you'd like a binary for your platform.
 
@@ -53,7 +48,7 @@ Grab the latest installer for Windows from the releases page
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://nodejs.org/) 18+
 - [Rust toolchain](https://rustup.rs/) (for Tauri builds)
 - A [Mistral AI API key](https://console.mistral.ai/)
 
@@ -118,3 +113,7 @@ The free tier includes generous credits — enough for heavy daily use.
 - [Zustand](https://github.com/pmndrs/zustand) — state management
 - [Pyodide](https://pyodide.org/) — in-browser Python execution (WebAssembly)
 - [Mistral AI](https://mistral.ai/) — LLM provider
+
+## License
+
+MIT

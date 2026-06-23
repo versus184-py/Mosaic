@@ -1,0 +1,209 @@
+/* ───── Glass Container ───── */
+.glass-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--shadow);
+  transition: background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ───── Layer 1: Backdrop blur + SVG filter ───── */
+.glass-filter-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  pointer-events: none;
+  transition: backdrop-filter 0.3s ease;
+}
+
+/* Active node glow pulse via box-shadow ring (avoids overflow clipping) */
+.active-pulse {
+  box-shadow: 0 0 0 0 var(--accent-alpha);
+  animation: pulseRing 2s ease-in-out infinite;
+}
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-alpha); }
+  50% { box-shadow: 0 0 0 3px var(--accent-alpha), 0 0 20px var(--accent-alpha); }
+}
+
+/* ───── Layer 2: Tint ───── */
+.glass-tint-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  background: linear-gradient(
+    135deg,
+    var(--glass-tint-a, rgba(140, 180, 255, 0.06)) 0%,
+    var(--glass-tint-b, rgba(120, 200, 220, 0.06)) 40%,
+    var(--glass-tint-c, rgba(100, 150, 255, 0.06)) 70%,
+    var(--glass-tint-a, rgba(140, 180, 255, 0.06)) 100%
+  );
+  pointer-events: none;
+  animation: tintDrift 14s ease-in-out infinite;
+}
+
+@keyframes tintDrift {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+
+/* ───── Layer 3: Shine / specular rim ───── */
+.glass-shine-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.4),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Top edge highlight */
+.glass-shine-layer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 40%,
+    rgba(255, 255, 255, 0.25) 60%,
+    transparent 100%
+  );
+}
+
+/* ───── Layer 4: Content ───── */
+.glass-content-layer {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
+
+/* ───── Ripple click effects ───── */
+.glass-ripple-container {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glass-ripple {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: none;
+}
+
+.glass-ripple-active {
+  animation: rippleExpand 0.6s ease-out forwards;
+}
+
+@keyframes rippleExpand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.6;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
+/* ───── Glass variants ───── */
+
+/* Minimal — less blur, no tint animation */
+.glass-minimal .glass-filter-layer {
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+}
+.glass-minimal .glass-tint-layer {
+  animation: none;
+  opacity: 0.4;
+}
+
+/* Clarity — max readability */
+.glass-clarity .glass-filter-layer {
+  backdrop-filter: blur(4px) saturate(150%);
+  -webkit-backdrop-filter: blur(4px) saturate(150%);
+}
+.glass-clarity .glass-tint-layer {
+  animation: none;
+  opacity: 0.3;
+}
+.glass-clarity .glass-shine-layer {
+  display: none;
+}
+
+/* Dream — soft ethereal */
+.glass-dream .glass-filter-layer {
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+}
+
+/* Floating bob animation */
+.glass-float {
+  animation: glassFloat 5s ease-in-out infinite;
+}
+
+@keyframes glassFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Touch illumination (legacy, kept for MessageNode) */
+.glass-illumination {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+}
+
+/* SVG filter lensing support */
+@supports (background: paint(something)) {
+  /* Reserved for future Houdini paint worklet */
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .glass-container {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  .glass-tint-layer {
+    animation: none !important;
+  }
+  .glass-float {
+    animation: none !important;
+  }
+  .glass-ripple-active {
+    animation: none !important;
+    display: none;
+  }
+  .active-pulse::after {
+    animation: none !important;
+    display: none;
+  }
+}
