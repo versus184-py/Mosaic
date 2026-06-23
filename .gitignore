@@ -1,0 +1,12 @@
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Tauri build output
+src-tauri/target/
