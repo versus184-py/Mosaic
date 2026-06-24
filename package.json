@@ -2,6 +2,27 @@
   "name": "mosaic",
   "private": true,
   "version": "0.1.0",
+  "description": "A spatial canvas for AI conversations — branch, explore, and run code inline",
+  "keywords": [
+    "ai",
+    "chat",
+    "canvas",
+    "llm",
+    "mistral",
+    "tauri",
+    "react-flow",
+    "rag",
+    "conversation-tree"
+  ],
+  "homepage": "https://github.com/versus184-py/Mosaic#readme",
+  "bugs": {
+    "url": "https://github.com/versus184-py/Mosaic/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/versus184-py/Mosaic.git"
+  },
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
