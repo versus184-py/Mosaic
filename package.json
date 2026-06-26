@@ -1,7 +1,7 @@
 {
   "name": "mosaic",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A spatial canvas for AI conversations — branch, explore, and run code inline",
   "keywords": [
     "ai",
