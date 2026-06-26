@@ -50,7 +50,27 @@ export interface CanvasState {
   positionHistory: { nodes: ChatNode[]; edges: ChatEdge[] }[];
 }
 
+export type ProviderId = "mistral" | "openai" | "anthropic" | "gemini" | "ollama";
+
 export interface ProviderConfig {
   url: string;
   label: string;
+  provider: ProviderId;
+}
+
+export interface ProviderDefinition {
+  id: ProviderId;
+  label: string;
+  keyLabel: string;
+  requiresKey: boolean;
+  builtIn: boolean;
+  defaultUrl?: string;
+  models: ModelOption[];
+}
+
+export interface ModelOption {
+  id: string;
+  label: string;
+  provider: ProviderId;
+  supportsEmbeddings: boolean;
 }

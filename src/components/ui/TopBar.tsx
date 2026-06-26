@@ -4,14 +4,30 @@ import { useUIStore } from "../../store/uiStore";
 import { useToastStore } from "../../store/toastStore";
 import { DocumentPanel } from "./DocumentPanel";
 import { AnalyticsPanel } from "./AnalyticsPanel";
-import { MODEL_MAP } from "../../api/config";
 import { useDistillation } from "../../hooks/useDistillation";
 import { useBranchPruning } from "../../hooks/useBranchPruning";
 import { usePruneStore } from "../../store/pruneStore";
+import type { ProviderId } from "../../types/canvas";
 
 interface TopBarProps {
   onNewChat: () => void;
 }
+
+const PROVIDER_LABELS: Record<ProviderId, string> = {
+  mistral: "Mistral",
+  openai: "OpenAI",
+  anthropic: "Anthropic",
+  gemini: "Gemini",
+  ollama: "Ollama",
+};
+
+const PROVIDER_COLORS: Record<ProviderId, string> = {
+  mistral: "hsla(215, 70%, 65%, 0.9)",
+  openai: "hsla(145, 60%, 50%, 0.9)",
+  anthropic: "hsla(25, 80%, 60%, 0.9)",
+  gemini: "hsla(55, 75%, 55%, 0.9)",
+  ollama: "hsla(275, 60%, 65%, 0.9)",
+};
 
 export function TopBar({ onNewChat }: TopBarProps) {
   const model = useUIStore((s) => s.model);
@@ -20,6 +36,7 @@ export function TopBar({ onNewChat }: TopBarProps) {
   const setSearchOpen = useUIStore((s) => s.setSearchOpen);
   const showBookmarksOnly = useUIStore((s) => s.showBookmarksOnly);
   const setShowBookmarksOnly = useUIStore((s) => s.setShowBookmarksOnly);
+  const getAvailableModels = useUIStore((s) => s.getAvailableModels);
   const [open, setOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
@@ -31,7 +48,7 @@ export function TopBar({ onNewChat }: TopBarProps) {
   const ref = useRef<HTMLDivElement>(null);
   const pruneRef = useRef<HTMLDivElement>(null);
 
-  const models = Object.entries(MODEL_MAP).map(([id, { label }]) => ({ id, label }));
+  const models = getAvailableModels();
   const current = models.find((m) => m.id === model);
 
   useEffect(() => {
@@ -85,7 +102,7 @@ export function TopBar({ onNewChat }: TopBarProps) {
           >
             <span style={{
               width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
-              background: "hsla(220, 60%, 70%, 0.9)",
+              background: current ? PROVIDER_COLORS[current.provider] : "hsla(220, 60%, 70%, 0.9)",
             }} />
             {current?.label || "Select model"}
             <span style={{ fontSize: 10, opacity: 0.5 }}>▾</span>
@@ -95,33 +112,48 @@ export function TopBar({ onNewChat }: TopBarProps) {
             <div
               style={{
                 position: "absolute", top: "100%", right: 0, marginTop: 4,
-                minWidth: 180, padding: 4,
+                minWidth: 200, padding: 4,
                 background: "var(--bg-1)", border: "1px solid var(--glass-border)",
                 borderRadius: 12, zIndex: 50,
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
               }}
             >
-              {models.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => { setModel(m.id); setOpen(false); }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    width: "100%", padding: "6px 10px", borderRadius: 8,
-                    background: model === m.id ? "var(--accent-alpha)" : "transparent",
-                    border: "none", color: "var(--text)", fontSize: 12,
-                    cursor: "pointer", textAlign: "left",
-                    transition: "all 0.1s",
-                  }}
-                >
-                  <span style={{
-                    width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
-                    background: "hsla(220, 60%, 70%, 0.9)",
-                  }} />
-                  <span>{m.label}</span>
-                </button>
-              ))}
+              {(["mistral", "openai", "anthropic", "gemini", "ollama"] as ProviderId[]).map((provider) => {
+                const group = models.filter((m) => m.provider === provider);
+                if (group.length === 0) return null;
+                return (
+                  <div key={provider}>
+                    <div style={{
+                      padding: "4px 10px 2px", fontSize: 10, fontWeight: 600,
+                      color: "var(--text-muted)", letterSpacing: 0.5,
+                      textTransform: "uppercase",
+                    }}>
+                      {PROVIDER_LABELS[provider]}
+                    </div>
+                    {group.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => { setModel(m.id); setOpen(false); }}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 8,
+                          width: "100%", padding: "6px 10px", borderRadius: 8,
+                          background: model === m.id ? "var(--accent-alpha)" : "transparent",
+                          border: "none", color: "var(--text)", fontSize: 12,
+                          cursor: "pointer", textAlign: "left",
+                          transition: "all 0.1s",
+                        }}
+                      >
+                        <span style={{
+                          width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
+                          background: PROVIDER_COLORS[provider],
+                        }} />
+                        <span>{m.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

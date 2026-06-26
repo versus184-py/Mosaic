@@ -3,6 +3,7 @@ import { useCanvasStore } from "../store/canvasStore";
 import { useUIStore } from "../store/uiStore";
 import { streamProvider } from "../api/providers";
 import { generateId } from "../utils/layout";
+import type { Message } from "../types/canvas";
 
 export function useDistillation() {
   const [isDistilling, setIsDistilling] = useState(false);
@@ -80,7 +81,7 @@ export function useDistillation() {
         const existing = useCanvasStore.getState().getNodeById(distillId)?.data.messages ?? [];
         const idx = existing.findIndex((m: { id: string }) => m.id === msgId);
         const next = idx >= 0
-          ? existing.map((m: any, i: number) => (i === idx ? { ...m, content: full } : m))
+            ? existing.map((m: Message, i: number) => (i === idx ? { ...m, content: full } : m))
           : [...existing, { id: msgId, role: "assistant" as const, content: full, timestamp: Date.now() }];
         updateNode(distillId, { label: full, messages: next });
       }

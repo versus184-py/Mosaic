@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { Message } from "../types/canvas";
 
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   "mistral-large-latest": { input: 2 / 1_000_000, output: 6 / 1_000_000 },
@@ -27,7 +28,7 @@ interface AnalyticsState {
   recordCompletion: (canvasId: string, model: string, text: string) => void;
   getCanvasStats: (canvasId: string) => CanvasStats;
   resetCanvasStats: (canvasId: string) => void;
-  computeNodeStats: (nodes: { id: string; data: { nodeType: string; messages: any[] } }[], edges: { source: string; target: string }[]) => {
+  computeNodeStats: (nodes: { id: string; data: { nodeType: string; messages: Message[] } }[], edges: { source: string; target: string }[]) => {
     totalNodes: number;
     branchNodes: number;
     responseNodes: number;

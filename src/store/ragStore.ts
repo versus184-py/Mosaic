@@ -8,6 +8,7 @@ const MAX_TOTAL_SIZE = 50 * 1024 * 1024;
 interface Chunk {
   text: string;
   index: number;
+  embedding?: number[];
 }
 
 export interface RagDocument {
@@ -25,8 +26,19 @@ interface RagState {
   addDocument: (doc: Omit<RagDocument, "id" | "addedAt">) => string;
   removeDocument: (id: string) => void;
   clearDocuments: () => void;
-  searchChunks: (query: string, topK?: number) => { text: string; docName: string; score: number }[];
+  searchChunks: (query: string, topK?: number, queryEmbedding?: number[]) => { text: string; docName: string; score: number }[];
   setEnabled: (v: boolean) => void;
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dot = 0, normA = 0, normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
 function tokenize(text: string): Map<string, number> {
@@ -38,7 +50,7 @@ function tokenize(text: string): Map<string, number> {
   return freq;
 }
 
-function cosineSimilarity(a: Map<string, number>, b: Map<string, number>): number {
+function tfidfSimilarity(a: Map<string, number>, b: Map<string, number>): number {
   let dot = 0, normA = 0, normB = 0;
   for (const [k, v] of a) {
     normA += v * v;
@@ -106,20 +118,28 @@ export const useRagStore = create<RagState>((set, get) => ({
     saveDocs([]);
   },
 
-  searchChunks: (query, topK = 3) => {
+  searchChunks: (query, topK = 3, queryEmbedding) => {
     const docs = get().documents;
     if (!docs.length || !query.trim()) return [];
-    const queryVec = tokenize(query);
+
+    const queryTokens = tokenize(query);
     const scored: { text: string; docName: string; score: number }[] = [];
+
     for (const doc of docs) {
       for (const chunk of doc.chunks) {
-        const chunkVec = tokenize(chunk.text);
-        const score = cosineSimilarity(queryVec, chunkVec);
+        let score = 0;
+        if (queryEmbedding && chunk.embedding && chunk.embedding.length > 0) {
+          score = cosineSimilarity(queryEmbedding, chunk.embedding);
+        } else {
+          const chunkVec = tokenize(chunk.text);
+          score = tfidfSimilarity(queryTokens, chunkVec);
+        }
         if (score > 0.05) {
           scored.push({ text: chunk.text, docName: doc.name, score });
         }
       }
     }
+
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, topK);
   },

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { useRagStore, type RagDocument } from "../store/ragStore";
+import { useRagStore } from "../store/ragStore";
+import { embedTexts } from "../api/providers";
 
 const TEXT_EXTENSIONS = new Set([
   ".txt", ".md", ".json", ".csv", ".xml", ".yaml", ".yml",
@@ -49,13 +50,21 @@ export function useDocumentParser() {
     }
 
     const text = await file.text();
-    const chunks = chunkText(text).map((t, i) => ({ text: t, index: i }));
+    const rawChunks = chunkText(text);
+
+    const embeddings = await embedTexts(rawChunks);
+
+    const chunkEntries = rawChunks.map((t, i) => ({
+      text: t,
+      index: i,
+      embedding: embeddings && embeddings[i] ? embeddings[i] : undefined,
+    }));
 
     addDocument({
       name: file.name,
       type: ext,
       size: file.size,
-      chunks,
+      chunks: chunkEntries,
     });
   }, [addDocument]);
 
@@ -66,8 +75,8 @@ export function useDocumentParser() {
       try {
         await parseFile(file);
         success++;
-      } catch (e: any) {
-        errors.push(`${file.name}: ${e.message}`);
+      } catch (e: unknown) {
+        errors.push(`${file.name}: ${e instanceof Error ? e.message : String(e)}`);
       }
     });
     await Promise.all(promises);

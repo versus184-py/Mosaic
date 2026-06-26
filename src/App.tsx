@@ -14,6 +14,7 @@ import { PruneBanner } from "./components/ui/PruneBanner";
 import { useCanvasStore } from "./store/canvasStore";
 import { useCanvasManagerStore } from "./store/canvasManagerStore";
 import { useUIStore } from "./store/uiStore";
+import { useOllamaDetect } from "./hooks/useOllamaDetect";
 import { generateId } from "./utils/layout";
 
 export default function App() {
@@ -29,6 +30,8 @@ export default function App() {
   const setSearchOpen = useUIStore((s) => s.setSearchOpen);
 
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  useOllamaDetect();
 
   const handleNewChat = useCallback(() => {
     clearCanvas();

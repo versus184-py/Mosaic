@@ -4,6 +4,7 @@ import { useUIStore } from "../store/uiStore";
 import { streamProvider } from "../api/providers";
 import { generateId } from "../utils/layout";
 import { MODEL_MAP } from "../api/config";
+import type { Message } from "../types/canvas";
 
 // When multi-provider support is added, streamProvider will route by model.
 // For now, all models use Mistral.
@@ -102,7 +103,7 @@ export function useParallelDebate() {
             const existing = node?.data?.messages ?? [];
             const idx = existing.findIndex((m: { id: string }) => m.id === msgId);
             const next = idx >= 0
-              ? existing.map((m: any, ix: number) => (ix === idx ? { ...m, content: full } : m))
+              ? existing.map((m: Message, ix: number) => (ix === idx ? { ...m, content: full } : m))
               : [...existing, { id: msgId, role: "assistant" as const, content: full, timestamp: Date.now() }];
             useCanvasStore.getState().updateNode(aiNodeId, { label: full, messages: next });
           }

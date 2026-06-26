@@ -5,8 +5,9 @@ import { useRagStore } from "../store/ragStore";
 import { useAnalyticsStore } from "../store/analyticsStore";
 import { useCanvasManagerStore } from "../store/canvasManagerStore";
 import { useToastStore } from "../store/toastStore";
-import { streamProvider } from "../api/providers";
+import { streamProvider, embedTexts } from "../api/providers";
 import { generateId } from "../utils/layout";
+import type { Message } from "../types/canvas";
 import { useConfidenceScore } from "./useConfidenceScore";
 import { useSuggestionTendrils } from "./useSuggestionTendrils";
 
@@ -42,7 +43,9 @@ export function useStreamMessage(): {
         let ragContext = "";
         const { enabled, searchChunks } = useRagStore.getState();
         if (enabled) {
-          const results = searchChunks(text, 3);
+          const queryEmbeddings = await embedTexts([text]);
+          const queryEmbedding = queryEmbeddings?.[0];
+          const results = searchChunks(text, 3, queryEmbedding);
           if (results.length > 0) {
             ragContext = "\n\nRelevant context from uploaded documents:\n" +
               results.map((r) => `[${r.docName}] ${r.text}`).join("\n\n");
@@ -69,7 +72,7 @@ export function useStreamMessage(): {
           const existing = node?.data?.messages ?? [];
           const idx = existing.findIndex((m: { id: string }) => m.id === msgId);
           const next = idx >= 0
-            ? existing.map((m: any, i: number) => (i === idx ? { ...m, content: full, timestamp: Date.now() } : m))
+            ? existing.map((m: Message, i: number) => (i === idx ? { ...m, content: full, timestamp: Date.now() } : m))
             : [...existing, { id: msgId, role: "assistant" as const, content: full, timestamp: Date.now() }];
           updateNode(nodeId, { label: full, messages: next });
         }

@@ -1,17 +1,8 @@
 import { create } from "zustand";
-import { hasApiKey } from "../api/config";
+import { hasApiKey, BUILT_IN_MODELS } from "../api/config";
+import type { ProviderId, ModelOption } from "../types/canvas";
 
 export type ThemeName = "void" | "dusk" | "sand" | "snow" | "sunrise";
-
-export interface ModelOption {
-  id: string;
-  label: string;
-}
-
-const AVAILABLE_MODELS: ModelOption[] = [
-  { id: "mistral-large-latest", label: "Mistral Large" },
-  { id: "mistral-small-latest", label: "Mistral Small" },
-];
 
 const UI_KEY = "mosaic-ui";
 
@@ -24,6 +15,7 @@ interface UIPersisted {
   confidenceEnabled: boolean;
   tendrilsEnabled: boolean;
   debateModels: string[];
+  ollamaUrl: string;
 }
 
 function loadUI(): Partial<UIPersisted> {
@@ -66,6 +58,9 @@ interface UIState {
   confidenceEnabled: boolean;
   tendrilsEnabled: boolean;
   debateModels: string[];
+  ollamaConnected: boolean;
+  ollamaModels: { id: string; label: string }[];
+  ollamaUrl: string;
 
   setTheme: (t: ThemeName) => void;
   setZoom: (z: number) => void;
@@ -82,10 +77,14 @@ interface UIState {
   setConfidenceEnabled: (v: boolean) => void;
   setTendrilsEnabled: (v: boolean) => void;
   setDebateModels: (m: string[]) => void;
+  setOllamaConnected: (v: boolean) => void;
+  setOllamaModels: (m: { id: string; label: string }[]) => void;
+  setOllamaUrl: (url: string) => void;
 
   getSelectedModel: () => ModelOption | undefined;
   getAvailableModels: () => ModelOption[];
-  hasApiKey: () => boolean;
+  getActiveProvider: () => ProviderId;
+  hasApiKeyForCurrent: () => boolean;
 }
 
 function applyTheme(theme: ThemeName) {
@@ -96,15 +95,28 @@ function applyTheme(theme: ThemeName) {
   document.documentElement.classList.add(`theme-${theme}`);
 }
 
+function getPreferredTheme(): ThemeName {
+  if (typeof window === "undefined") return "sunrise";
+  try {
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "void" : "sunrise";
+  } catch {
+    return "sunrise";
+  }
+}
+
+function allModels(): ModelOption[] {
+  return BUILT_IN_MODELS;
+}
+
 export const useUIStore = create<UIState>((set, get) => ({
-  theme: persisted.theme || "sunrise",
+  theme: persisted.theme || getPreferredTheme(),
   zoom: 1,
   showMiniMap: persisted.showMiniMap || false,
   showWelcome: true,
   settingsOpen: false,
   systemPrompt: persisted.systemPrompt || "You are a helpful AI assistant. Be concise and clear.",
   temperature: persisted.temperature ?? 0.7,
-  model: (persisted.model && AVAILABLE_MODELS.some((m) => m.id === persisted.model))
+  model: (persisted.model && allModels().some((m) => m.id === persisted.model))
     ? persisted.model
     : "mistral-large-latest",
   searchQuery: "",
@@ -113,6 +125,9 @@ export const useUIStore = create<UIState>((set, get) => ({
   confidenceEnabled: persisted.confidenceEnabled ?? true,
   tendrilsEnabled: persisted.tendrilsEnabled ?? true,
   debateModels: persisted.debateModels ?? ["mistral-large-latest"],
+  ollamaConnected: false,
+  ollamaModels: [],
+  ollamaUrl: persisted.ollamaUrl || "http://localhost:11434",
 
   setTheme: (t) => {
     applyTheme(t);
@@ -153,12 +168,46 @@ export const useUIStore = create<UIState>((set, get) => ({
   setConfidenceEnabled: (v) => { set({ confidenceEnabled: v }); saveUI({ ...get(), confidenceEnabled: v }); },
   setTendrilsEnabled: (v) => { set({ tendrilsEnabled: v }); saveUI({ ...get(), tendrilsEnabled: v }); },
   setDebateModels: (m) => { set({ debateModels: m }); saveUI({ ...get(), debateModels: m }); },
+  setOllamaConnected: (v) => set({ ollamaConnected: v }),
+  setOllamaModels: (m) => set({ ollamaModels: m }),
+  setOllamaUrl: (url) => {
+    set({ ollamaUrl: url });
+    saveUI({ ...get(), ollamaUrl: url });
+  },
 
-  getSelectedModel: () => AVAILABLE_MODELS.find((m) => m.id === get().model),
+  getSelectedModel: () => allModels().find((m) => m.id === get().model),
 
-  getAvailableModels: () => AVAILABLE_MODELS,
+  getAvailableModels: () => {
+    const state = get();
+    const builtIn = allModels();
+    if (state.ollamaConnected && state.ollamaModels.length > 0) {
+      const ollamaOpts: ModelOption[] = state.ollamaModels.map((m) => ({
+        id: m.id,
+        label: m.label,
+        provider: "ollama" as ProviderId,
+        supportsEmbeddings: true,
+      }));
+      return [...builtIn, ...ollamaOpts];
+    }
+    return builtIn;
+  },
 
-  hasApiKey: () => hasApiKey(),
+  getActiveProvider: () => {
+    const model = get().model;
+    const found = allModels().find((m) => m.id === model);
+    if (found) return found.provider;
+    if (model.startsWith("ollama/")) return "ollama";
+    if (model.startsWith("openai/")) return "openai";
+    if (model.startsWith("anthropic/")) return "anthropic";
+    if (model.startsWith("gemini/")) return "gemini";
+    return "mistral";
+  },
+
+  hasApiKeyForCurrent: () => {
+    const provider = get().getActiveProvider();
+    if (provider === "ollama") return true;
+    return hasApiKey(provider);
+  },
 }));
 
 applyTheme(useUIStore.getState().theme);
