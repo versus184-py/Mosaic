@@ -20,9 +20,6 @@
   <a href="https://github.com/versus184-py/Mosaic/stargazers">
     <img src="https://img.shields.io/github/stars/versus184-py/Mosaic?style=flat-square&label=Stars" alt="Stars">
   </a>
-  <a href="https://github.com/versus184-py/Mosaic/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/versus184-py/Mosaic?style=flat-square&label=License" alt="License">
-  </a>
   <a href="https://github.com/versus184-py/Mosaic/issues">
     <img src="https://img.shields.io/github/issues/versus184-py/Mosaic?style=flat-square&label=Issues" alt="Issues">
   </a>
@@ -177,6 +174,58 @@ Contributions are welcome! Here's how to help:
 
 ---
 
-## License
+## Release Notes
 
-[MIT](LICENSE) © 2025 Mosaic
+### v0.2.0 — Glass UI, Confidence Scoring, Tendrils, Distillation & More
+
+**New Features**
+- Glass UI system — physics-based refractive glass components: Lens, FluidSlider, TactileSwitch, DragLens, SegmentControl, GlassEffectContainer
+- Confidence scoring — AI auto-scores responses (0–100) after each completion
+- Suggestion tendrils — auto-generated follow-up suggestions that appear after AI responses, auto-dismiss after 30s
+- Branch distillation — summarize entire conversation branches into a single synthesis node
+- Branch pruning — AI-driven relevance scoring to dim low-value branches
+- Parallel debate — run responses from multiple models simultaneously on the same input
+- Validation utilities for imported canvas data, RAG docs, and stored state
+- Undo history now captured for add/remove/clear operations
+- New edge types: DistillEdge (gold dash), TendrilEdge (dotted)
+
+**UI/UX**
+- Floating draggable lens overlay on canvas
+- Spring-animated FluidSlider and TactileSwitch components
+- Prune banner with restore-all button
+- Confidence badges, pruned node dimming, search highlights on nodes
+- Settings drawer: confidence scoring and tendrils toggles, improved API key UX
+- Zoom controls now use FluidSlider
+
+**Security**
+- Sandboxed JS execution with complete network blocking
+- Pyodide fetch restricted to allowlisted CDN hosts (cdn.jsdelivr.net, pyodide-cdn2.iodide.io, files.pythonhosted.org)
+- pip installs limited to an allowlist (numpy, pandas, scipy, matplotlib, sympy, requests, beautifulsoup4, lxml, Pillow, markdown, jinja2, pyyaml, toml, colorama, tqdm)
+- CSP enforced at Tauri level (was previously null)
+- Integrity checks on Pyodide module load
+- Imported canvas data validated before use
+
+**Fixes**
+- Added `deepClone` utility with `structuredClone` fallback for undo snapshots
+- `analyticsStore`: type fixes in `computeNodeStats`, data validation on localStorage load
+- `canvasManagerStore`: validate canvas data on load, reset invalid data
+- `ragStore`: enforce document count (50) and total size (50 MB) limits
+- `codeWorker`: strict sandboxed globals with blocked APIs (fetch, XHR, WebSocket, Worker, localStorage, etc.)
+
+---
+
+### v0.1.0 — Initial Beta Release
+
+- Infinite spatial canvas using React Flow (@xyflow/react)
+- Conversation branching — fork from any message, explore paths in parallel
+- Mistral AI integration — streaming responses, configurable temperature, model selection
+- 5 glass UI themes: Void, Dusk, Sand, Snow, Sunrise
+- Inline code execution: JavaScript via sandboxed Web Worker, Python via Pyodide (WASM)
+- RAG from uploaded documents — automatic chunking and TF-IDF cosine similarity search
+- Multi-canvas tabs — create, rename, duplicate, switch canvases
+- Export/import canvases as JSON
+- Analytics tracking — token usage, cost, node counts, branching stats
+- Minimap, full-text search, bookmarks, node collapsing
+- Keyboard shortcuts — Ctrl+N, Ctrl+F, Ctrl+Z, zoom, fit, delete
+- Onboarding hints for new users
+- Undo support for node positions

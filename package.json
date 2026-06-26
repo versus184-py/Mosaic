@@ -22,7 +22,7 @@
     "type": "git",
     "url": "git+https://github.com/versus184-py/Mosaic.git"
   },
-  "license": "MIT",
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "dev": "vite",
