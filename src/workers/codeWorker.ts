@@ -126,7 +126,7 @@ function executeSandboxedJS(code: string): { result?: unknown; error?: string; l
   const keys = Object.keys(globals);
   const values = Object.values(globals);
 
-  patchNetworkForJS();
+  patchPyodideNetwork();
   try {
     const fn = new Function(...keys, `"use strict";\n${code}`);
     const result = fn(...values);
@@ -137,6 +137,13 @@ function executeSandboxedJS(code: string): { result?: unknown; error?: string; l
     delete (self as any)._sandboxLogs;
     restoreNetwork();
   }
+}
+
+function patchNetworkBlockAll() {
+  if (!originalWorkerFetch) {
+    originalWorkerFetch = self.fetch.bind(self);
+  }
+  self.fetch = async () => { throw new Error("Network access is blocked in sandboxed code execution."); };
 }
 
 function patchPyodideNetwork() {
@@ -210,7 +217,7 @@ self.onmessage = async (e: MessageEvent) => {
     }
   } else if (lang === "python" || lang === "py") {
     try {
-      patchPyodideNetwork();
+  patchNetworkBlockAll();
 
       const pyodide = await getPyodide();
       if (currentExecId !== id) return;
