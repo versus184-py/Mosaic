@@ -1,0 +1,135 @@
+<!-- mosaic-docs.html - Documentation page that complements the main React app -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/versus184-py/Mosaic/main/src-tauri/icons/128x128@2x.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mosaic — Documentation</title>
+    <meta name="description" content="Mosaic documentation, technical deep-dive, and API references for the branching AI canvas desktop app.">
+    <meta property="og:title" content="Mosaic — Documentation">
+    <meta property="og:description" content="Branching AI canvas documentation, architecture details, and features of Mosaic desktop app.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/versus184-py/Mosaic/main/screenshots/social-preview.png">
+    <meta property="og:url" content="https://versus184-py.github.io/Mosaic/">
+    <link rel="stylesheet" href="website/style.css">
+  </head>
+  <body>
+    <nav id="nav" role="navigation">
+      <a href="index.html" class="logo">
+        <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+        Mosaic
+      </a>
+      <div class="nav-links">
+        <a href="index.html#main">Home</a>
+        <a href="website/technical.html">Technical</a>
+        <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank">Wiki</a>
+        <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+      </div>
+      <a href="index.html#download" class="nav-cta">Download</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html#main">Home</a>
+      <a href="website/technical.html">Technical</a>
+      <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank">Wiki</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+      <a href="index.html#download" class="nav-cta">Download</a>
+    </div>
+
+    <section class="hero" id="main">
+      <div class="hero-bg"></div>
+      <div class="hero-card glass">
+        <div class="glass-edge"></div>
+        <div class="glass-tint"></div>
+        <h1>Mosaic Documentation</h1>
+        <p>Technical deep-dive, architecture details, and API references for the branching AI canvas desktop app.</p>
+        <div class="hero-btns">
+          <a href="website/technical.html" class="btn btn-primary">
+            Technical Deep-Dive
+          </a>
+          <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank" class="btn btn-secondary">
+            Wiki
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="docs">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <div class="section-tag">Documentation</div>
+          <h2 class="section-title">For Developers</h2>
+          <p class="section-desc">Comprehensive technical guides and API references for building with Mosaic.</p>
+        </div>
+        <div class="docs-grid reveal">
+          <a href="website/technical.html" class="doc-card">
+            <div class="glass-edge"></div>
+            <h3>Technical Deep-Dive</h3>
+            <p>Architecture, provider comparison, RAG pipeline, sandbox design, and more.</p>
+          </a>
+          <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank" class="doc-card">
+            <div class="glass-edge"></div>
+            <h3>Wiki</h3>
+            <p>Browse interactive documentation, installation guides, and tutorials.</p>
+          </a>
+          <a href="https://github.com/versus184-py/Mosaic" target="_blank" class="doc-card">
+            <div class="glass-edge"></div>
+            <h3>GitHub</h3>
+            <p>Source code, releases, issues, and contributions.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="section-inner">
+        <div class="section-header reveal">
+          <div class="section-tag">App Features</div>
+          <h2 class="section-title">Built for depth</h2>
+          <p class="section-desc">Every feature designed to accelerate exploration and reasoning.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card reveal reveal-delay-1"><div class="glass-edge"></div><div class="feature-icon">&#8617;</div><h3>Branching canvas</h3><p>Non-linear conversation tree. Fork any node, explore tangents, never lose your thread.</p></div>
+          <div class="feature-card reveal reveal-delay-2"><div class="glass-edge"></div><div class="feature-icon">&#9881;</div><h3>Model routing</h3><p>Route prompts to Mistral, OpenAI, Anthropic, Gemini, or Ollama from one interface.</p></div>
+          <div class="feature-card reveal reveal-delay-3"><div class="glass-edge"></div><div class="feature-icon">&#9776;</div><h3>Side-by-side compare</h3><p>Send the same prompt to multiple providers and compare responses in split view.</p></div>
+          <div class="feature-card reveal reveal-delay-4"><div class="glass-edge"></div><div class="feature-icon">&#9733;</div><h3>RAG embeddings</h3><p>Inject context from your own documents using local embedding models.</p></div>
+          <div class="feature-card reveal reveal-delay-5"><div class="glass-edge"></div><div class="feature-icon">&#10003;</div><h3>Code sandbox</h3><p>Python execution in-browser via Pyodide (WASM) — no server needed, instant feedback.</p></div>
+          <div class="feature-card reveal reveal-delay-6"><div class="glass-edge"></div><div class="feature-icon">&#9678;</div><h3>Local-first</h3><p>All data stays on your machine. Works offline with Ollama for complete privacy.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+        <div class="footer-links">
+          <a href="index.html#download">Download</a>
+          <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank">Wiki</a>
+          <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </footer>
+
+    <div class="theme-picker" role="radiogroup" aria-label="Theme">
+      <span class="theme-picker-label">Theme</span>
+      <div class="theme-dots">
+        <button class="theme-dot-btn theme-dot-dusk active" data-theme="dusk" onclick="applyTheme('dusk')" aria-label="Dusk theme"><span class="tt">Dusk</span></button>
+        <button class="theme-dot-btn theme-dot-sand" data-theme="sand" onclick="applyTheme('sand')" aria-label="Sand theme"><span class="tt">Sand</span></button>
+      </div>
+    </div>
+
+    <script src="website/theme.js"></script>
+    <script>
+      document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('toggle', () => {
+          if (item.open) {
+            document.querySelectorAll('.faq-item').forEach(other => {
+              if (other !== item) other.open = false;
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

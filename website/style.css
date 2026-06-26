@@ -311,23 +311,98 @@ details[open] .faq-answer{animation:faqFade 0.4s var(--ease-out)}
 @keyframes faqFade{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ===== DOWNLOAD ===== */
-.download-wrapper{max-width:480px;margin:0 auto;text-align:center}
-.download-card{
-  display:inline-flex;align-items:center;gap:14px;
-  padding:18px 36px;border-radius:var(--radius-lg);
-  background:var(--accent);color:#fff;text-decoration:none;
-  box-shadow:0 4px 24px var(--accent-glow);
-  transition:all var(--transition-fast);font-family:inherit;
+.section#download .download-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: stretch;
+  padding: 0 1rem;
 }
-.download-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px var(--accent-glow)}
-.download-card .icon{font-size:28px;opacity:0.9}
-.download-card .info{text-align:left}
-.download-card .info .name{font-size:16px;font-weight:600}
-.download-card .info .size{font-size:12px;opacity:0.7}
-.download-alt{margin-top:16px;font-size:13px;color:var(--text-secondary)}
-.download-alt a{color:var(--accent);text-decoration:none;transition:color var(--transition-fast)}
-.download-alt a:hover{text-decoration:underline}
-.download-version{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:var(--radius-pill);font-size:11px;background:var(--accent-alpha);color:var(--accent)}
+
+.section#download .download-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--accent-ring);
+  backdrop-filter: blur(32px) saturate(200%);
+  transition: all 0.6s var(--ease-spring);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.section#download .download-card.linux {
+  margin-top: 0;
+}
+
+.section#download .download-card .icon {
+  font-size: 2.5rem;
+  opacity: 0.95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius);
+  background: var(--accent-alpha);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.section#download .download-card .info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.section#download .download-card .name {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.section#download .download-card .size {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.section#download .download-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: var(--accent-alpha);
+  box-shadow: 0 16px 48px -8px var(--shadow), 0 0 20px var(--accent-glow);
+  background: var(--surface);
+}
+
+.section#download .download-card:hover::before {
+  opacity: 1;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.section#download .download-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes glow {
+  0% { opacity: 0.5; transform: translateX(-100%); }
+  50% { opacity: 1; transform: translateX(100%); }
+  100% { opacity: 0.5; transform: translateX(-100%); }
+}
 
 /* ===== CTA ===== */
 .cta-banner{

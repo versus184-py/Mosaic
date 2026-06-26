@@ -174,6 +174,16 @@ Grab the installer for your platform from the [Releases page](https://github.com
 - **macOS** — `.dmg` disk image
 - **Linux** — `.AppImage` (portable)
 
+### Documentation
+
+Visit the **Documentation website** for comprehensive technical deep-dive, architecture details, and API references.
+[Documentation](https://versus184-py.github.io/Mosaic/)
+
+### Get Help
+
+- **Wiki** - Browse interactive documentation, installation guides, and tutorials
+- **GitHub** - Source code, releases, issues, and contributions
+
 ### Build from Source
 
 **Prerequisites:** [Node.js](https://nodejs.org/) 18+, [Rust toolchain](https://rustup.rs/), and an API key for at least one provider.
