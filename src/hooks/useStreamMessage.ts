@@ -7,12 +7,20 @@ import { useCanvasManagerStore } from "../store/canvasManagerStore";
 import { useToastStore } from "../store/toastStore";
 import { streamProvider } from "../api/providers";
 import { generateId } from "../utils/layout";
+import { useConfidenceScore } from "./useConfidenceScore";
+import { useSuggestionTendrils } from "./useSuggestionTendrils";
 
 export function useStreamMessage(): {
   classifyAndStream: (text: string, nodeId: string, model: string) => Promise<void>;
   stopStreaming: () => void;
 } {
   const abortRef = useRef<AbortController | null>(null);
+  const { scoreNode } = useConfidenceScore();
+  const { spawnTendrils } = useSuggestionTendrils();
+  const scoreNodeRef = useRef(scoreNode);
+  const spawnRef = useRef(spawnTendrils);
+  scoreNodeRef.current = scoreNode;
+  spawnRef.current = spawnTendrils;
 
   const stopStreaming = useCallback(() => {
     abortRef.current?.abort();
@@ -66,6 +74,13 @@ export function useStreamMessage(): {
           updateNode(nodeId, { label: full, messages: next });
         }
         updateNode(nodeId, { isTyping: false });
+
+        const ctx = conversation.map((m) => `${m.role}: ${m.content}`).join("\n").slice(0, 2000);
+        if (useUIStore.getState().confidenceEnabled) {
+          scoreNodeRef.current?.(nodeId, full, ctx);
+        }
+        spawnRef.current?.(nodeId, full);
+
         useAnalyticsStore.getState().recordCompletion(
           useCanvasManagerStore.getState().activeCanvasId,
           model,

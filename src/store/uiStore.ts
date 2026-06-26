@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { hasApiKey } from "../api/config";
 
 export type ThemeName = "void" | "dusk" | "sand" | "snow" | "sunrise";
 
@@ -20,14 +21,20 @@ interface UIPersisted {
   systemPrompt: string;
   temperature: number;
   model: string;
-  apiKey: string;
+  confidenceEnabled: boolean;
+  tendrilsEnabled: boolean;
+  debateModels: string[];
 }
 
 function loadUI(): Partial<UIPersisted> {
   try {
     const raw = localStorage.getItem(UI_KEY);
     if (!raw) return {};
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === "object" && parsed !== null) {
+      return parsed;
+    }
+    return {};
   } catch (error) {
     console.warn("Failed to load UI state from localStorage:", error);
     return {};
@@ -55,8 +62,10 @@ interface UIState {
   model: string;
   searchQuery: string;
   searchOpen: boolean;
-  apiKey: string;
   showBookmarksOnly: boolean;
+  confidenceEnabled: boolean;
+  tendrilsEnabled: boolean;
+  debateModels: string[];
 
   setTheme: (t: ThemeName) => void;
   setZoom: (z: number) => void;
@@ -69,11 +78,14 @@ interface UIState {
   setModel: (m: string) => void;
   setSearchQuery: (q: string) => void;
   setSearchOpen: (o: boolean) => void;
-  setApiKey: (k: string) => void;
   setShowBookmarksOnly: (s: boolean) => void;
+  setConfidenceEnabled: (v: boolean) => void;
+  setTendrilsEnabled: (v: boolean) => void;
+  setDebateModels: (m: string[]) => void;
 
   getSelectedModel: () => ModelOption | undefined;
   getAvailableModels: () => ModelOption[];
+  hasApiKey: () => boolean;
 }
 
 function applyTheme(theme: ThemeName) {
@@ -97,8 +109,10 @@ export const useUIStore = create<UIState>((set, get) => ({
     : "mistral-large-latest",
   searchQuery: "",
   searchOpen: false,
-  apiKey: persisted.apiKey || "",
   showBookmarksOnly: false,
+  confidenceEnabled: persisted.confidenceEnabled ?? true,
+  tendrilsEnabled: persisted.tendrilsEnabled ?? true,
+  debateModels: persisted.debateModels ?? ["mistral-large-latest"],
 
   setTheme: (t) => {
     applyTheme(t);
@@ -112,11 +126,6 @@ export const useUIStore = create<UIState>((set, get) => ({
     const next = !get().showMiniMap;
     set({ showMiniMap: next });
     saveUI({ ...get(), showMiniMap: next });
-  },
-
-  setApiKey: (k) => {
-    set({ apiKey: k });
-    saveUI({ ...get(), apiKey: k });
   },
 
   setShowWelcome: (s) => set({ showWelcome: s }),
@@ -141,10 +150,15 @@ export const useUIStore = create<UIState>((set, get) => ({
   setSearchQuery: (q) => set({ searchQuery: q }),
   setSearchOpen: (o) => set({ searchOpen: o }),
   setShowBookmarksOnly: (s) => set({ showBookmarksOnly: s }),
+  setConfidenceEnabled: (v) => { set({ confidenceEnabled: v }); saveUI({ ...get(), confidenceEnabled: v }); },
+  setTendrilsEnabled: (v) => { set({ tendrilsEnabled: v }); saveUI({ ...get(), tendrilsEnabled: v }); },
+  setDebateModels: (m) => { set({ debateModels: m }); saveUI({ ...get(), debateModels: m }); },
 
   getSelectedModel: () => AVAILABLE_MODELS.find((m) => m.id === get().model),
 
   getAvailableModels: () => AVAILABLE_MODELS,
+
+  hasApiKey: () => hasApiKey(),
 }));
 
 applyTheme(useUIStore.getState().theme);

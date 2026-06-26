@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useUIStore } from "../../store/uiStore";
+import { useToastStore } from "../../store/toastStore";
 import { DocumentPanel } from "./DocumentPanel";
 import { AnalyticsPanel } from "./AnalyticsPanel";
 import { MODEL_MAP } from "../../api/config";
+import { useDistillation } from "../../hooks/useDistillation";
+import { useBranchPruning } from "../../hooks/useBranchPruning";
+import { usePruneStore } from "../../store/pruneStore";
 
 interface TopBarProps {
   onNewChat: () => void;
@@ -18,7 +23,13 @@ export function TopBar({ onNewChat }: TopBarProps) {
   const [open, setOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [pruneGoal, setPruneGoal] = useState("");
+  const [showPruneInput, setShowPruneInput] = useState(false);
+  const { distill, isDistilling } = useDistillation();
+  const { pruneCanvas } = useBranchPruning();
+  const pruneActive = usePruneStore((s) => s.pruneActive);
   const ref = useRef<HTMLDivElement>(null);
+  const pruneRef = useRef<HTMLDivElement>(null);
 
   const models = Object.entries(MODEL_MAP).map(([id, { label }]) => ({ id, label }));
   const current = models.find((m) => m.id === model);
@@ -149,6 +160,48 @@ export function TopBar({ onNewChat }: TopBarProps) {
             <path d="M6 20v-6" />
           </svg>
         </button>
+        <button onClick={distill} disabled={isDistilling}
+          style={{ ...btnStyle, opacity: isDistilling ? 0.5 : 1 }}
+          title="Distill canvas into synthesis">
+          {isDistilling ? (
+            <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }}>◈</motion.span>
+          ) : "◈"}
+        </button>
+        <div ref={pruneRef} style={{ position: "relative" }}>
+          <button onClick={() => setShowPruneInput(!showPruneInput)}
+            style={{ ...btnStyle, color: pruneActive ? "var(--accent)" : "var(--text-muted)" }}
+            title={pruneActive ? "Pruning active" : "Prune branches"}>
+            ⊜
+          </button>
+          {showPruneInput && (
+            <div style={{
+              position: "absolute", top: "100%", right: 0, marginTop: 4,
+              background: "var(--bg-1)", border: "1px solid var(--glass-border)",
+              borderRadius: 12, padding: 8, zIndex: 50, minWidth: 220,
+              backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+            }}>
+              <input
+                value={pruneGoal}
+                onChange={(e) => setPruneGoal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && pruneGoal.trim()) {
+                    usePruneStore.getState().setPruneGoal(pruneGoal.trim());
+                    usePruneStore.getState().setPruneActive(true);
+                    pruneCanvas(pruneGoal.trim());
+                    setShowPruneInput(false);
+                  }
+                }}
+                placeholder="What is your goal?"
+                style={{
+                  width: "100%", padding: "6px 8px", borderRadius: 8,
+                  background: "var(--glass-hover)", border: "1px solid var(--glass-border)",
+                  color: "var(--text)", fontSize: 12, outline: "none",
+                }}
+                autoFocus
+              />
+            </div>
+          )}
+        </div>
         <button onClick={onNewChat} style={btnStyle} title="New thread">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14" />

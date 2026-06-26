@@ -1,3 +1,5 @@
+// Single-provider mode (Mistral). When multi-provider is added, import
+// streamOpenAI/streamAnthropic and route via MODEL_MAP[model].provider.
 import { streamMistral } from "./mistral";
 
 export async function* streamProvider(

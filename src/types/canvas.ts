@@ -13,12 +13,18 @@ export interface NodeData {
   messages: Message[];
   isActive: boolean;
   isTyping: boolean;
-  nodeType: "root" | "branch" | "response";
+  nodeType: "root" | "branch" | "response" | "suggestion" | "distillation";
   collapsed?: boolean;
   bookmarked?: boolean;
   width?: number;
   height?: number;
   execOutputs?: Record<string, { output: string; result: string }>;
+  confidence?: number;
+  suggestionText?: string;
+  modelLabel?: string;
+  debateModel?: string;
+  pruneScore?: number;
+  pruned?: boolean;
   [key: string]: unknown;
 }
 

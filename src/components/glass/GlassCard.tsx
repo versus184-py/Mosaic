@@ -1,5 +1,8 @@
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
+import type { LensParams } from "../../liquid-glass/types";
+import { createGridBackgroundNode } from "../../liquid-glass/capture";
+import { Lens } from "./Lens";
 
 interface GlassCardProps {
   children: React.ReactNode;
@@ -8,6 +11,8 @@ interface GlassCardProps {
   tint?: string;
   clickEffect?: boolean;
   noAnimation?: boolean;
+  lens?: LensParams;
+  refractionTarget?: React.ReactNode;
   onClick?: (e: React.MouseEvent) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
   onMouseEnter?: (e: React.MouseEvent) => void;
@@ -21,6 +26,8 @@ export function GlassCard({
   tint,
   clickEffect,
   noAnimation,
+  lens,
+  refractionTarget,
   onClick,
   onContextMenu,
   onMouseEnter,
@@ -48,6 +55,33 @@ export function GlassCard({
     handleRipple(e);
     onClick?.(e);
   };
+
+  if (lens) {
+    const target = refractionTarget ?? createGridBackgroundNode(lens.width, lens.height);
+    return (
+      <motion.div
+        className={className}
+        style={{
+          ...style,
+          ...(tint ? { "--glass-tint-a": tint } as React.CSSProperties : {}),
+        } as React.CSSProperties}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        initial={noAnimation ? false : { opacity: 0, scale: 0.95 }}
+        animate={noAnimation ? undefined : { opacity: 1, scale: 1 }}
+        transition={noAnimation ? undefined : { duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <Lens
+          params={lens}
+          refractionTarget={target}
+          onClick={handleClick}
+          onContextMenu={onContextMenu}
+        >
+          {children}
+        </Lens>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

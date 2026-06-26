@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { ChatNode, ChatEdge } from "../types/canvas";
 import { generateId } from "../utils/layout";
+import { validateCanvasData } from "../utils/validation";
 
 const MANAGER_KEY = "mosaic-canvases";
 const CANVAS_DATA_PREFIX = "mosaic-canvas-data-";
@@ -121,7 +122,13 @@ export const useCanvasManagerStore = create<CanvasManagerState>((set, get) => ({
     try {
       const raw = localStorage.getItem(CANVAS_DATA_PREFIX + id);
       if (!raw) return null;
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      const validation = validateCanvasData(parsed);
+      if (!validation.valid) {
+        console.warn(`Canvas data validation failed for ${id}, resetting:`, validation.errors.join("; "));
+        return null;
+      }
+      return parsed;
     } catch {
       return null;
     }

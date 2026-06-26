@@ -1,5 +1,9 @@
 import { create } from "zustand";
 import { generateId } from "../utils/layout";
+import { validateRagDocs } from "../utils/validation";
+
+const MAX_DOCUMENTS = 50;
+const MAX_TOTAL_SIZE = 50 * 1024 * 1024;
 
 interface Chunk {
   text: string;
@@ -51,7 +55,14 @@ const RAG_KEY = "mosaic-rag";
 function loadDocs(): RagDocument[] {
   try {
     const raw = localStorage.getItem(RAG_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    const validation = validateRagDocs(parsed);
+    if (!validation.valid) {
+      console.warn("RAG documents data validation failed, resetting:", validation.errors.join("; "));
+      return [];
+    }
+    return parsed;
   } catch { return []; }
 }
 
@@ -61,15 +72,27 @@ function saveDocs(docs: RagDocument[]) {
   } catch { /* noop */ }
 }
 
+function getTotalSize(docs: RagDocument[]): number {
+  return docs.reduce((sum, d) => sum + d.size, 0);
+}
+
 export const useRagStore = create<RagState>((set, get) => ({
   documents: loadDocs(),
   enabled: false,
 
   addDocument: (doc) => {
+    const state = get();
+    if (state.documents.length >= MAX_DOCUMENTS) {
+      throw new Error(`Maximum of ${MAX_DOCUMENTS} documents reached`);
+    }
+    const totalSize = getTotalSize(state.documents);
+    if (totalSize + doc.size > MAX_TOTAL_SIZE) {
+      throw new Error(`Total document storage limit of ${MAX_TOTAL_SIZE / 1024 / 1024}MB exceeded`);
+    }
     const id = generateId();
     const entry: RagDocument = { ...doc, id, addedAt: Date.now() };
     set((s) => ({ documents: [...s.documents, entry] }));
-    saveDocs([...get().documents]);
+    saveDocs(get().documents);
     return id;
   },
 

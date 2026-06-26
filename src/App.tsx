@@ -10,6 +10,7 @@ import { SearchOverlay } from "./components/ui/SearchOverlay";
 import { ShortcutsModal } from "./components/ui/ShortcutsModal";
 import { PythonTerminal } from "./components/ui/PythonTerminal";
 import { CanvasTabs } from "./components/ui/CanvasTabs";
+import { PruneBanner } from "./components/ui/PruneBanner";
 import { useCanvasStore } from "./store/canvasStore";
 import { useCanvasManagerStore } from "./store/canvasManagerStore";
 import { useUIStore } from "./store/uiStore";
@@ -103,6 +104,7 @@ export default function App() {
       <SettingsDrawer />
       <SearchOverlay />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <PruneBanner />
       <ToastContainer />
       <OnboardingHint />
       <PythonTerminal />

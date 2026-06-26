@@ -6,7 +6,10 @@ import { useCanvasManagerStore } from "../../store/canvasManagerStore";
 import { useToastStore } from "../../store/toastStore";
 import { ConfirmDialog } from "../modals/ConfirmDialog";
 import { ShortcutsModal } from "./ShortcutsModal";
-import { setApiKey as persistApiKey } from "../../api/config";
+import { setApiKey as persistApiKey, hasApiKey } from "../../api/config";
+import { validateImportedCanvas } from "../../utils/validation";
+import { TactileSwitch } from "../glass/TactileSwitch";
+import { FluidSlider } from "../glass/FluidSlider";
 
 const themes: { id: ThemeName; label: string; desc: string }[] = [
   { id: "void", label: "◉ Void", desc: "Dark, cold, minimal" },
@@ -23,12 +26,14 @@ export function SettingsDrawer() {
   const setTheme = useUIStore((s) => s.setTheme);
   const showMiniMap = useUIStore((s) => s.showMiniMap);
   const toggleMiniMap = useUIStore((s) => s.toggleMiniMap);
+  const confidenceEnabled = useUIStore((s) => s.confidenceEnabled);
+  const setConfidenceEnabled = useUIStore((s) => s.setConfidenceEnabled);
+  const tendrilsEnabled = useUIStore((s) => s.tendrilsEnabled);
+  const setTendrilsEnabled = useUIStore((s) => s.setTendrilsEnabled);
   const systemPrompt = useUIStore((s) => s.systemPrompt);
   const setSystemPrompt = useUIStore((s) => s.setSystemPrompt);
   const temperature = useUIStore((s) => s.temperature);
   const setTemperature = useUIStore((s) => s.setTemperature);
-  const apiKey = useUIStore((s) => s.apiKey);
-  const setApiKey = useUIStore((s) => s.setApiKey);
 
   const importData = useCanvasStore((s) => s.importData);
   const clearCanvas = useCanvasStore((s) => s.clearCanvas);
@@ -38,7 +43,8 @@ export function SettingsDrawer() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [promptDraft, setPromptDraft] = useState(systemPrompt);
-  const [keyDraft, setKeyDraft] = useState(apiKey);
+  const [keyDraft, setKeyDraft] = useState(hasApiKey() ? "********" : "");
+  const [keyHasValue, setKeyHasValue] = useState(hasApiKey());
   const [keySaved, setKeySaved] = useState(false);
   const keyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -55,8 +61,10 @@ export function SettingsDrawer() {
   }, [settingsOpen]);
 
   const handleKeySave = () => {
-    setApiKey(keyDraft);
+    if (!keyDraft || keyDraft === "********") return;
     persistApiKey(keyDraft);
+    setKeyHasValue(true);
+    setKeyDraft("********");
     setKeySaved(true);
     if (keyTimeoutRef.current) {
       clearTimeout(keyTimeoutRef.current);
@@ -98,7 +106,11 @@ export function SettingsDrawer() {
       reader.onload = () => {
         try {
           const data = JSON.parse(reader.result as string);
-          if (!data.nodes || !data.edges) throw new Error("Invalid format");
+          const validation = validateImportedCanvas(data);
+          if (!validation.valid) {
+            addToast(`Invalid canvas file: ${validation.errors[0]}`, "error");
+            return;
+          }
           importData(data);
           addToast("Canvas imported", "success");
         } catch {
@@ -189,8 +201,11 @@ export function SettingsDrawer() {
                 <input
                   type="password"
                   value={keyDraft}
-                  onChange={(e) => setKeyDraft(e.target.value)}
-                  placeholder="Enter your Mistral API key..."
+                  onChange={(e) => {
+                    setKeyDraft(e.target.value);
+                    if (e.target.value !== "********") setKeyHasValue(false);
+                  }}
+                  placeholder={keyHasValue ? "API key is set (type to replace)" : "Enter your Mistral API key..."}
                   style={{
                     flex: 1, padding: "8px 10px", borderRadius: 10,
                     background: "var(--glass-hover)", border: "1px solid var(--glass-border)",
@@ -198,14 +213,30 @@ export function SettingsDrawer() {
                     outline: "none",
                   }}
                 />
+                {keyHasValue && !keyDraft.startsWith("********") && (
+                  <button
+                    onClick={() => { persistApiKey(""); setKeyHasValue(false); setKeyDraft(""); addToast("API key removed", "info"); }}
+                    style={{
+                      padding: "8px 10px", borderRadius: 10,
+                      background: "rgba(255,60,60,0.1)", border: "1px solid rgba(255,60,60,0.3)",
+                      color: "#f56", cursor: "pointer", fontSize: 11, fontWeight: 500,
+                      transition: "all 0.15s", whiteSpace: "nowrap",
+                    }}
+                    title="Remove API key"
+                  >
+                    ✕
+                  </button>
+                )}
                 <button
                   onClick={handleKeySave}
+                  disabled={!keyDraft || keyDraft === "********"}
                   style={{
                     padding: "8px 14px", borderRadius: 10,
-                    background: keySaved ? "var(--accent-alpha)" : "var(--glass-hover)",
+                    background: keySaved ? "var(--accent-alpha)" : (keyDraft && keyDraft !== "********" ? "var(--glass-hover)" : "var(--glass-hover)"),
                     border: keySaved ? "1px solid var(--accent)" : "1px solid var(--glass-border)",
-                    color: keySaved ? "var(--accent)" : "var(--text-secondary)",
-                    cursor: "pointer", fontSize: 11, fontWeight: 500,
+                    color: keySaved ? "var(--accent)" : (keyDraft && keyDraft !== "********" ? "var(--text-secondary)" : "var(--text-muted)"),
+                    cursor: (keyDraft && keyDraft !== "********") ? "pointer" : "default",
+                    fontSize: 11, fontWeight: 500,
                     transition: "all 0.15s", whiteSpace: "nowrap",
                   }}
                 >
@@ -232,18 +263,13 @@ export function SettingsDrawer() {
                 }}
               />
 
-              <label style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: -4 }}>
-                Temperature: {temperature.toFixed(1)}
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="2"
-                step="0.1"
+              <FluidSlider
+                min={0}
+                max={2}
+                step={0.1}
                 value={temperature}
-                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                style={{ width: "100%", accentColor: "var(--accent)" }}
-                aria-label="Temperature"
+                onChange={setTemperature}
+                label={`Temperature: ${temperature.toFixed(1)}`}
               />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-muted)", marginTop: -4 }}>
                 <span>Precise</span>
@@ -252,7 +278,9 @@ export function SettingsDrawer() {
             </Section>
 
             <Section label="Canvas">
-              <ToggleRow label="Minimap" checked={showMiniMap} onChange={toggleMiniMap} />
+              <TactileSwitch label="Minimap" checked={showMiniMap} onChange={toggleMiniMap} />
+              <TactileSwitch label="Confidence scoring" checked={confidenceEnabled} onChange={() => setConfidenceEnabled(!confidenceEnabled)} />
+              <TactileSwitch label="Follow-up suggestions" checked={tendrilsEnabled} onChange={() => setTendrilsEnabled(!tendrilsEnabled)} />
               <button onClick={autoLayout} style={dataBtnStyle} title="Auto-arrange nodes">
                 ⊞ Auto arrange
               </button>
@@ -335,30 +363,6 @@ function Chip({
     >
       {children}
     </button>
-  );
-}
-
-function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
-  return (
-    <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 0", cursor: "pointer" }}>
-      <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{label}</span>
-      <div
-        onClick={onChange}
-        style={{
-          width: 34, height: 20, borderRadius: 10,
-          background: checked ? "var(--accent)" : "var(--glass-border)",
-          position: "relative", transition: "background 0.2s", cursor: "pointer",
-        }}
-      >
-        <div
-          style={{
-            width: 16, height: 16, borderRadius: "50%", background: "#fff",
-            position: "absolute", top: 2, transition: "left 0.2s",
-            left: checked ? 16 : 2,
-          }}
-        />
-      </div>
-    </label>
   );
 }
 

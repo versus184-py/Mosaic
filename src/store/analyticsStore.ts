@@ -27,7 +27,7 @@ interface AnalyticsState {
   recordCompletion: (canvasId: string, model: string, text: string) => void;
   getCanvasStats: (canvasId: string) => CanvasStats;
   resetCanvasStats: (canvasId: string) => void;
-  computeNodeStats: (nodes: { data: { nodeType: string; messages: any[] } }[], edges: { source: string; target: string }[]) => {
+  computeNodeStats: (nodes: { id: string; data: { nodeType: string; messages: any[] } }[], edges: { source: string; target: string }[]) => {
     totalNodes: number;
     branchNodes: number;
     responseNodes: number;
@@ -43,7 +43,13 @@ const ANALYTICS_KEY = "mosaic-analytics";
 function loadStats(): Record<string, CanvasStats> {
   try {
     const raw = localStorage.getItem(ANALYTICS_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      console.warn("Analytics data invalid, resetting");
+      return {};
+    }
+    return parsed;
   } catch { return {}; }
 }
 
@@ -113,7 +119,7 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
     }
 
     const targets = new Set(edges.map((e) => e.target));
-    const roots = nodes.filter((n) => !targets.has((n as any).id));
+    const roots = nodes.filter((n) => !targets.has(n.id));
 
     let maxDepth = 0;
     function walkDepth(nodeId: string, depth: number) {
@@ -121,7 +127,7 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
       const children = childMap.get(nodeId) || [];
       for (const c of children) walkDepth(c, depth + 1);
     }
-    for (const root of roots) walkDepth((root as any).id, 1);
+    for (const root of roots) walkDepth(root.id, 1);
 
     const branchSources = new Set<string>();
     for (const e of edges) {

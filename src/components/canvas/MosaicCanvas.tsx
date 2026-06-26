@@ -17,9 +17,12 @@ import { useCanvasStore } from "../../store/canvasStore";
 import { useUIStore } from "../../store/uiStore";
 import MessageNode from "./MessageNode";
 import { LiquidEdge } from "./LiquidEdge";
+import { TendrilEdge } from "./TendrilEdge";
+import { DistillEdge } from "./DistillEdge";
+import { DragLens } from "../glass/DragLens";
 
 const nodeTypes = { messageNode: MessageNode };
-const edgeTypes = { liquidEdge: LiquidEdge };
+const edgeTypes = { liquidEdge: LiquidEdge, tendrilEdge: TendrilEdge, distillEdge: DistillEdge };
 
 const LIGHT_THEMES = new Set(["sand", "snow", "sunrise"]);
 
@@ -76,6 +79,7 @@ function FlowInner() {
   }, [storeEdges, hiddenIds, visibleNodeIdSet]);
 
   useEffect(() => {
+    restoring.current = false;
     setNodes(
       visibleStoreNodes.map((n) => ({
         id: n.id,
@@ -84,19 +88,22 @@ function FlowInner() {
         data: n.data,
       }))
     );
-    restoring.current = false;
   }, [visibleStoreNodes, setNodes]);
 
   useEffect(() => {
     setEdges(
-      visibleStoreEdges.map((e) => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        type: "liquidEdge",
-      }))
+      visibleStoreEdges.map((e) => {
+        const tgtNode = storeNodes.find((n) => n.id === e.target);
+        return {
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          type: e.type || "liquidEdge",
+          data: { pruned: tgtNode?.data?.pruned ?? false },
+        };
+      })
     );
-  }, [visibleStoreEdges, setEdges]);
+  }, [visibleStoreEdges, storeNodes, setEdges]);
 
   useEffect(() => {
     const vp = rf.getViewport();
@@ -218,6 +225,7 @@ export function MosaicCanvas() {
       <ReactFlowProvider>
         <FlowInner />
       </ReactFlowProvider>
+      <DragLens initialX={40} initialY={40} />
     </div>
   );
 }

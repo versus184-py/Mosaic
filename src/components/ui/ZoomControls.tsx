@@ -1,4 +1,5 @@
 import { GlassCard } from "../glass/GlassCard";
+import { FluidSlider } from "../glass/FluidSlider";
 
 interface ZoomControlsProps {
   zoom: number;
@@ -25,23 +26,15 @@ export function ZoomControls({ zoom, onZoomChange }: ZoomControlsProps) {
       <span style={{ fontSize: 11, color: "var(--text-muted)", minWidth: 32 }}>
         {Math.round(zoom * 100)}%
       </span>
-      <input
-        type="range"
-        min={0.1}
-        max={2}
-        step={0.01}
-        value={zoom}
-        onChange={(e) => onZoomChange(parseFloat(e.target.value))}
-        style={{
-          width: 100,
-          height: 4,
-          WebkitAppearance: "none",
-          background: "var(--glass-border)",
-          borderRadius: 2,
-          outline: "none",
-          cursor: "pointer",
-        }}
-      />
+      <div style={{ width: 100 }}>
+        <FluidSlider
+          min={0.1}
+          max={2}
+          step={0.01}
+          value={zoom}
+          onChange={onZoomChange}
+        />
+      </div>
     </GlassCard>
   );
 }

@@ -1,5 +1,18 @@
 import { getProviderConfig } from "./config";
 
+const RATE_LIMIT_WINDOW = 1000;
+const MAX_REQUESTS_PER_WINDOW = 10;
+let requestTimestamps: number[] = [];
+
+function checkRateLimit() {
+  const now = Date.now();
+  requestTimestamps = requestTimestamps.filter((t) => now - t < RATE_LIMIT_WINDOW);
+  if (requestTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    throw new Error(`Rate limit exceeded. Max ${MAX_REQUESTS_PER_WINDOW} requests per ${RATE_LIMIT_WINDOW / 1000}s.`);
+  }
+  requestTimestamps.push(now);
+}
+
 async function authHeaders(): Promise<Record<string, string>> {
   const cfg = getProviderConfig();
   const key = cfg.key();
@@ -16,6 +29,7 @@ export async function* streamMistral(
   signal: AbortSignal,
   model = "mistral-large-latest"
 ): AsyncGenerator<string> {
+  checkRateLimit();
   const headers = await authHeaders();
   const url = getProviderConfig().url;
 
@@ -68,6 +82,7 @@ export async function mistralCompletion(
   signal?: AbortSignal,
   model = "mistral-large-latest"
 ): Promise<string> {
+  checkRateLimit();
   const headers = await authHeaders();
   const url = getProviderConfig().url;
 

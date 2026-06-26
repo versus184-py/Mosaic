@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ChatNode, ChatEdge, CanvasState } from "../types/canvas";
-import { layoutTree } from "../utils/layout";
+import { deepClone, layoutTree } from "../utils/layout";
 import { useCanvasManagerStore } from "./canvasManagerStore";
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -17,6 +17,12 @@ function scheduleSave(state: CanvasState) {
     });
     saveTimer = null;
   }, 300);
+}
+
+function pushHistory(state: CanvasState) {
+  const history = state.positionHistory || [];
+  const entry = { nodes: deepClone(state.nodes), edges: deepClone(state.edges) };
+  return [...history.slice(-49), entry];
 }
 
 function flushSave(state: CanvasState) {
@@ -42,7 +48,7 @@ function loadInitialState(): Partial<CanvasState> & { bookmarkedIds?: Set<string
       edges: data.edges || [],
       viewport: data.viewport || { x: 0, y: 0, zoom: 1 },
       positionHistory: data.positionHistory || [],
-      bookmarkedIds: new Set(data.nodes?.filter((n: ChatNode) => (n.data as any).bookmarked).map((n: ChatNode) => n.id) || []),
+      bookmarkedIds: new Set((data.nodes || []).filter((n: ChatNode) => n.data.bookmarked).map((n: ChatNode) => n.id)),
     };
   }
   return {};
@@ -98,7 +104,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const mgr = useCanvasManagerStore.getState();
     const data = mgr.loadCanvasData(canvasId);
     if (data) {
-      const bookmarkedIds = new Set(data.nodes?.filter((n: ChatNode) => (n.data as any).bookmarked).map((n: ChatNode) => n.id) || []);
+      const bookmarkedIds = new Set((data.nodes || []).filter((n: ChatNode) => n.data.bookmarked).map((n: ChatNode) => n.id));
       set({
         nodes: data.nodes || [],
         edges: data.edges || [],
@@ -125,7 +131,10 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   addNode: (node) => {
-    set((s) => ({ nodes: [...s.nodes, node] }));
+    set((s) => {
+      const history = pushHistory(s);
+      return { nodes: [...s.nodes, node], positionHistory: history };
+    });
     scheduleSave(get());
   },
 
@@ -155,7 +164,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const original = state.nodes.find((n) => n.id === id);
     if (original && (original.position.x !== position.x || original.position.y !== position.y)) {
       const history = state.positionHistory || [];
-      const entry = { nodes: structuredClone(state.nodes), edges: structuredClone(state.edges) };
+      const entry = { nodes: deepClone(state.nodes), edges: deepClone(state.edges) };
       set((s) => ({
         positionHistory: [...history.slice(-49), entry],
         nodes: s.nodes.map((n) =>
@@ -173,10 +182,14 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   removeNode: (id) => {
-    set((s) => ({
-      nodes: s.nodes.filter((n) => n.id !== id),
-      edges: s.edges.filter((e) => e.source !== id && e.target !== id),
-    }));
+    set((s) => {
+      const history = pushHistory(s);
+      return {
+        nodes: s.nodes.filter((n) => n.id !== id),
+        edges: s.edges.filter((e) => e.source !== id && e.target !== id),
+        positionHistory: history,
+      };
+    });
     scheduleSave(get());
   },
 
@@ -184,13 +197,17 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const state = get();
     const descendantIds = state.getDescendantIds(id);
     const allToRemove = new Set([id, ...descendantIds]);
-    set((s) => ({
-      nodes: s.nodes.filter((n) => !allToRemove.has(n.id)),
-      edges: s.edges.filter(
-        (e) => !allToRemove.has(e.source) && !allToRemove.has(e.target)
-      ),
-      activeNodeId: s.activeNodeId && allToRemove.has(s.activeNodeId) ? null : s.activeNodeId,
-    }));
+    set((s) => {
+      const history = pushHistory(s);
+      return {
+        nodes: s.nodes.filter((n) => !allToRemove.has(n.id)),
+        edges: s.edges.filter(
+          (e) => !allToRemove.has(e.source) && !allToRemove.has(e.target)
+        ),
+        activeNodeId: s.activeNodeId && allToRemove.has(s.activeNodeId) ? null : s.activeNodeId,
+        positionHistory: history,
+      };
+    });
     scheduleSave(get());
   },
 
@@ -202,7 +219,10 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   clearCanvas: () => {
-    set({ nodes: [], edges: [], activeNodeId: null, positionHistory: [], bookmarkedIds: new Set() });
+    set((s) => {
+      const history = s.nodes.length > 0 ? pushHistory(s) : [];
+      return { nodes: [], edges: [], activeNodeId: null, positionHistory: history, bookmarkedIds: new Set() };
+    });
     scheduleSave(get());
   },
 
@@ -235,7 +255,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const positions = layoutTree(state.nodes, state.edges);
     if (positions.size === 0) return;
     const history = state.positionHistory || [];
-    const entry = { nodes: structuredClone(state.nodes), edges: structuredClone(state.edges) };
+    const entry = { nodes: deepClone(state.nodes), edges: deepClone(state.edges) };
     set({
       nodes: state.nodes.map((n) => {
         const pos = positions.get(n.id);
@@ -266,7 +286,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       return {
         bookmarkedIds: next,
         nodes: s.nodes.map((n) =>
-          n.id === id ? { ...n, data: { ...n.data, bookmarked: !(n.data as any).bookmarked } } : n
+          n.id === id ? { ...n, data: { ...n.data, bookmarked: !n.data.bookmarked } } : n
         ),
       };
     });

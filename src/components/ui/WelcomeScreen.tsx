@@ -25,6 +25,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const animRef = useRef<number>(0);
   const [phase, setPhase] = useState<"idle" | "burst" | "gone">("idle");
   const [animationEnabled, setAnimationEnabled] = useState(true);
+  const [ready, setReady] = useState(false);
 
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
@@ -136,6 +137,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       animRef.current = requestAnimationFrame(animate);
     }
 
+    setReady(true);
     animate();
 
     return () => {
@@ -155,7 +157,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   }, []);
 
   const handleClick = () => {
-    if (phase !== "idle") return;
+    if (phase !== "idle" || !ready) return;
     setPhase("burst");
     const particles = particlesRef.current;
     for (const p of particles) {

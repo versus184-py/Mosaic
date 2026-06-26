@@ -18,7 +18,7 @@ export function SearchOverlay() {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
     setSearchIndex(-1);
-  }, [searchOpen, searchQuery]);
+  }, [searchOpen, searchQuery, setSearchIndex]);
 
   const results = useMemo(() => {
     if (!searchQuery.trim()) return [];

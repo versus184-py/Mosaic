@@ -4,10 +4,12 @@ import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 
 interface NodeInputProps {
   onSend: (text: string) => void;
+  onDebate?: (text: string) => void;
+  initialValue?: string;
 }
 
-export function NodeInput({ onSend }: NodeInputProps) {
-  const [value, setValue] = useState("");
+export function NodeInput({ onSend, onDebate, initialValue }: NodeInputProps) {
+  const [value, setValue] = useState(initialValue || "");
   const ref = useRef<HTMLTextAreaElement>(null);
   const [focused, setFocused] = useState(false);
   const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition();
@@ -36,12 +38,24 @@ export function NodeInput({ onSend }: NodeInputProps) {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && e.shiftKey) {
+        e.preventDefault();
+        if (onDebate) {
+          const raw = value.length > MAX_INPUT_LENGTH ? value.substring(0, MAX_INPUT_LENGTH) : value;
+          const trimmed = raw.trim();
+          if (trimmed) {
+            onDebate(trimmed);
+            setValue("");
+          }
+        }
+        return;
+      }
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
     },
-    [handleSend]
+    [handleSend, onDebate, value]
   );
 
   const handleMicClick = useCallback(() => {

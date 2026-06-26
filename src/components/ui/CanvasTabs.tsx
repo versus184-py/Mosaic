@@ -2,6 +2,8 @@ import { useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCanvasManagerStore } from "../../store/canvasManagerStore";
 import { useCanvasStore } from "../../store/canvasStore";
+import { Lens } from "../glass/Lens";
+import { createGridBackgroundNode } from "../../liquid-glass/capture";
 
 export function CanvasTabs() {
   const canvases = useCanvasManagerStore((s) => s.canvases);
@@ -97,15 +99,33 @@ export function CanvasTabs() {
               fontSize: 11,
               fontWeight: 500,
               color: activeCanvasId === c.id ? "var(--text)" : "var(--text-muted)",
-              background: activeCanvasId === c.id ? "var(--glass-hover)" : "transparent",
-              border: activeCanvasId === c.id
-                ? "1px solid var(--glass-border)"
-                : "1px solid transparent",
-              transition: "all 0.12s",
               whiteSpace: "nowrap",
               flexShrink: 0,
+              position: "relative",
             }}
           >
+            {activeCanvasId === c.id && (
+              <Lens
+                params={{
+                  width: c.name.length * 10 + 40,
+                  height: 24,
+                  radius: 6,
+                  bezelWidth: 3,
+                  glassThickness: 20,
+                  refractiveIndex: 1.3,
+                  scale: 0.6,
+                  surface: "convex_squircle",
+                  squirclePower: 2,
+                }}
+                refractionTarget={createGridBackgroundNode(c.name.length * 10 + 40, 24)}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: 8,
+                  border: "1px solid var(--glass-border)",
+                }}
+              />
+            )}
             {editingId === c.id ? (
               <input
                 ref={inputRef}
@@ -127,10 +147,12 @@ export function CanvasTabs() {
                   color: "var(--text)",
                   outline: "none",
                   fontFamily: "inherit",
+                  position: "relative",
+                  zIndex: 1,
                 }}
               />
             ) : (
-              <span>{c.name}</span>
+              <span style={{ position: "relative", zIndex: 1 }}>{c.name}</span>
             )}
             {canvases.length > 1 && (
               <span
@@ -142,6 +164,8 @@ export function CanvasTabs() {
                   padding: "0 2px",
                   borderRadius: 4,
                   lineHeight: 1,
+                  position: "relative",
+                  zIndex: 1,
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.4"; }}

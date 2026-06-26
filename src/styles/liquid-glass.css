@@ -11,6 +11,29 @@
     box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ───── iOS 26 Variants ───── */
+.glass-frosted .glass-tint-layer {
+  opacity: 1;
+}
+.glass-clear {
+  background: transparent;
+  border-color: rgba(255,255,255,0.08);
+}
+.glass-clear .glass-tint-layer {
+  display: none;
+}
+.glass-clear .glass-shine-layer {
+  box-shadow:
+    inset 1px 1px 0.5px 0 rgba(255, 255, 255, 0.2),
+    inset -0.5px -0.5px 0.5px 0.5px rgba(255, 255, 255, 0.08);
+}
+.glass-clear .glass-shine-layer::after {
+  opacity: 0.5;
+}
+.glass-shine-clear {
+  opacity: 0.4;
+}
+
 /* ───── Layer 1: Backdrop blur + SVG filter ───── */
 .glass-filter-layer {
   position: absolute;
@@ -23,6 +46,25 @@
   transition: backdrop-filter 0.3s ease;
 }
 
+/* ───── Refraction lens layer (physics-based) ───── */
+.glass-refraction-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ───── Clone fallback layer for non-Chrome browsers ───── */
+.glass-lens-clone {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
 /* Active node glow pulse via box-shadow ring (avoids overflow clipping) */
 .active-pulse {
   box-shadow: 0 0 0 0 var(--accent-alpha);
@@ -31,6 +73,14 @@
 @keyframes pulseRing {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-alpha); }
   50% { box-shadow: 0 0 0 3px var(--accent-alpha), 0 0 20px var(--accent-alpha); }
+}
+
+/* ───── Refraction lens variants ───── */
+.glass-lens-subtle .glass-refraction-layer {
+  opacity: 0.6;
+}
+.glass-lens-strong .glass-refraction-layer {
+  opacity: 1;
 }
 
 /* ───── Layer 2: Tint ───── */
@@ -186,7 +236,9 @@
   /* Reserved for future Houdini paint worklet */
 }
 
-/* Reduced motion */
+/* ───── Accessibility ───── */
+
+/* Reduce Motion — disable animations, static glass only */
 @media (prefers-reduced-motion: reduce) {
   .glass-container {
     animation: none !important;
@@ -206,4 +258,30 @@
     animation: none !important;
     display: none;
   }
+  .glass-lens-clone {
+    filter: none !important;
+  }
 }
+
+/* Reduce Transparency — frostier glass, stronger tint */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-container {
+    background: var(--glass-content-bg) !important;
+    backdrop-filter: blur(0px) !important;
+    -webkit-backdrop-filter: blur(0px) !important;
+  }
+  .glass-frosted .glass-tint-layer {
+    opacity: 0.8 !important;
+  }
+  .glass-clear {
+    background: var(--glass-content-bg) !important;
+  }
+  .glass-clear .glass-shine-layer {
+    display: none !important;
+  }
+  .glass-lens-clone {
+    opacity: 0 !important;
+  }
+}
+
+
