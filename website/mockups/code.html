@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dusk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mosaic — Code Sandbox</title>
+<link rel="stylesheet" href="mockup-themes.css">
+<style>
+.window{width:1200px;height:800px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--glass-border),0 32px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;position:relative;background:var(--bg)}
+.titlebar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(20,20,28,0.95);border-bottom:1px solid rgba(255,255,255,0.06);-webkit-user-select:none;user-select:none;flex-shrink:0}
+.traffic-lights{display:flex;gap:7px;flex-shrink:0}
+.traffic-light{width:12px;height:12px;border-radius:50%}
+.traffic-light.r{background:#ff5f56}
+.traffic-light.y{background:#ffbd2e}
+.traffic-light.g{background:#27c93f}
+.titlebar-title{font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);flex:1;text-align:center;letter-spacing:0.01em;margin-right:52px}
+.titlebar-btn{width:28px;height:28px;border-radius:6px;border:none;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background 0.2s}
+.titlebar-btn:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)}
+
+.canvas{flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 40%,var(--accent-alpha) 0%,transparent 50%),radial-gradient(circle at 20% 80%,var(--accent-alpha) 0%,transparent 35%)}
+.grid-bg{position:absolute;inset:0;background-image:radial-gradient(circle,var(--grid-color) 1px,transparent 1px);background-size:28px 28px;z-index:0}
+
+.node{position:absolute;background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:16px 20px;backdrop-filter:blur(16px) saturate(180%);box-shadow:0 8px 32px rgba(0,0,0,0.5);width:340px;z-index:2;cursor:default}
+.node.node-active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-alpha),0 12px 40px rgba(0,0,0,0.5)}
+.node-label{font-size:10px;font-weight:600;color:var(--accent);margin-bottom:6px;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.node-label .status{font-size:9px;padding:2px 7px;border-radius:var(--radius-pill);text-transform:none;letter-spacing:0;font-weight:500}
+.node-label .status.running{background:rgba(250,204,21,0.15);color:#facc15}
+.node-label .status.done{background:rgba(74,222,128,0.15);color:#4ade80}
+.node-message{font-size:13px;line-height:1.6;color:var(--text-secondary)}
+.node-message strong{color:var(--text);font-weight:500}
+.node-meta{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--glass-border)}
+.node-provider{font-size:9px;padding:2px 7px;border-radius:var(--radius-pill);background:var(--accent-alpha);color:var(--accent);font-weight:500}
+.node-time{font-size:9px;color:var(--text-muted);margin-left:auto}
+.edges-svg{position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;height:100%}
+.edge-line{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:4 6;opacity:0.25}
+
+.code-block{background:rgba(0,0,0,0.35);border-radius:12px;margin:10px 0 0;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
+.code-header{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.04);font-size:10px;color:var(--text-muted)}
+.code-content{padding:12px;font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:12px;line-height:1.6;color:var(--text-secondary)}
+.code-content .kw{color:var(--accent)}
+.code-content .str{color:#98d8a8}
+.code-content .fn{color:#7cb8f0}
+.code-content .cm{color:var(--text-muted)}
+.code-content .num{color:#fbbf24}
+.code-output{padding:10px 12px;background:rgba(0,0,0,0.2);border-top:1px solid rgba(255,255,255,0.04);font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:11px;color:var(--text-muted);line-height:1.5}
+.code-output .out{color:#4ade80}
+.code-run-btn{display:flex;align-items:center;gap:4px;margin-left:auto;padding:3px 10px;border-radius:6px;background:var(--accent-alpha);color:var(--accent);font-size:9px;font-weight:600;border:none;cursor:pointer}
+
+.chart-placeholder{display:flex;align-items:flex-end;gap:4px;height:70px;padding:6px 0 4px;margin-top:6px}
+.chart-bar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 30%,transparent));min-width:8px}
+
+.terminal{position:absolute;bottom:20px;right:20px;width:380px;z-index:4;background:rgba(2,2,4,0.94);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:14px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.6)}
+.terminal-header{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.04);font-size:10px;color:var(--text-muted)}
+.terminal-header .status-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,0.4)}
+.terminal-body{padding:12px 14px;font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:11px;line-height:1.6;color:var(--text-secondary);max-height:160px;overflow-y:auto}
+.terminal-body .prompt{color:var(--accent)}
+.terminal-body .out{color:#4ade80}
+.terminal-input{display:flex;align-items:center;gap:6px;padding:8px 14px;border-top:1px solid rgba(255,255,255,0.04);font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:11px;color:var(--text);background:rgba(0,0,0,0.15)}
+.terminal-input .prompt{color:var(--accent);flex-shrink:0}
+.terminal-input input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:11px}
+</style>
+<script>document.documentElement.setAttribute('data-theme',new URLSearchParams(location.search).get('theme')||'dusk')</script>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="traffic-lights"><div class="traffic-light r"></div><div class="traffic-light y"></div><div class="traffic-light g"></div></div>
+    <div class="titlebar-title">Mosaic — Code Sandbox</div>
+    <button class="titlebar-btn">&#8212;</button>
+    <button class="titlebar-btn">&#9744;</button>
+    <button class="titlebar-btn">&#10005;</button>
+  </div>
+  <div class="canvas">
+    <div class="grid-bg"></div>
+    <svg class="edges-svg">
+      <path d="M210,190 C270,190 270,310 210,310" class="edge-line"/>
+      <path d="M570,190 C570,220 570,280 570,310" class="edge-line"/>
+    </svg>
+
+    <div class="node node-active" style="left:190px;top:40px;width:340px;">
+      <div class="node-label">&#9733; Prompt</div>
+      <div class="node-message" style="color:var(--text);font-size:14px;"><strong>Write a Python script to analyze this dataset</strong> and visualize the distribution of values with a histogram and summary statistics.</div>
+      <div class="node-meta"><span class="node-provider">GPT-4o</span><span class="node-time">Just now</span></div>
+    </div>
+
+    <div class="node" style="left:40px;top:150px;width:340px;">
+      <div class="node-label">&#8617; Response <span class="status done" style="margin-left:auto;">&#10003; Complete</span></div>
+      <div class="node-message">Here's the analysis script with inline execution:</div>
+      <div class="code-block">
+        <div class="code-header"><span>Python 3.12 — Pyodide</span><span class="code-run-btn">&#9654; Run</span></div>
+        <div class="code-content">
+<span class="kw">import</span> numpy <span class="kw">as</span> np<br>
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt<br><br>
+np.random.seed(<span class="num">42</span>)<br>
+data = np.random.normal(<span class="num">50</span>, <span class="num">15</span>, <span class="num">1000</span>)<br><br>
+mean = np.mean(data)<br>
+std = np.std(data)<br><br>
+<span class="kw">print</span>(<span class="str">f"Mean: {mean:.2f}"</span>)<br>
+<span class="kw">print</span>(<span class="str">f"Std:  {std:.2f}"</span>)
+        </div>
+        <div class="code-output">
+<span class="out">Mean: 49.83</span><br>
+<span class="out">Std:  14.92</span><br>
+<span class="cm">[Plot rendered below]</span>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding:12px;background:rgba(0,0,0,0.25);border-radius:10px;border:1px solid rgba(255,255,255,0.04);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:9px;color:var(--text-muted)">Distribution (n=1000)</span><span style="font-size:8px;color:var(--text-muted)">&#9632; Histogram &nbsp; &#9473; KDE</span></div>
+        <div class="chart-placeholder">
+          <div class="chart-bar" style="height:8%;opacity:0.4"></div>
+          <div class="chart-bar" style="height:15%;opacity:0.5"></div>
+          <div class="chart-bar" style="height:25%;opacity:0.6"></div>
+          <div class="chart-bar" style="height:40%;opacity:0.7"></div>
+          <div class="chart-bar" style="height:55%;opacity:0.8"></div>
+          <div class="chart-bar" style="height:72%;opacity:0.9"></div>
+          <div class="chart-bar" style="height:88%;opacity:1"></div>
+          <div class="chart-bar" style="height:95%;opacity:1"></div>
+          <div class="chart-bar" style="height:100%;opacity:1"></div>
+          <div class="chart-bar" style="height:92%;opacity:1"></div>
+          <div class="chart-bar" style="height:78%;opacity:0.9"></div>
+          <div class="chart-bar" style="height:60%;opacity:0.8"></div>
+          <div class="chart-bar" style="height:42%;opacity:0.7"></div>
+          <div class="chart-bar" style="height:28%;opacity:0.6"></div>
+          <div class="chart-bar" style="height:18%;opacity:0.5"></div>
+          <div class="chart-bar" style="height:10%;opacity:0.4"></div>
+          <div class="chart-bar" style="height:5%;opacity:0.3"></div>
+        </div>
+        <svg style="width:100%;height:24px;margin-top:0;" viewBox="0 0 340 24" preserveAspectRatio="none">
+          <path d="M0,22 C20,22 30,18 40,14 C50,10 60,6 70,4 C80,2 90,2 100,1 C120,0 140,0 160,1 C180,2 200,2 210,4 C220,6 230,10 240,12 C250,14 260,16 270,17 C280,18 290,19 300,20 C310,21 320,22 330,22 C340,22" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.7"/>
+        </svg>
+      </div>
+      <div class="node-meta"><span class="node-provider">GPT-4o</span><span class="node-time">Executed in 0.32s</span></div>
+    </div>
+
+    <div class="node" style="left:430px;top:150px;width:320px;">
+      <div class="node-label">&#8617; Alternative <span class="status running" style="margin-left:auto;">&#9679; Running</span></div>
+      <div class="node-message">Same analysis using <strong>JavaScript</strong> in the Web Worker sandbox:</div>
+      <div class="code-block">
+        <div class="code-header"><span>JavaScript (Web Worker)</span><span style="margin-left:auto;color:#facc15;font-size:9px;">&#9679; Running...</span></div>
+        <div class="code-content">
+<span class="kw">const</span> data = Array.from({length: <span class="num">1000</span>},<br>
+&nbsp;&nbsp;<span class="kw">()=></span> boxMuller(<span class="num">50</span>, <span class="num">15</span>));<br><br>
+<span class="kw">const</span> mean = data.reduce(<span class="kw">(a,b)=></span> a+b) / data.length;<br>
+postMessage({ stats: { mean, std: Math.sqrt(variance) }});
+        </div>
+      </div>
+      <div class="node-meta"><span class="node-provider">Web Worker</span><span class="node-time">Running...</span></div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-header"><span class="status-dot"></span><span>Python 3.12 (Pyodide) — Connected</span></div>
+      <div class="terminal-body">
+        <div><span class="prompt">In [1]:</span> import numpy as np</div>
+        <div><span class="prompt">In [2]:</span> data = np.random.normal(50, 15, 1000)</div>
+        <div><span class="prompt">In [3]:</span> np.mean(data)</div>
+        <div><span class="out">Out[3]: 49.827341</span></div>
+        <div><span class="prompt">In [4]:</span> plt.hist(data, bins=30)</div>
+        <div><span class="out">Out[4]: [Plot rendered]</span></div>
+      </div>
+      <div class="terminal-input"><span class="prompt">In [5]:</span><input type="text" readonly value="len(data)"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

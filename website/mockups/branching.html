@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dusk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mosaic — Branching Tree</title>
+<link rel="stylesheet" href="mockup-themes.css">
+<style>
+.window{width:1200px;height:800px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--glass-border),0 32px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;position:relative;background:var(--bg)}
+.titlebar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(20,20,28,0.95);border-bottom:1px solid rgba(255,255,255,0.06);-webkit-user-select:none;user-select:none;flex-shrink:0}
+.traffic-lights{display:flex;gap:7px;flex-shrink:0}
+.traffic-light{width:12px;height:12px;border-radius:50%}
+.traffic-light.r{background:#ff5f56}
+.traffic-light.y{background:#ffbd2e}
+.traffic-light.g{background:#27c93f}
+.titlebar-title{font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);flex:1;text-align:center;letter-spacing:0.01em;margin-right:52px}
+
+.canvas{flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 30% 20%,var(--accent-alpha) 0%,transparent 50%),radial-gradient(circle at 70% 80%,var(--accent-alpha) 0%,transparent 40%)}
+.grid-bg{position:absolute;inset:0;background-image:radial-gradient(circle,var(--grid-color) 1px,transparent 1px);background-size:28px 28px;z-index:0}
+
+.node{position:absolute;background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:14px 18px;backdrop-filter:blur(16px) saturate(180%);box-shadow:0 8px 32px rgba(0,0,0,0.5);width:260px;z-index:2;cursor:default}
+.node.node-accent{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-alpha),0 12px 40px rgba(0,0,0,0.5)}
+.node-label{font-size:10px;font-weight:600;color:var(--accent);margin-bottom:4px;letter-spacing:0.04em;text-transform:uppercase}
+.node-message{font-size:12.5px;line-height:1.5;color:var(--text-secondary)}
+.node-message strong{color:var(--text);font-weight:500}
+.node-meta{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--glass-border)}
+.node-provider{font-size:9px;padding:2px 7px;border-radius:var(--radius-pill);background:var(--accent-alpha);color:var(--accent);font-weight:500}
+.node-time{font-size:9px;color:var(--text-muted);margin-left:auto}
+
+.edges-svg{position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;height:100%}
+.edge-line{stroke:var(--accent);stroke-width:1.5;fill:none;stroke-dasharray:4 6;opacity:0.2}
+.edge-line.thick{stroke-width:2.5;opacity:0.4;stroke-dasharray:none}
+.edge-line.colored-a{stroke:var(--accent);stroke-width:2;opacity:0.5;stroke-dasharray:none}
+.edge-line.colored-b{stroke:#818cf8;stroke-width:2;opacity:0.4;stroke-dasharray:none}
+.edge-line.colored-c{stroke:#f472b6;stroke-width:2;opacity:0.35;stroke-dasharray:none}
+
+.branch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.branch-dot.a{background:var(--accent);box-shadow:0 0 8px var(--accent-glow)}
+.branch-dot.b{background:#818cf8;box-shadow:0 0 8px rgba(129,140,248,0.4)}
+.branch-dot.c{background:#f472b6;box-shadow:0 0 8px rgba(244,114,182,0.3)}
+
+.topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(6,6,26,0.9);border-bottom:1px solid var(--glass-border);flex-shrink:0}
+.topbar-logo{font-size:13px;font-weight:500;color:var(--text-muted);margin-right:12px;display:flex;align-items:center;gap:6px}
+.topbar-logo svg{width:16px;height:16px;color:var(--accent)}
+.topbar-tab{padding:4px 14px;border-radius:var(--radius-pill);font-size:11px;color:var(--text-secondary);background:transparent;border:1px solid transparent;cursor:pointer}
+.topbar-tab.active{background:var(--glass);border-color:var(--glass-border);color:var(--text)}
+.topbar-spacer{flex:1}
+.topbar-compare-btn{display:flex;align-items:center;gap:4px;padding:4px 12px;border-radius:var(--radius-pill);font-size:10px;font-weight:600;background:var(--accent);color:#fff;border:none;cursor:pointer}
+
+.minimap{position:absolute;bottom:20px;right:20px;width:160px;height:110px;background:rgba(6,6,26,0.88);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:12px;z-index:5;overflow:hidden;padding:10px}
+.minimap-node{position:absolute;width:6px;height:6px;border-radius:2px;background:var(--accent);opacity:0.5}
+.minimap-node.active{opacity:1;box-shadow:0 0 4px var(--accent-glow)}
+.minimap-edge{position:absolute;height:1px;background:var(--accent);opacity:0.15;transform-origin:0 0}
+</style>
+<script>document.documentElement.setAttribute('data-theme',new URLSearchParams(location.search).get('theme')||'dusk')</script>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="traffic-lights"><div class="traffic-light r"></div><div class="traffic-light y"></div><div class="traffic-light g"></div></div>
+    <div class="titlebar-title">Mosaic — Branching Canvas</div>
+  </div>
+  <div class="topbar">
+    <div class="topbar-logo"><svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg> Mosaic</div>
+    <div class="topbar-tab active">Explore</div>
+    <div class="topbar-tab">Research</div>
+    <div class="topbar-spacer"></div>
+    <button class="topbar-compare-btn">&#8801; Compare</button>
+  </div>
+  <div class="canvas">
+    <div class="grid-bg"></div>
+    <svg class="edges-svg">
+      <path d="M490,50 C490,70 490,90 490,90" class="edge-line thick"/>
+      <path d="M490,130 C420,150 350,170 300,190" class="edge-line colored-a"/>
+      <path d="M490,130 C490,150 490,170 490,190" class="edge-line thick"/>
+      <path d="M490,130 C560,150 630,170 680,190" class="edge-line colored-b"/>
+      <path d="M490,230 C440,260 380,290 340,320" class="edge-line colored-c"/>
+      <path d="M490,230 C490,260 490,290 490,320" class="edge-line thick"/>
+      <path d="M490,230 C540,260 600,290 650,320" class="edge-line colored-a"/>
+      <path d="M300,230 C300,260 300,290 300,320" class="edge-line colored-b"/>
+      <path d="M300,230 C350,260 410,290 450,320" class="edge-line colored-c"/>
+      <path d="M340,360 C290,390 250,420 220,450" class="edge-line colored-a"/>
+      <path d="M340,360 C340,390 340,420 340,450" class="edge-line colored-b"/>
+      <path d="M490,360 C490,390 490,420 490,450" class="edge-line thick"/>
+      <path d="M650,360 C650,390 650,420 650,450" class="edge-line colored-c"/>
+      <path d="M650,360 C700,390 740,420 770,450" class="edge-line colored-a"/>
+    </svg>
+
+    <div class="node node-accent" style="left:360px;top:10px;width:280px;text-align:center;">
+      <div class="node-label">&#9679; How do transformers work?</div>
+      <div class="node-message" style="color:var(--text);font-size:13px;">Explain the attention mechanism like I'm 15</div>
+      <div class="node-meta" style="justify-content:center;border-top:none;margin-top:4px;padding-top:0;"><span class="node-provider">Root</span></div>
+    </div>
+
+    <div class="node" style="left:130px;top:150px;width:280px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><div class="branch-dot a"></div><div class="node-label">Branch A — Intuitive</div></div>
+      <div class="node-message">Think of attention as a <strong>spotlight</strong>. The model learns which words to illuminate based on relevance. When processing "sat", the model shines light on "cat" (who sat?) and "mat" (where?).</div>
+      <div class="node-meta"><span class="node-provider"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:4px;"></span>Mistral Large</span><span class="node-time">42s</span></div>
+    </div>
+
+    <div class="node node-accent" style="left:360px;top:150px;width:280px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><div class="branch-dot b"></div><div class="node-label">Main — Technical</div></div>
+      <div class="node-message">Scaled dot-product attention: <strong>Attention(Q,K,V) = softmax(QK&#8314;/&#8730;d_k)V</strong>. Each word gets a query, key, and value vector. The dot product between query and all keys determines how much each word attends to others.</div>
+      <div class="node-meta"><span class="node-provider"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#818cf8;margin-right:4px;"></span>GPT-4o</span><span class="node-time">35s</span></div>
+    </div>
+
+    <div class="node" style="left:590px;top:150px;width:280px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><div class="branch-dot c"></div><div class="node-label">Branch C — Deep Dive</div></div>
+      <div class="node-message"><strong>Multi-head attention</strong> runs 8-16 attention computations in parallel with different learned projections, then concatenates and projects the results.</div>
+      <div class="node-meta"><span class="node-provider"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#f472b6;margin-right:4px;"></span>Claude 3.5</span><span class="node-time">28s</span></div>
+    </div>
+
+    <div class="node" style="left:100px;top:290px;width:250px;">
+      <div class="node-label">&#8617; Follow-up</div>
+      <div class="node-message">What about <strong>positional encoding</strong>? Sine/cosine waves of different frequencies create unique position fingerprints.</div>
+      <div class="node-meta"><span class="node-provider">Mistral</span><span class="node-time">20s</span></div>
+    </div>
+
+    <div class="node" style="left:360px;top:290px;width:280px;">
+      <div class="node-label">&#8617; Deep Dive</div>
+      <div class="node-message"><strong>Encoder-decoder architecture</strong>: Encoder processes input in parallel (bidirectional), decoder is autoregressive (masked attention). BERT is encoder-only; GPT is decoder-only.</div>
+      <div class="node-meta"><span class="node-provider">GPT-4o</span><span class="node-time">15s</span></div>
+    </div>
+
+    <div class="node" style="left:520px;top:290px;width:280px;">
+      <div class="node-label">&#8617; Note</div>
+      <div class="node-message">The <code style="padding:1px 5px;border-radius:4px;background:var(--accent-alpha);font-size:11px">&#8730;d_k</code> scaling factor prevents softmax saturation with high-dimensional keys.</div>
+      <div class="node-meta"><span class="node-provider">Claude 3.5</span><span class="node-time">12s</span></div>
+    </div>
+
+    <div class="node" style="left:60px;top:420px;width:240px;">
+      <div class="node-label">&#8617; Visual</div>
+      <div class="node-message">Each position gets a <strong>unique wave pattern</strong> from sine/cosine functions at different frequencies.</div>
+      <div class="node-meta"><span class="node-provider">Mistral</span><span class="node-time">8s</span></div>
+    </div>
+
+    <div class="node node-accent" style="left:320px;top:420px;width:260px;">
+      <div class="node-label">&#8617; Key Insight</div>
+      <div class="node-message">The <strong>O(n²) complexity</strong> of attention is the main bottleneck. For 100K tokens, that's 10B comparisons. Sparse attention (Longformer) and linear attention (Mamba) solve this.</div>
+      <div class="node-meta"><span class="node-provider">GPT-4o</span><span class="node-time">5s</span></div>
+    </div>
+
+    <div class="node" style="left:500px;top:420px;width:270px;">
+      <div class="node-label">&#8617; Paper</div>
+      <div class="node-message">"Attention Is All You Need" (2017). <strong>Flash Attention</strong> (2022) tiles the computation for 2-4x GPU speedup by fitting attention blocks in SRAM.</div>
+      <div class="node-meta"><span class="node-provider">Claude 3.5</span><span class="node-time">2s</span></div>
+    </div>
+
+    <div class="node" style="left:670px;top:420px;width:240px;">
+      <div class="node-label">&#8617; Example</div>
+      <div class="node-message">Flash Attention uses <strong>tiling</strong> to compute attention in blocks that fit in fast SRAM, avoiding slow HBM reads.</div>
+      <div class="node-meta"><span class="node-provider">Mistral</span><span class="node-time">1s</span></div>
+    </div>
+
+    <div class="minimap">
+      <div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Overview</div>
+      <div class="minimap-node" style="top:5px;left:48%;width:8px;height:8px;"></div>
+      <div class="minimap-node" style="top:25px;left:18%;"></div>
+      <div class="minimap-node active" style="top:25px;left:46%;"></div>
+      <div class="minimap-node" style="top:25px;left:72%;"></div>
+      <div class="minimap-node" style="top:42px;left:14%;width:5px;height:5px;"></div>
+      <div class="minimap-node" style="top:42px;left:46%;width:5px;height:5px;"></div>
+      <div class="minimap-node" style="top:42px;left:68%;width:5px;height:5px;"></div>
+      <div class="minimap-node" style="top:60px;left:8%;width:4px;height:4px;"></div>
+      <div class="minimap-node active" style="top:60px;left:42%;width:4px;height:4px;"></div>
+      <div class="minimap-node" style="top:60px;left:64%;width:4px;height:4px;"></div>
+      <div class="minimap-node" style="top:60px;left:82%;width:4px;height:4px;"></div>
+      <div class="minimap-edge" style="top:13px;left:48%;width:52%;"></div>
+      <div class="minimap-edge" style="top:13px;right:48%;width:52%;"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
