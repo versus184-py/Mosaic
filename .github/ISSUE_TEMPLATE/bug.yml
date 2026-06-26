@@ -1,0 +1,88 @@
+name: Bug Report
+description: Report something that isn't working
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report. The more detail you share, the faster we can fix it.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug
+      placeholder: "The app crashes when I try to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: How can we trigger this bug?
+      placeholder: |
+        1. Open Mosaic
+        2. Click on ...
+        3. Wait 5 seconds
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Mosaic version
+      description: Find this in Settings → About or check the title bar
+      placeholder: "e.g. 0.3.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: AI provider (if relevant)
+      options:
+        - Mistral
+        - OpenAI
+        - Anthropic
+        - Gemini
+        - Ollama
+        - N/A
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / error messages
+      description: Paste any console errors, crash reports, or screenshots
+      render: text
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical — app crashes or data loss
+        - High — feature broken with no workaround
+        - Medium — feature broken but has workaround
+        - Low — cosmetic or minor annoyance

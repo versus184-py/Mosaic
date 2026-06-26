@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions & Help
+    url: https://github.com/versus184-py/Mosaic/discussions
+    about: Please use Discussions for Q&A, help, and general conversation.
+  - name: Documentation (Wiki)
+    url: https://github.com/versus184-py/Mosaic/wiki
+    about: Full documentation including setup, configuration, and API references.
+  - name: Troubleshooting & FAQ
+    url: https://github.com/versus184-py/Mosaic/wiki/Troubleshooting-and-FAQ
+    about: Check the FAQ before posting — your question may already be answered.
+  - name: Security Vulnerability
+    url: https://github.com/versus184-py/Mosaic/security/policy
+    about: Please report security vulnerabilities via our SECURITY.md process.

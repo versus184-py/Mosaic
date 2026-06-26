@@ -1,8 +1,8 @@
 [package]
 name = "mosaic"
 version = "0.1.0"
-description = "Mosaic - Spatial AI Canvas"
-authors = ["you"]
+description = "Mosaic: A spatial canvas for AI conversations with branching, RAG semantic search, inline code execution (JS/Python via WASM), and multi-provider LLM support (Mistral, OpenAI, Anthropic, Gemini, Ollama)"
+authors = ["Mosaic Contributors"]
 edition = "2021"
 
 [lib]

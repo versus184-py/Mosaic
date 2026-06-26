@@ -4,15 +4,16 @@
   "version": "0.3.0",
   "description": "A spatial canvas for AI conversations — branch, explore, and run code inline",
   "keywords": [
-    "ai",
-    "chat",
-    "canvas",
-    "llm",
-    "mistral",
-    "tauri",
-    "react-flow",
-    "rag",
-    "conversation-tree"
+    "ai", "llm", "chat", "conversation-tree", "canvas",
+    "mistral", "openai", "anthropic", "gemini", "ollama",
+    "rag", "retrieval-augmented-generation", "semantic-search",
+    "tauri", "react", "typescript", "react-flow", "zustand",
+    "framer-motion", "tailwindcss",
+    "pyodide", "wasm", "webassembly",
+    "local-llm", "offline-ai",
+    "glass-ui", "branching", "parallel-debate",
+    "desktop-app", "cross-platform", "open-source", "mit",
+    "code-execution", "node-editor", "knowledge-management"
   ],
   "homepage": "https://github.com/versus184-py/Mosaic#readme",
   "bugs": {

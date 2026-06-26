@@ -1,0 +1,84 @@
+name: Performance Report
+description: Report slow or unresponsive behavior
+title: "[Performance]: "
+labels: ["performance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us make Mosaic faster. Tell us what's slow and what you're working with.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What's slow?
+      description: Describe the performance issue
+      placeholder: "Scrolling becomes choppy when..."
+    validations:
+      required: true
+
+  - type: input
+    id: canvas_size
+    attributes:
+      label: Canvas size
+      description: Roughly how many nodes are on your canvas?
+      placeholder: "e.g. ~50 nodes"
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: How to trigger the slowness
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: specs
+    attributes:
+      label: Machine specs
+      description: CPU, RAM, GPU (if known)
+      placeholder: "e.g. M1 MacBook Air, 16GB RAM"
+
+  - type: input
+    id: version
+    attributes:
+      label: Mosaic version
+      placeholder: "e.g. 0.3.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: AI provider (if relevant)
+      options:
+        - Mistral
+        - OpenAI
+        - Anthropic
+        - Gemini
+        - Ollama
+        - N/A
+
+  - type: textarea
+    id: timing
+    attributes:
+      label: Timing / metrics
+      description: "Any measurements: how long does it take? What's the FPS? Memory usage?"
+      render: text
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / console output
+      render: text

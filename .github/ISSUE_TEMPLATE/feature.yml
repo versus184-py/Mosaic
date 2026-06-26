@@ -1,0 +1,58 @@
+name: Feature Request
+description: Suggest an idea for Mosaic
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are what make Mosaic better. Tell us what you'd love to see.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: The more specific you can be about the use case, the better
+      placeholder: "I often find myself wanting to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution
+      description: How would you like this to work?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: What workarounds have you tried?
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - Saves time or frustration
+        - Unlocks a new workflow
+        - Improves aesthetics or polish
+        - Makes Mosaic more accessible
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Rough effort estimate
+      options:
+        - Small (a few lines of code)
+        - Medium (a new component or page)
+        - Large (a new system or major refactor)
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to help implement this

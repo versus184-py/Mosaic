@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use Mosaic in your research, please cite it as below."
+title: "Mosaic — Spatial Canvas for AI Conversations"
+version: 0.3.0
+date-released: 2026-06-26
+url: "https://github.com/versus184-py/Mosaic"
+license: MIT
+repository-code: "https://github.com/versus184-py/Mosaic"
+type: software
+abstract: "Mosaic turns linear AI chat into an interactive tree on an infinite canvas. Supports branching conversations, multi-provider LLM integration (Mistral, OpenAI, Anthropic, Gemini, Ollama), RAG with semantic search, inline code execution via WebAssembly, and glass UI theming."
