@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic technical deep-dive — architecture, provider comparison, RAG pipeline, code sandbox, performance, security.">
+<meta name="keywords" content="Mosaic, AI, architecture, RAG, Pyodide, WASM, Tauri, React Flow, Zustand, Rust, technical">
+<meta property="og:title" content="Mosaic — Technical Deep-Dive">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — Technical Deep-Dive</title>
+</head>
+<body>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="technical.html" class="active">Technical</a>
+    <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank">Wiki</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="technical.html" class="active">Technical</a>
+  <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank">Wiki</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<div class="tech-hero">
+  <h1>Technical <em>Deep-Dive</em></h1>
+  <p>Architecture, provider internals, RAG pipeline, sandbox design, and performance characteristics.</p>
+</div>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">Contents</div>
+      <a href="#architecture">Architecture</a>
+      <a href="#stack">Tech Stack</a>
+      <a href="#providers">Provider Layer</a>
+      <a href="#rag">RAG Pipeline</a>
+      <a href="#sandbox">Code Sandbox</a>
+      <a href="#perf">Performance</a>
+      <a href="#tests">Tests</a>
+      <a href="#build">Build</a>
+      <a href="#structure">Project Structure</a>
+      <a href="#security">Security</a>
+    </div>
+  </aside>
+
+  <main class="tech-content">
+    <section id="architecture" class="reveal">
+      <h2>Architecture</h2>
+      <p>Mosaic is a Tauri v2 desktop app with a React 19 frontend and a Rust backend. The frontend manages the branching canvas, provider routing, and code sandbox, while the backend handles window management, file system access, and native OS integration.</p>
+      <div class="glass"><div class="glass-edge"></div>
+        <pre><code class="syntax">┌─────────────────────────────────────────┐
+│         Tauri Shell (Rust)              │
+│  ┌───────────────────────────────────┐  │
+│  │     React 19 + TypeScript         │  │
+│  │  ┌─────────┐ ┌──────────────────┐ │  │
+│  │  │ React   │ │ Zustand Stores   │ │  │
+│  │  │ Flow v12│ │ canvas │ chat    │ │  │
+│  │  └─────────┘ │ config │ models  │ │  │
+│  │              └──────────────────┘ │  │
+│  │  ┌──────────────────────────────┐ │  │
+│  │  │ Provider Adapter Layer       │ │  │
+│  │  │ Mistral │ OpenAI │ Anthropic │ │  │
+│  │  │ Gemini  │ Ollama             │ │  │
+│  │  └──────────────────────────────┘ │  │
+│  │  ┌──────────┐ ┌────────────────┐ │  │
+│  │  │ Pyodide  │ │ Embedding      │ │  │
+│  │  │ Sandbox  │ │ Pipeline (RAG) │ │  │
+│  │  └──────────┘ └────────────────┘ │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘</code></pre>
+      </div>
+      <p>The canvas uses React Flow v12 for the node-graph UI. Each message is a node in a directed tree. Branches fork from any parent node, creating a DAG structure that allows arbitrary branching depth.</p>
+    </section>
+
+    <section id="stack" class="reveal">
+      <h2>Tech Stack</h2>
+      <div class="glass"><div class="glass-edge"></div>
+        <table>
+          <tr><td style="font-weight:600;color:var(--accent);white-space:nowrap">Desktop Shell</td><td>Tauri v2 (Rust + Tokio async runtime)</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent);white-space:nowrap">UI Framework</td><td>React 19, TypeScript 5.7, Vite 6</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent);white-space:nowrap">Canvas</td><td>React Flow v12 (xyflow), custom node types</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent);white-space:nowrap">State</td><td>Zustand v5 with immer middleware</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent);white-space:nowrap">Code Sandbox</td><td>Pyodide (Python 3.12 WASM), 50+ packages</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent);white-space:nowrap">Testing</td><td>Vitest 3, React Testing Library, jsdom</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent);white-space:nowrap">Provider SDKs</td><td>Mistral AI, OpenAI, Anthropic, Google GenAI, Ollama REST</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="providers" class="reveal">
+      <h2>Provider Layer</h2>
+      <p>All five providers share a common streaming abstraction via a generic <code>streamProvider</code> adapter that normalizes differences in API signatures, error handling, and token streaming.</p>
+      <div class="glass"><div class="glass-edge"></div>
+        <table>
+          <thead><tr><th>Provider</th><th>Stream</th><th>Models</th><th>Embedding</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--accent);font-weight:500">Mistral</td><td>ReadableStream via fetch</td><td>mistral-small, -medium, -large</td><td>&#10003;</td></tr>
+            <tr><td style="color:var(--accent);font-weight:500">OpenAI</td><td>OpenAI SDK stream</td><td>GPT-4o, GPT-4o-mini, o3-mini</td><td>&#10003;</td></tr>
+            <tr><td style="color:var(--accent);font-weight:500">Anthropic</td><td>Anthropic SDK stream</td><td>Claude 3.5 Sonnet, Haiku</td><td>&#10007;</td></tr>
+            <tr><td style="color:var(--accent);font-weight:500">Gemini</td><td>GenAI SDK stream</td><td>Gemini 2.0 Flash, Pro</td><td>&#10007;</td></tr>
+            <tr><td style="color:var(--accent);font-weight:500">Ollama</td><td>REST /api/chat stream</td><td>Any local model</td><td>&#10003;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Each provider adapter implements a common <code>ProviderAdapter</code> interface with methods for <code>streamChat</code>, <code>embedTexts</code>, and <code>detectModels</code>. The <code>useOllamaDetect</code> hook returns <code>{ checking, retry, connected }</code> to manage Ollama connection state.</p>
+    </section>
+
+    <section id="rag" class="reveal">
+      <h2>RAG Pipeline</h2>
+      <p>Mosaic supports retrieval-augmented generation using local embeddings. The pipeline chunks documents, embeds them with the selected provider, and injects relevant context into the prompt.</p>
+      <div class="glass"><div class="glass-edge"></div>
+        <pre><code class="syntax">Document ──> Chunk ──> Embed ──> Store ──> Query
+                                    │
+                                    v
+                              Rank chunks ──> Inject into prompt</code></pre>
+      </div>
+      <p>Embeddings are fetched via <code>embedTexts</code> which returns <code>number[][] | null</code>. The function never throws — it returns <code>null</code> on failure for graceful degradation. Cosine similarity ranks chunks, and the top-k are prepended to the system prompt.</p>
+    </section>
+
+    <section id="sandbox" class="reveal">
+      <h2>Code Sandbox</h2>
+      <p>Python execution runs entirely in-browser via Pyodide, a WebAssembly build of CPython 3.12. No code leaves your machine. The sandbox includes 50+ pre-installed packages including NumPy, Pandas, Matplotlib, and SymPy.</p>
+      <p>Execution is asynchronous — the UI remains responsive while Python runs. Output (stdout + stderr) is streamed back into the canvas as a child node of the code block. JavaScript execution uses Web Workers as an alternative sandbox.</p>
+    </section>
+
+    <section id="perf" class="reveal">
+      <h2>Performance</h2>
+      <div class="glass"><div class="glass-edge"></div>
+        <table>
+          <tr><td style="font-weight:600;white-space:nowrap">Bundle size (JS)</td><td>~120 KB gzipped (excluding Pyodide WASM)</td></tr>
+          <tr><td style="font-weight:600;white-space:nowrap">Pyodide WASM</td><td>~11 MB (loaded lazily on first code execution)</td></tr>
+          <tr><td style="font-weight:600;white-space:nowrap">Canvas render</td><td>React Flow virtualizes off-screen nodes; 500+ nodes at 60 fps</td></tr>
+          <tr><td style="font-weight:600;white-space:nowrap">State updates</td><td>Zustand with immer — O(1) immutable patches via structural sharing</td></tr>
+          <tr><td style="font-weight:600;white-space:nowrap">Memory (idle)</td><td>~45 MB without Pyodide, ~90 MB with Pyodide loaded</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="tests" class="reveal">
+      <h2>Test Suite</h2>
+      <p><strong>191 tests</strong> across 11 files, all passing. Coverage spans stores, hooks, components, and utilities — including every provider adapter with mocked streaming responses.</p>
+      <div class="glass"><div class="glass-edge"></div>
+        <table>
+          <thead><tr><th>Area</th><th>Tests</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td>chat / config / canvas / models stores</td><td>81</td><td>Add nodes, branch, clear, persistence, provider config, layout</td></tr>
+            <tr><td>Provider adapters (Mistral, OpenAI, Anthropic, Gemini, Ollama)</td><td>46</td><td>Stream, embed, detect models, error handling</td></tr>
+            <tr><td>Hooks</td><td>16</td><td>useOllamaDetect, useDocumentParser, connection state</td></tr>
+            <tr><td>Utilities</td><td>48</td><td>Helpers, formatting, validation, code runner edge cases</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="build" class="reveal">
+      <h2>Build Guide</h2>
+      <div class="glass"><div class="glass-edge"></div>
+        <pre><code class="syntax"><span class="cm"># Prerequisites: Node.js 20+, Rust 1.83+, Tauri CLI</span>
+npm install
+npm run tauri dev     <span class="cm"># Development with hot-reload</span>
+npm run build         <span class="cm"># Prod build (JS + Rust)</span>
+npm run tauri build   <span class="cm"># Desktop binaries (Win/Mac/Linux)</span></code></pre>
+      </div>
+      <p>CI/CD runs on GitHub Actions with a Win/Mac/Linux matrix. <code>ci.yml</code> handles lint + typecheck + test coverage, and <code>release.yml</code> produces platform-specific installers on tag push.</p>
+    </section>
+
+    <section id="structure" class="reveal">
+      <h2>Project Structure</h2>
+      <div class="glass"><div class="glass-edge"></div>
+        <pre><code class="syntax">src/
+  components/       React components (nodes, panels, modals)
+  stores/           Zustand stores (chat, config, canvas, models)
+  providers/        Provider adapters (Mistral, OpenAI, Anthropic, Gemini, Ollama)
+  hooks/            Custom hooks (useOllamaDetect, useStream, useTheme)
+  utils/            Helpers (formatting, validation, embeddings)
+  types/            TypeScript types and interfaces
+src-tauri/
+  src/main.rs       Tauri commands and setup
+  Cargo.toml        Rust dependencies and metadata
+tests/              Integration tests</code></pre>
+      </div>
+    </section>
+
+    <section id="security" class="reveal">
+      <h2>Security Model</h2>
+      <ul>
+        <li>API keys are stored in <code>localStorage</code> — never sent to any server except the provider's API endpoint</li>
+        <li>Pyodide sandbox is fully isolated — no access to the file system, network, or OS APIs</li>
+        <li>All provider communication is over HTTPS with TLS 1.3</li>
+        <li>Ollama traffic stays on <code>localhost:11434</code> — never leaves your machine</li>
+        <li>No telemetry, no analytics, no data collection</li>
+        <li>Auto-updates via Tauri updater with signature verification</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="https://github.com/versus184-py/Mosaic/wiki" target="_blank">Wiki</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <span class="theme-picker-label">Theme</span>
+  <div class="theme-dots">
+    <button class="theme-dot-btn theme-dot-dusk active" data-theme="dusk" onclick="applyTheme('dusk')" aria-label="Dusk theme"><span class="tt">Dusk</span></button>
+    <button class="theme-dot-btn theme-dot-sand" data-theme="sand" onclick="applyTheme('sand')" aria-label="Sand theme"><span class="tt">Sand</span></button>
+  </div>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

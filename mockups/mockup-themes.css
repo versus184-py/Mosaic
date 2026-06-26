@@ -1,0 +1,35 @@
+/* =============================================
+   Mosaic Mockup — Shared Theme Variables
+   All 5 themes, exact app colors
+   ============================================= */
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --radius:16px;--radius-lg:24px;--radius-pill:999px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ===== DUSK (dark, cosmic, gold) ===== */
+[data-theme=dusk]{
+  --bg:#06030e;--bg-1:#0a0720;--text:#e8e0f5;--text-secondary:#9388ba;--text-muted:#544870;
+  --accent:#c49a3c;--accent-alpha:rgba(196,154,60,0.15);--accent-glow:rgba(196,154,60,0.25);
+  --glass:rgba(160,120,255,0.04);--glass-border:rgba(160,120,255,0.08);--glass-hover:rgba(160,120,255,0.08);--glass-border-hover:rgba(160,120,255,0.14);
+  --shadow:rgba(0,0,0,0.7);--grid-color:rgba(160,120,255,0.04);
+  --dot-mistral:hsla(215,70%,65%,0.9);--dot-openai:hsla(145,60%,50%,0.9);--dot-anthropic:hsla(25,80%,60%,0.9);--dot-gemini:hsla(55,75%,55%,0.9);--dot-ollama:hsla(275,60%,65%,0.9);
+}
+
+/* ===== SAND (light, desert, terracotta) ===== */
+[data-theme=sand]{
+  --bg:#f0e6d4;--bg-1:#e8dcc8;--text:#1a1610;--text-secondary:#605448;--text-muted:#90846a;
+  --accent:#c4694a;--accent-alpha:rgba(196,105,74,0.15);--accent-glow:rgba(196,105,74,0.2);
+  --glass:rgba(180,100,60,0.06);--glass-border:rgba(180,100,60,0.08);--glass-hover:rgba(180,100,60,0.07);--glass-border-hover:rgba(180,100,60,0.14);
+  --shadow:rgba(60,40,20,0.08);--grid-color:rgba(120,80,40,0.04);
+  --dot-mistral:hsla(215,70%,45%,0.9);--dot-openai:hsla(145,60%,40%,0.9);--dot-anthropic:hsla(25,80%,45%,0.9);--dot-gemini:hsla(55,75%,45%,0.9);--dot-ollama:hsla(275,60%,45%,0.9);
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;
+  background:transparent;color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden;
+  height:100vh;display:flex;align-items:center;justify-content:center;
+}

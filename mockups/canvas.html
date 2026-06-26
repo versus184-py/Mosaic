@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dusk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mosaic — Canvas</title>
+<link rel="stylesheet" href="mockup-themes.css">
+<style>
+.window{width:1200px;height:800px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--glass-border),0 32px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;position:relative;background:var(--bg)}
+.titlebar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(20,20,28,0.95);border-bottom:1px solid rgba(255,255,255,0.06);-webkit-user-select:none;user-select:none;flex-shrink:0}
+.traffic-lights{display:flex;gap:7px;flex-shrink:0}
+.traffic-light{width:12px;height:12px;border-radius:50%}
+.traffic-light.r{background:#ff5f56}
+.traffic-light.y{background:#ffbd2e}
+.traffic-light.g{background:#27c93f}
+.titlebar-title{font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);flex:1;text-align:center;letter-spacing:0.01em;margin-right:52px}
+.titlebar-btn{width:28px;height:28px;border-radius:6px;border:none;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background 0.2s}
+.titlebar-btn:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)}
+
+.canvas{flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 20% 30%,var(--accent-alpha) 0%,transparent 60%),radial-gradient(circle at 80% 70%,var(--accent-alpha) 0%,transparent 50%)}
+.grid-bg{position:absolute;inset:0;background-image:radial-gradient(circle,var(--grid-color) 1px,transparent 1px);background-size:28px 28px;z-index:0}
+
+.node{position:absolute;background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:16px 20px;backdrop-filter:blur(16px) saturate(180%);box-shadow:0 8px 32px rgba(0,0,0,0.5);width:280px;z-index:2;cursor:default;transition:border-color 0.3s var(--ease-out)}
+.node:hover{border-color:var(--glass-border-hover)}
+.node.node-active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-alpha),0 12px 40px rgba(0,0,0,0.5)}
+.node-handle{position:absolute;left:50%;bottom:-8px;width:16px;height:16px;border-radius:50%;background:var(--accent);transform:translateX(-50%);opacity:0;transition:opacity 0.3s}
+.node:hover .node-handle{opacity:0.6}
+.node-label{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px;letter-spacing:0.03em;text-transform:uppercase}
+.node-message{font-size:13px;line-height:1.55;color:var(--text-secondary)}
+.node-message strong{color:var(--text);font-weight:500}
+.node-meta{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--glass-border)}
+.node-provider{font-size:10px;padding:2px 8px;border-radius:var(--radius-pill);background:var(--accent-alpha);color:var(--accent);font-weight:500}
+.node-time{font-size:10px;color:var(--text-muted);margin-left:auto}
+
+.edges-svg{position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;height:100%}
+.edge-line{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:4 6;opacity:0.25}
+.edge-line.active{opacity:0.5;stroke-dasharray:none}
+
+.topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(6,6,26,0.9);border-bottom:1px solid var(--glass-border);flex-shrink:0}
+.topbar-logo{font-size:13px;font-weight:500;color:var(--text-muted);margin-right:12px;display:flex;align-items:center;gap:6px}
+.topbar-logo svg{width:16px;height:16px;color:var(--accent)}
+.topbar-tab{padding:4px 14px;border-radius:var(--radius-pill);font-size:11px;color:var(--text-secondary);background:transparent;border:1px solid transparent;cursor:pointer}
+.topbar-tab.active{background:var(--glass);border-color:var(--glass-border);color:var(--text)}
+.topbar-tab:hover:not(.active){color:var(--text)}
+.topbar-spacer{flex:1}
+.topbar-provider{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--radius-pill);font-size:10px;background:var(--accent-alpha);color:var(--accent)}
+
+.code-block{background:rgba(0,0,0,0.3);border-radius:12px;margin:10px 0 0;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
+.code-header{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.04);font-size:10px;color:var(--text-muted)}
+.code-content{padding:12px;font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:11px;line-height:1.6;color:var(--text-secondary)}
+.code-content .kw{color:var(--accent)}
+.code-content .str{color:#98d8a8}
+.code-content .fn{color:#7cb8f0}
+.code-content .cm{color:var(--text-muted)}
+.code-output{padding:10px 12px;background:rgba(0,0,0,0.2);border-top:1px solid rgba(255,255,255,0.04);font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:11px;color:var(--text-muted);line-height:1.5}
+.code-run-btn{display:flex;align-items:center;gap:4px;margin-left:auto;padding:2px 8px;border-radius:6px;background:var(--accent-alpha);color:var(--accent);font-size:9px;font-weight:600;border:none;cursor:pointer}
+
+/* Side panel */
+.side-panel{position:absolute;right:0;top:0;bottom:0;width:280px;background:rgba(6,6,26,0.92);backdrop-filter:blur(20px);border-left:1px solid var(--glass-border);z-index:3;padding:20px;display:flex;flex-direction:column;gap:16px}
+.side-section-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.provider-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border)}
+.provider-row.active{background:var(--accent-alpha);border-color:var(--accent)}
+.provider-status{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.provider-status.on{background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,0.5)}
+.provider-status.warn{background:#fbbf24;box-shadow:0 0 6px rgba(251,191,36,0.4)}
+.provider-name{font-size:12px;font-weight:500;color:var(--text)}
+.provider-latency{font-size:10px;color:var(--text-muted);margin-left:auto}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{padding:10px;border-radius:12px;background:var(--glass);text-align:center}
+.stat-num{font-size:18px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:10px;color:var(--text-muted);margin-top:2px}
+.input-row{display:flex;gap:6px;margin-top:auto}
+.input-row input{flex:1;padding:8px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-size:12px;color:var(--text-muted);font-family:inherit;outline:none}
+.input-row button{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+</style>
+<script>document.documentElement.setAttribute('data-theme',new URLSearchParams(location.search).get('theme')||'dusk')</script>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="traffic-lights"><div class="traffic-light r"></div><div class="traffic-light y"></div><div class="traffic-light g"></div></div>
+    <div class="titlebar-title">Mosaic</div>
+    <button class="titlebar-btn">&#8212;</button>
+    <button class="titlebar-btn">&#9744;</button>
+    <button class="titlebar-btn">&#10005;</button>
+  </div>
+  <div class="topbar">
+    <div class="topbar-logo"><svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg> Mosaic</div>
+    <div class="topbar-tab active">Canvas 1</div>
+    <div class="topbar-tab">Research</div>
+    <div class="topbar-tab">Debug</div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-provider">Mistral Large</div>
+  </div>
+  <div class="canvas">
+    <div class="grid-bg"></div>
+    <svg class="edges-svg">
+      <path d="M310,180 C370,180 370,300 310,300" class="edge-line active"/>
+      <path d="M310,180 C370,180 370,320 310,320" class="edge-line"/>
+      <path d="M310,300 C370,300 370,420 310,420" class="edge-line"/>
+      <path d="M670,180 C730,180 730,300 670,300" class="edge-line active"/>
+      <path d="M670,300 C730,300 730,420 670,420" class="edge-line"/>
+      <path d="M670,300 C730,300 730,440 670,440" class="edge-line active"/>
+    </svg>
+
+    <div class="node node-active" style="left:50%;top:40px;transform:translateX(-50%);width:300px;">
+      <div class="node-label">&#9733; Root</div>
+      <div class="node-message"><strong>What's the best approach for</strong> building a real-time collaborative canvas app with WebSocket sync and conflict resolution?</div>
+      <div class="node-meta"><span class="node-provider">Mistral Large</span><span class="node-time">2 min ago</span></div>
+      <div class="node-handle"></div>
+    </div>
+
+    <div class="node" style="left:60px;top:260px;">
+      <div class="node-label">&#8617; Branch A</div>
+      <div class="node-message"><strong>CRDT-based approach</strong> with Yjs or Automerge is the gold standard. Yjs uses a performant algorithm with minimal overhead. Pair it with WebRTC or WebSocket providers for real-time sync.</div>
+      <div class="node-meta"><span class="node-provider">Mistral Large</span><span class="node-time">2 min ago</span></div>
+      <div class="node-handle"></div>
+    </div>
+
+    <div class="node node-active" style="left:370px;top:260px;">
+      <div class="node-label">&#8617; Branch B</div>
+      <div class="node-message"><strong>For a simpler approach</strong>, consider using a central WebSocket server with last-writer-wins. Each operation is an event: <code style="padding:1px 5px;border-radius:4px;background:var(--accent-alpha);font-size:12px">{ type: 'draw', data: {...} }</code>. Works well for under 10 concurrent users.</div>
+      <div class="node-meta"><span class="node-provider">GPT-4o</span><span class="node-time">1 min ago</span></div>
+      <div class="node-handle"></div>
+    </div>
+
+    <div class="node" style="left:30px;top:470px;width:260px;">
+      <div class="node-label">&#8617; Deep Dive</div>
+      <div class="node-message">Yjs uses a <strong>binary encoding format</strong> that's 2-5x more efficient than JSON. Each operation is ~12 bytes. The gc algorithm prunes deleted content every ~1MB of operations.</div>
+      <div class="node-meta"><span class="node-provider">Claude 3.5</span><span class="node-time">Just now</span></div>
+    </div>
+
+    <div class="node node-active" style="left:340px;top:460px;width:290px;">
+      <div class="node-label">&#8617; Code Example</div>
+      <div class="node-message">Here's a WebSocket sync pattern in Python:</div>
+      <div class="code-block">
+        <div class="code-header"><span>Python 3.12</span><span class="code-run-btn">&#9654; Run</span></div>
+        <div class="code-content">
+<span class="kw">import</span> asyncio<br>
+<span class="kw">from</span> websockets <span class="kw">import</span> serve<br><br>
+<span class="kw">async def</span> <span class="fn">handler</span>(websocket):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">async for</span> msg <span class="kw">in</span> websocket:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;board = merge(msg)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">await</span> broadcast(msg)
+        </div>
+        <div class="code-output"><span class="cm">> Server started on ws://localhost:8765</span></div>
+      </div>
+      <div class="node-handle"></div>
+    </div>
+
+    <div class="side-panel">
+      <div class="side-section-title">&#9679; Connected Providers</div>
+      <div class="provider-row active"><div class="provider-status on"></div><span class="provider-name">Mistral Large</span><span class="provider-latency">340ms</span></div>
+      <div class="provider-row"><div class="provider-status on"></div><span class="provider-name">GPT-4o</span><span class="provider-latency">510ms</span></div>
+      <div class="provider-row"><div class="provider-status on"></div><span class="provider-name">Claude 3.5 Sonnet</span><span class="provider-latency">620ms</span></div>
+      <div class="provider-row"><div class="provider-status warn"></div><span class="provider-name">Ollama (local)</span><span class="provider-latency">1.2s</span></div>
+      <div style="border-top:1px solid var(--glass-border);padding-top:16px;">
+        <div class="side-section-title">&#9679; Branch Stats</div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-num">7</div><div class="stat-label">Nodes</div></div>
+          <div class="stat-box"><div class="stat-num">4</div><div class="stat-label">Branches</div></div>
+          <div class="stat-box"><div class="stat-num">3</div><div class="stat-label">Providers</div></div>
+          <div class="stat-box"><div class="stat-num">12.4k</div><div class="stat-label">Tokens</div></div>
+        </div>
+      </div>
+      <div class="input-row"><input type="text" readonly value="Ask a follow-up..." placeholder="Ask a follow-up..."><button>&#8593;</button></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

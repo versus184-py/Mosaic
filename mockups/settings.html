@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dusk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mosaic — Settings</title>
+<link rel="stylesheet" href="mockup-themes.css">
+<style>
+.window{width:1200px;height:800px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--glass-border),0 32px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;position:relative;background:var(--bg)}
+.titlebar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(20,20,28,0.95);border-bottom:1px solid rgba(255,255,255,0.06);-webkit-user-select:none;user-select:none;flex-shrink:0}
+.traffic-lights{display:flex;gap:7px;flex-shrink:0}
+.traffic-light{width:12px;height:12px;border-radius:50%}
+.traffic-light.r{background:#ff5f56}
+.traffic-light.y{background:#ffbd2e}
+.traffic-light.g{background:#27c93f}
+.titlebar-title{font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);flex:1;text-align:center;letter-spacing:0.01em;margin-right:52px}
+.titlebar-btn{width:28px;height:28px;border-radius:6px;border:none;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background 0.2s}
+.titlebar-btn:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)}
+
+.layout{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(circle at 70% 30%,var(--accent-alpha) 0%,transparent 50%),radial-gradient(circle at 30% 70%,var(--accent-alpha) 0%,transparent 40%)}
+.grid-bg{position:absolute;inset:0;background-image:radial-gradient(circle,var(--grid-color) 1px,transparent 1px);background-size:28px 28px;z-index:0}
+
+.modal-overlay{position:absolute;inset:0;background:rgba(2,2,4,0.6);backdrop-filter:blur(8px);z-index:1;display:flex;align-items:center;justify-content:center}
+.settings-panel{width:520px;max-height:85vh;overflow-y:auto;background:rgba(6,6,26,0.92);backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--glass-border);border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,0.6);padding:28px;display:flex;flex-direction:column;gap:20px}
+.settings-panel::-webkit-scrollbar{width:4px}
+.settings-panel::-webkit-scrollbar-track{background:transparent}
+.settings-panel::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+
+.settings-header{display:flex;align-items:center;justify-content:space-between}
+.settings-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.settings-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--glass);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s}
+.settings-close:hover{background:var(--glass-hover);color:var(--text)}
+
+.settings-section{display:flex;flex-direction:column;gap:10px}
+.settings-section-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px}
+
+.provider-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);cursor:pointer;transition:all 0.2s var(--ease-out)}
+.provider-card:hover{border-color:var(--glass-border-hover);background:var(--glass-hover)}
+.provider-card.active{border-color:var(--accent);background:var(--accent-alpha)}
+.provider-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.provider-dot.mistral{background:var(--dot-mistral);box-shadow:0 0 8px var(--dot-mistral)}
+.provider-dot.openai{background:var(--dot-openai);box-shadow:0 0 8px var(--dot-openai)}
+.provider-dot.anthropic{background:var(--dot-anthropic);box-shadow:0 0 8px var(--dot-anthropic)}
+.provider-dot.gemini{background:var(--dot-gemini);box-shadow:0 0 8px var(--dot-gemini)}
+.provider-dot.ollama{background:var(--dot-ollama);box-shadow:0 0 8px var(--dot-ollama)}
+.provider-info{flex:1;display:flex;flex-direction:column;gap:1px}
+.provider-name{font-size:13px;font-weight:500;color:var(--text)}
+.provider-model{font-size:11px;color:var(--text-muted)}
+.provider-toggle{position:relative;width:36px;height:20px;border-radius:10px;background:var(--glass-border);border:none;cursor:pointer;transition:background 0.3s;flex-shrink:0}
+.provider-toggle.on{background:var(--accent)}
+.provider-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform 0.3s var(--ease-out);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.provider-toggle.on::after{transform:translateX(16px)}
+
+.api-key-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid var(--glass-border);margin-top:4px}
+.api-key-row input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:12px;font-family:'SF Mono','Fira Code',monospace;padding:4px 0}
+.api-key-row input::placeholder{color:var(--text-muted)}
+.api-key-eye{width:24px;height:24px;border-radius:6px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px}
+.api-key-label{font-size:11px;color:var(--text-muted);width:60px;flex-shrink:0}
+
+.model-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.model-chip{padding:6px 10px;border-radius:8px;font-size:11px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);cursor:pointer;text-align:center;transition:all 0.2s var(--ease-out)}
+.model-chip:hover{border-color:var(--glass-border-hover);color:var(--text)}
+.model-chip.selected{background:var(--accent-alpha);border-color:var(--accent);color:var(--accent);font-weight:500}
+
+.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.theme-chip{padding:8px 6px;border-radius:10px;text-align:center;font-size:10px;font-weight:500;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);cursor:pointer;transition:all 0.2s var(--ease-out)}
+.theme-chip:hover{border-color:var(--glass-border-hover)}
+.theme-chip.active{background:var(--accent-alpha);border-color:var(--accent);color:var(--accent)}
+.theme-chip .swatch{width:20px;height:20px;border-radius:50%;margin:0 auto 4px;border:1px solid rgba(255,255,255,0.06)}
+.theme-chip .swatch.dusk{background:linear-gradient(135deg,#06030e,#0a0720)}
+.theme-chip .swatch.sand{background:linear-gradient(135deg,#f0e6d4,#e8dcc8)}
+
+.ollama-status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15)}
+.ollama-status .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,0.5);flex-shrink:0;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.8}50%{opacity:1}}
+.ollama-status .label{font-size:12px;color:var(--text)}
+.ollama-status .detail{font-size:10px;color:var(--text-muted);margin-left:auto}
+
+.danger-zone{padding:12px 14px;border-radius:12px;border:1px solid rgba(255,60,60,0.15);background:rgba(255,60,60,0.04)}
+.danger-title{font-size:11px;font-weight:600;color:#f56;margin-bottom:6px}
+.danger-desc{font-size:11px;color:var(--text-secondary);line-height:1.4}
+.danger-btn{margin-top:8px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,60,60,0.2);background:rgba(255,60,60,0.08);color:#f56;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.danger-btn:hover{background:rgba(255,60,60,0.15)}
+</style>
+<script>document.documentElement.setAttribute('data-theme',new URLSearchParams(location.search).get('theme')||'dusk')</script>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="traffic-lights"><div class="traffic-light r"></div><div class="traffic-light y"></div><div class="traffic-light g"></div></div>
+    <div class="titlebar-title">Mosaic — Settings</div>
+    <button class="titlebar-btn">&#8212;</button>
+    <button class="titlebar-btn">&#9744;</button>
+    <button class="titlebar-btn">&#10005;</button>
+  </div>
+  <div class="layout">
+    <div class="grid-bg"></div>
+    <div class="modal-overlay">
+      <div class="settings-panel">
+        <div class="settings-header">
+          <div class="settings-title">Settings</div>
+          <button class="settings-close">&#10005;</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">&#9679; Providers</div>
+          <div class="provider-card active"><div class="provider-dot mistral"></div><div class="provider-info"><div class="provider-name">Mistral</div><div class="provider-model">mistral-large, mistral-medium, mistral-small</div></div><button class="provider-toggle on"></button></div>
+          <div class="provider-card active" style="margin-top:-4px;"><div class="provider-dot openai"></div><div class="provider-info"><div class="provider-name">OpenAI</div><div class="provider-model">GPT-4o, GPT-4o-mini, o3-mini</div></div><button class="provider-toggle on"></button></div>
+          <div class="provider-card active" style="margin-top:-4px;"><div class="provider-dot anthropic"></div><div class="provider-info"><div class="provider-name">Anthropic</div><div class="provider-model">Claude 3.5 Sonnet, Claude 3.5 Haiku</div></div><button class="provider-toggle on"></button></div>
+          <div class="provider-card" style="margin-top:-4px;"><div class="provider-dot gemini"></div><div class="provider-info"><div class="provider-name">Gemini</div><div class="provider-model">Gemini 2.0 Flash, Gemini 2.0 Pro</div></div><button class="provider-toggle"></button></div>
+          <div class="provider-card active" style="margin-top:-4px;"><div class="provider-dot ollama"></div><div class="provider-info"><div class="provider-name">Ollama</div><div class="provider-model">Local — Llama 3, DeepSeek, Qwen, Mistral</div></div><button class="provider-toggle on"></button></div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">&#9679; API Keys</div>
+          <div class="api-key-row"><span class="api-key-label">Mistral</span><input type="password" value="••••••••••••••••••••" readonly><button class="api-key-eye">&#9679;</button></div>
+          <div class="api-key-row"><span class="api-key-label">OpenAI</span><input type="password" value="••••••••••••••••••••" readonly><button class="api-key-eye">&#9679;</button></div>
+          <div class="api-key-row"><span class="api-key-label">Anthropic</span><input type="password" value="••••••••••••••••••••" readonly><button class="api-key-eye">&#9679;</button></div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">&#9679; Default Model</div>
+          <div class="model-grid">
+            <div class="model-chip selected">Mistral Large</div>
+            <div class="model-chip">GPT-4o</div>
+            <div class="model-chip">Claude 3.5 Sonnet</div>
+            <div class="model-chip">Gemini 2.0 Flash</div>
+            <div class="model-chip">Llama 3 (local)</div>
+            <div class="model-chip">DeepSeek (local)</div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">&#9679; Theme</div>
+          <div class="theme-grid">
+            <div class="theme-chip active"><div class="swatch dusk"></div>Dusk</div>
+            <div class="theme-chip"><div class="swatch sand"></div>Sand</div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">&#9679; Local LLM</div>
+          <div class="ollama-status"><div class="dot"></div><span class="label">Ollama connected</span><span class="detail">http://localhost:11434 &nbsp; &#9679; 6 models</span></div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="danger-title">&#9888; Data Management</div>
+          <div class="danger-desc">Clear all conversations, settings, and cached embeddings. This cannot be undone.</div>
+          <button class="danger-btn">Clear All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
