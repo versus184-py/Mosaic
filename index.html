@@ -1,13 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mosaic</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic — Branch, explore, run code inline. A branching AI canvas that runs anywhere with Mistral, OpenAI, Anthropic, Gemini, and Ollama.">
+<meta name="keywords" content="AI, canvas, branching, conversations, LLM, Mistral, OpenAI, Anthropic, Gemini, Ollama, Tauri, desktop app, code execution, Pyodide, WASM, local AI, RAG, prompt engineering">
+<meta property="og:title" content="Mosaic — Branching AI Canvas">
+<meta property="og:description" content="Branch, explore, run code inline. A desktop AI canvas that runs with Mistral, OpenAI, Anthropic, Gemini, and Ollama.">
+<meta property="og:image" content="https://raw.githubusercontent.com/versus184-py/Mosaic/main/screenshots/social-preview.png">
+<meta property="og:url" content="https://versus184-py.github.io/Mosaic/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mosaic",
+  "applicationCategory": "AIApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "description": "Branching AI canvas for multi-provider conversations, inline code execution, and RAG pipelines.",
+  "offers": {"@type": "Offer","price": "0","priceCurrency": "USD"},
+  "author": {"@type": "Person","name": "Mosaic Contributors"},
+  "license": "https://github.com/versus184-py/Mosaic/blob/main/LICENSE"
+}
+</script>
+<title>Mosaic — Branching AI Canvas</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<!-- ===== NAV ===== -->
+<nav id="nav" role="navigation">
+  <a href="#" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ===== MOBILE MENU ===== -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features">Features</a>
+  <a href="#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="#download" class="nav-cta">Download</a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="main">
+  <div class="hero-bg"></div>
+  <div class="hero-card glass">
+    <div class="glass-edge"></div>
+    <div class="glass-tint"></div>
+    <h1>Branch, explore,<br><em>run code inline</em></h1>
+    <p>A branching AI canvas that runs anywhere. Compare models side-by-side, execute code in a WASM sandbox, and build RAG pipelines — all on your desktop.</p>
+    <div class="hero-features">
+      <span class="hero-feature">&#8617; Branching Tree</span>
+      <span class="hero-feature"><span class="sep">&#183;</span> 5 Providers <span class="sep">&#183;</span></span>
+      <span class="hero-feature">&#10003; Code Sandbox</span>
+      <span class="hero-feature"><span class="sep">&#183;</span> Local-First <span class="sep">&#183;</span></span>
+      <span class="hero-feature">&#9733; RAG Ready</span>
+    </div>
+    <div class="hero-btns">
+      <a href="#download" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download
+      </a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        Source
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">Features</div>
+      <h2 class="section-title">Built for depth</h2>
+      <p class="section-desc">Every feature designed to accelerate exploration and reasoning.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal reveal-delay-1"><div class="glass-edge"></div><div class="feature-icon">&#8617;</div><h3>Branching canvas</h3><p>Non-linear conversation tree. Fork any node, explore tangents, never lose your thread.</p></div>
+      <div class="feature-card reveal reveal-delay-2"><div class="glass-edge"></div><div class="feature-icon">&#9881;</div><h3>Model routing</h3><p>Route prompts to Mistral, OpenAI, Anthropic, Gemini, or Ollama from one interface.</p></div>
+      <div class="feature-card reveal reveal-delay-3"><div class="glass-edge"></div><div class="feature-icon">&#9776;</div><h3>Side-by-side compare</h3><p>Send the same prompt to multiple providers and compare responses in split view.</p></div>
+      <div class="feature-card reveal reveal-delay-4"><div class="glass-edge"></div><div class="feature-icon">&#9733;</div><h3>RAG embeddings</h3><p>Inject context from your own documents using local embedding models.</p></div>
+      <div class="feature-card reveal reveal-delay-5"><div class="glass-edge"></div><div class="feature-icon">&#10003;</div><h3>Code sandbox</h3><p>Python execution in-browser via Pyodide (WASM) — no server needed, instant feedback.</p></div>
+      <div class="feature-card reveal reveal-delay-6"><div class="glass-edge"></div><div class="feature-icon">&#9678;</div><h3>Local-first</h3><p>All data stays on your machine. Works offline with Ollama for complete privacy.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SCREENSHOT GALLERY ===== -->
+<section class="section" id="gallery">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">Product</div>
+      <h2 class="section-title">See it in action</h2>
+      <p class="section-desc">A visual canvas for branching conversations, inline code execution, and model comparison.</p>
+    </div>
+    <div class="gallery reveal">
+      <div class="gallery-view">
+        <div class="gallery-track" id="galleryTrack">
+          <div class="gallery-slide"><img class="screenshot" data-src-dark="../screenshots/close-up-branch-convo-dusk.png" data-src-light="../screenshots/close-up-branch-convo-sand.png" src="../screenshots/close-up-branch-convo-dusk.png" alt="Mosaic branching canvas" fetchpriority="high" width="1200" height="800"></div>
+          <div class="gallery-slide"><img class="screenshot" data-src-dark="../screenshots/synthesis-dusk.png" data-src-light="../screenshots/synthesis-sand.png" src="../screenshots/synthesis-dusk.png" alt="Mosaic conversation tree" width="1200" height="800"></div>
+          <div class="gallery-slide"><img class="screenshot" data-src-dark="../screenshots/code-dusk.png" data-src-light="../screenshots/code-sand.png" src="../screenshots/code-dusk.png" alt="Mosaic code sandbox" width="1200" height="800"></div>
+          <div class="gallery-slide"><img class="screenshot" data-src-dark="../screenshots/settings-dusk.png" data-src-light="../screenshots/settings-sand.png" src="../screenshots/settings-dusk.png" alt="Mosaic settings panel" width="1200" height="800"></div>
+        </div>
+      </div>
+      <div class="gallery-dots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROVIDERS ===== -->
+<section class="section" id="providers">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">Providers</div>
+      <h2 class="section-title">Five models, one canvas</h2>
+      <p class="section-desc">Bring your own API key. Switch between providers without leaving the flow.</p>
+    </div>
+    <div class="providers-grid">
+      <div class="provider-card reveal reveal-delay-1"><div class="glass-edge"></div><div class="pulse-dot"></div><div class="name">Mistral</div><div class="count">mistral-small, -medium, -large</div></div>
+      <div class="provider-card reveal reveal-delay-2"><div class="glass-edge"></div><div class="pulse-dot"></div><div class="name">OpenAI</div><div class="count">GPT-4o, GPT-4o-mini, o3-mini</div></div>
+      <div class="provider-card reveal reveal-delay-3"><div class="glass-edge"></div><div class="pulse-dot"></div><div class="name">Anthropic</div><div class="count">Claude 3.5 Sonnet, Haiku</div></div>
+      <div class="provider-card reveal reveal-delay-4"><div class="glass-edge"></div><div class="pulse-dot"></div><div class="name">Gemini</div><div class="count">Gemini 2.0 Flash, 2.0 Pro</div></div>
+      <div class="provider-card reveal reveal-delay-5"><div class="glass-edge"></div><div class="pulse-dot"></div><div class="name">Ollama</div><div class="count">Local models — Llama, DeepSeek, Qwen</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMPARISON ===== -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">Comparison</div>
+      <h2 class="section-title">How Mosaic stacks up</h2>
+      <p class="section-desc">The branching canvas advantage over traditional chat interfaces.</p>
+    </div>
+    <div class="table-wrap glass" style="padding:0">
+      <table class="comparison-table">
+        <thead><tr><th>Feature</th><th>Mosaic</th><th>ChatGPT</th><th>Claude</th><th>NotebookLM</th></tr></thead>
+        <tbody>
+          <tr><td>Branching tree</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td></tr>
+          <tr><td>Multi-provider</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td></tr>
+          <tr><td>Side-by-side compare</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td></tr>
+          <tr><td>Code execution</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td></tr>
+          <tr><td>Local-first (offline)</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td></tr>
+          <tr><td>Local LLM (Ollama)</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td></tr>
+          <tr><td>RAG / embeddings</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Desktop app</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td></tr>
+          <tr><td>Web access</td><td class="check-none">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+          <tr><td>Open source</td><td class="check">&#10003;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td><td class="check-none">&#10007;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">FAQ</div>
+      <h2 class="section-title">Common questions</h2>
+      <p class="section-desc">Everything you need to know about Mosaic.</p>
+    </div>
+    <div class="faq-list reveal">
+      <details class="faq-item">
+        <summary class="faq-question"><span>Do I need an API key for every provider?</span><svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-answer">Yes, each provider requires its own API key. Bring your own keys and manage them through Mosaic's settings panel. Keys are stored locally on your machine and never sent anywhere except the provider's API endpoint.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span>Can I use Mosaic offline?</span><svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-answer">Yes, with Ollama. Point Mosaic at your local Ollama instance and run any supported model completely offline with zero data leaving your machine. Cloud providers require internet access.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span>Does Mosaic support streaming responses?</span><svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-answer">Yes. All providers stream responses token-by-token. Mosaic normalizes streaming across providers so you get real-time output regardless of which model you choose, with a unified event system.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span>What is the code sandbox?</span><svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-answer">Mosaic embeds Pyodide, a Python 3.12 runtime compiled to WebAssembly, to execute code directly in the app. No server needed — results appear instantly in the canvas. Includes 50+ pre-installed packages like NumPy, Pandas, and Matplotlib.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span>Is Mosaic open source?</span><svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-answer">Yes, Mosaic is fully open source under the MIT license. The entire codebase is available on GitHub for inspection, contribution, and self-hosting. 191 tests pass across 11 test suites.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DOWNLOAD ===== -->
+<section class="section" id="download">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">Download</div>
+      <h2 class="section-title">Get Mosaic</h2>
+      <p class="section-desc">Available for macOS, Windows, and Linux. One binary, zero dependencies.</p>
+    </div>
+    <div class="download-wrapper reveal">
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank" class="download-card">
+        <span class="icon">&#9681;</span>
+        <span class="info">
+          <span class="name">Download for macOS</span>
+          <span class="size">Apple Silicon &bull; Intel &bull; ~45 MB</span>
+        </span>
+      </a>
+      <div class="download-alt">
+        <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Windows (.msi)</a>
+        <span style="color:var(--text-muted)"> &bull; </span>
+        <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Linux (.AppImage / .deb)</a>
+      </div>
+      <span class="download-version">Latest: v0.3.0</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="section">
+  <div class="section-inner">
+    <div class="cta-banner glass reveal">
+      <div class="glass-edge"></div>
+      <h2>Ready to explore?</h2>
+      <p>Download Mosaic and start branching your conversations today.</p>
+      <a href="#download" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Now
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== THEME TOGGLE ===== -->
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// ===== FAQ ACCORDION =====
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('toggle', () => {
+    if (item.open) {
+      document.querySelectorAll('.faq-item').forEach(other => {
+        if (other !== item) other.open = false;
+      });
+    }
+  });
+});
+</script>
+<script>
+// ===== 3D CIRCULAR GALLERY =====
+(function(){
+  const track = document.getElementById('galleryTrack');
+  if (!track) return;
+  const slides = track.querySelectorAll('.gallery-slide');
+  const dots = document.querySelector('.gallery-dots');
+  if (!slides.length || !dots) return;
+  const count = slides.length;
+  const angleStep = 360 / count;
+  let current = 0, interval;
+  function layout() {
+    const isMobile = window.innerWidth < 640;
+    const sw = isMobile ? 280 : 460;
+    const radius = isMobile ? 300 : 540;
+    const aspect = 800 / 1200;
+    const sh = Math.round(sw * aspect);
+    slides.forEach((slide, i) => {
+      const angle = i * angleStep;
+      slide.style.width = sw + 'px';
+      slide.style.left = (-sw / 2) + 'px';
+      slide.style.top = (-sh / 2) + 'px';
+      slide.style.transform = 'rotateY(' + angle + 'deg) translateZ(' + radius + 'px)';
+    });
+    track.style.transform = 'rotateY(' + (-current * angleStep) + 'deg)';
+  }
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label','Screenshot '+(i+1));
+    dot.onclick = () => go(i);
+    dots.appendChild(dot);
+  });
+  const dotEls = dots.querySelectorAll('.gallery-dot');
+  function go(i) {
+    slides[current].classList.remove('active');
+    dotEls[current].classList.remove('active');
+    current = i;
+    track.style.transform = 'rotateY(' + (-current * angleStep) + 'deg)';
+    slides[current].classList.add('active');
+    dotEls[current].classList.add('active');
+    clearInterval(interval);
+    interval = setInterval(next, 4000);
+  }
+  function next() { go((current + 1) % count) }
+  function prev() { go((current + count - 1) % count) }
+  layout(); go(0);
+  window.addEventListener('resize', layout);
+  const gallery = document.querySelector('.gallery');
+  if (gallery) {
+    gallery.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') { prev(); e.preventDefault() }
+      if (e.key === 'ArrowRight') { next(); e.preventDefault() }
+    });
+    gallery.setAttribute('tabindex','0');
+    gallery.addEventListener('mouseenter', () => clearInterval(interval));
+    gallery.addEventListener('mouseleave', () => { interval = setInterval(next, 4000) });
+  }
+})();
+
+// ===== NODE BACKGROUND =====
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    // draw connections
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    // draw nodes
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
 </html>
