@@ -7,6 +7,7 @@
 [![Release](https://img.shields.io/github/v/release/versus184-py/Mosaic?style=flat-square&label=Release)](https://github.com/versus184-py/Mosaic/releases)
 [![Stars](https://img.shields.io/github/stars/versus184-py/Mosaic?style=flat-square&label=Stars)](https://github.com/versus184-py/Mosaic/stargazers)
 [![Issues](https://img.shields.io/github/issues/versus184-py/Mosaic?style=flat-square&label=Issues)](https://github.com/versus184-py/Mosaic/issues)
+![Tests](https://img.shields.io/badge/tests-191-passing-brightgreen?style=flat-square)
 ![Beta](https://img.shields.io/badge/status-beta-yellow?style=flat-square)
 ![Tauri v2](https://img.shields.io/badge/Tauri-v2-purple?style=flat-square&logo=tauri)
 ![React 19](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)
@@ -17,7 +18,7 @@
 
 Mosaic is a **desktop application** that reimagines the AI chat interface. Instead of a linear scroll of messages, Mosaic gives you an **infinite spatial canvas** where conversations grow as branching trees. Every AI response can be a starting point for a new direction — fork, explore, compare, and synthesize without losing context.
 
-Built with **Tauri v2** (Rust backend) and **React 19** (TypeScript frontend), Mosaic is fast, secure, and cross-platform. The application runs natively on Windows, with macOS and Linux builds in development. The Rust backend provides a lightweight, secure shell while the entire UI is rendered via a webview, giving you the performance of a native app with the flexibility of web technologies.
+Built with **Tauri v2** (Rust backend) and **React 19** (TypeScript frontend), Mosaic is fast, secure, and cross-platform. The application runs natively on Windows, macOS, and Linux via automated CI/CD builds. The Rust backend provides a lightweight, secure shell while the entire UI is rendered via a webview, giving you the performance of a native app with the flexibility of web technologies.
 
 ### Why an Infinite Canvas?
 
@@ -62,7 +63,7 @@ Mosaic's spatial canvas solves all of these. Every message is a node on an infin
 | | Accessibility | Respects `prefers-reduced-motion` and `prefers-reduced-transparency` OS preferences. |
 | | Animations | Framer Motion-powered entrance animations, spring-based sliders and switches, particle welcome screen. |
 | **Security** | Sandboxed code execution | JavaScript executes with blocked network APIs; Python pip is limited to 14 allowlisted packages; fetches restricted to CDN hosts only. |
-| | Strict CSP | Content Security Policy enforced at the Tauri level; restricts connect-src to only Mistral API and Pyodide CDNs. |
+| | Strict CSP | Content Security Policy enforced at the Tauri level; restricts connect-src to all 5 provider API endpoints and CDNs. |
 | | API key encryption | API keys are XOR-obfuscated in localStorage with a salt key to prevent casual exposure. |
 | | Data validation | All imported canvas data, RAG documents, and stored UI state undergo schema validation before use. |
 | **Analytics** | Token tracking | Per-model token usage estimation and cost calculation using provider pricing tables. |
@@ -103,7 +104,7 @@ Mosaic's spatial canvas solves all of these. Every message is a node on an infin
 
 ## Project Status
 
-Mosaic is currently in **beta** (v0.2.0). The core features are stable and functional, but you may encounter edge cases. Feedback is actively welcomed via [GitHub Issues](https://github.com/versus184-py/Mosaic/issues).
+Mosaic is currently in **beta** (v0.3.0). The core features are stable and functional, but you may encounter edge cases. Feedback is actively welcomed via [GitHub Issues](https://github.com/versus184-py/Mosaic/issues).
 
 ### What works well
 - Spatial canvas with branching conversations
@@ -117,15 +118,50 @@ Mosaic is currently in **beta** (v0.2.0). The core features are stable and funct
 - Collaborative real-time canvases
 - Node grouping and labels
 - Visual branching indicators
-- Improved RAG chunking and embedding
-- macOS and Linux native builds
-- Additional provider support
+- Improved RAG chunking (paragraph-aware)
+- Plugin system
 
 ---
 
 ## Gallery
 
 > Screenshots coming soon! Want to help? Take a screenshot and drop it in a [GitHub issue](https://github.com/versus184-py/Mosaic/issues).
+
+---
+
+## Use Cases
+
+Mosaic is designed for a wide range of AI-powered workflows:
+
+### Research and Analysis
+- Explore a topic by branching into multiple subtopics simultaneously
+- Upload research papers as RAG documents and query them with context
+- Compare how different AI models approach the same research question
+- Distill insights from multiple branches into a coherent synthesis
+
+### Software Development
+- Use the AI as a pair programmer — ask for code, review, and iterate
+- Run generated code inline (JavaScript or Python) without leaving the app
+- Branch to explore different implementation approaches
+- Upload codebases as RAG documents for context-aware code review
+
+### Creative Writing and Brainstorming
+- Generate multiple outline variations by branching from a single idea
+- Use parallel debate to get diverse creative perspectives
+- Follow suggestion tendrils to explore unexpected directions
+- Prune weak ideas and distill the best into a final draft
+
+### Learning and Education
+- Ask follow-up questions that branch into deeper topics
+- Upload lecture notes or textbooks as RAG documents
+- Run code examples inline to see them work
+- Bookmark key explanations for later review
+
+### Meeting and Project Preparation
+- Research multiple topics in parallel branches
+- Synthesize findings into a single distillation node
+- Export the complete canvas as a JSON archive
+- Revisit and extend preparation canvases over time
 
 ---
 

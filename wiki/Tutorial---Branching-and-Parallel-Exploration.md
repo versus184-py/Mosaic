@@ -224,6 +224,96 @@ Best for: Fact-checking, comparing reasoning styles, cost/quality analysis.
 
 ---
 
+### Strategy 5: The Synthesis
+
+Explore several branches, then distill into a summary:
+
+```
+[root] → [broad question]
+              ├── [angle A] → [deep dive A]
+              ├── [angle B] → [deep dive B]
+              └── [angle C] → [deep dive C]
+                                      │
+                                      └── [Distillation: synthesis of A, B, C]
+```
+
+Best for: Research where you need to explore multiple angles and then synthesize findings.
+
+### Strategy 6: The Debate
+
+Use parallel debate to get multiple perspectives:
+
+```
+[question] → Mistral, GPT-4o, Claude (simultaneous)
+                  │
+                  ├── [AI response from Model A]
+                  ├── [AI response from Model B]
+                  └── [AI response from Model C]
+```
+
+Best for: Fact-checking, comparing reasoning styles, cost/quality analysis.
+
+### Strategy 7: The Garden
+
+Allow the conversation to grow organically with tendrils:
+
+```
+[root] → [question] → [AI response]
+                        ├── [tendril: follow-up 1] → materialize → branch
+                        ├── [tendril: follow-up 2] → (auto-dismissed)
+                        └── [tendril: follow-up 3] → materialize → branch → deep dive
+```
+
+Best for: Exploratory conversations where you don't know the direction in advance.
+
+---
+
+## Real-World Branching Scenarios
+
+### Scenario: Code Debugging
+
+```
+[root: "Help me debug this Python error"]
+  └── [AI: suggests 3 possible causes]
+        ├── [Branch: "Check database connection pooling"]
+        │     └── [AI: deep dive into connection pool settings]
+        ├── [Branch: "Check async/await patterns"]
+        │     └── [AI: reviews code for async issues]
+        └── [Branch: "Check environment variables"]
+              └── [AI: walks through env config]
+```
+
+### Scenario: Essay Writing
+
+```
+[root: "Outline an essay on AI ethics"]
+  └── [AI: provides outline with 5 sections]
+        ├── [Branch: "Expand privacy section"]
+        │     └── [AI: detailed privacy analysis]
+        ├── [Branch: "Expand bias section"]
+        │     └── [AI: detailed bias analysis]
+        └── [Branch: "Write introduction"]
+              └── [AI: draft introduction]
+                    └── [Branch: "Make it more engaging"]
+                          └── [AI: revised introduction]
+```
+
+### Scenario: Meeting Preparation
+
+```
+[root: "Prepare for Q3 board meeting"]
+  └── [AI: suggests preparation areas]
+        ├── [Branch: "Financial highlights"]
+        │     └── [AI: revenue, costs, projections]
+        ├── [Branch: "Product roadmap"]
+        │     └── [AI: feature launch timeline]
+        └── [Branch: "Competitive landscape"]
+              └── [AI: competitor analysis]
+                    └── [Distillation: executive summary]
+```
+
+---
+
 ## Tips for Effective Branching
 
 1. **Name your branches mentally** — know what each branch is exploring
@@ -233,6 +323,9 @@ Best for: Fact-checking, comparing reasoning styles, cost/quality analysis.
 5. **Use auto-layout** — press F to fit all nodes when the tree gets messy
 6. **Rearrange spatially** — drag nodes to group related branches together
 7. **Prune ruthlessly** — dim branches that don't serve your goal
+8. **Leverage tendrils** — let the AI suggest follow-ups to save typing time
+9. **Combine strategies** — start with a Star, follow a Chain on one branch, then Distill
+10. **Export regularly** — save important canvases before major restructuring
 
 ---
 

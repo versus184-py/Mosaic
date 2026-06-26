@@ -214,6 +214,40 @@ Query: "What is the error handling strategy?"
 5. AI generates response with context
 ```
 
+## Chunking Strategy Explained
+
+Mosaic uses fixed-size chunking with overlap:
+
+```
+Document text:
+[--- 800 chars ---][--- overlap 100 ---][--- 800 chars ---]
+[                                    ][--- overlap 100 ---][--- 800 chars ---]
+```
+
+**Why 800 characters?**
+- Long enough to contain meaningful context (several paragraphs)
+- Short enough to fit within most LLM context windows
+- Multiple chunks can be included (top 3 = ~2,400 characters of context)
+- Embedding models typically work best with 256-512 tokens (~200-800 words)
+
+**Why 100-character overlap?**
+- Prevents information loss at chunk boundaries
+- If a sentence spans two chunks, it appears in both
+- Ensures context isn't cut mid-paragraph
+- Increases recall for queries about boundary-spanning content
+
+### Chunking Example
+
+For a 2,000-character document:
+
+```
+Chunk 1:  [characters 0-800]
+Chunk 2:  [characters 700-1500]  (overlaps 100 chars with chunk 1)
+Chunk 3:  [characters 1400-2000]  (overlaps 100 chars with chunk 2)
+```
+
+Total: 3 chunks covering the full document with overlap buffer at each boundary.
+
 See the [[RAG System Guide]] for a complete technical explanation.
 
 ---

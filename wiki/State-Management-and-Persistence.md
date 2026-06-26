@@ -204,12 +204,24 @@ setTheme: (theme) => {
 }
 ```
 
-On initialization, the store detects OS theme preference:
+On initialization, the store respects the OS `prefers-color-scheme` setting:
 
 ```typescript
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 const initialTheme = prefersDark ? 'void' : 'sand';
 ```
+
+### Ollama State
+
+The uiStore manages three Ollama-related fields:
+
+| Field | Default | Setter | Description |
+|-------|---------|--------|-------------|
+| `ollamaConnected` | `false` | `setOllamaConnected()` | Whether Ollama is reachable |
+| `ollamaModels` | `[]` | `setOllamaModels()` | List of pulled model names |
+| `ollamaUrl` | `http://localhost:11434` | `setOllamaUrl()` | Configured server URL |
+
+The `useOllamaDetect` hook in `App.tsx` polls the Ollama API on mount and updates these fields automatically.
 
 ---
 
@@ -430,6 +442,37 @@ const state = useUIStore();
 
 Mosaic's components use selective subscriptions throughout for optimal performance.
 
+### Avoiding Common Zustand Pitfalls
+
+**Pitfall 1: Creating new objects in selectors**
+```typescript
+// Bad — creates new object every render, causing infinite re-renders
+const { theme, temperature } = useUIStore(s => ({ theme: s.theme, temperature: s.temperature }));
+
+// Good — select primitives individually
+const theme = useUIStore(s => s.theme);
+const temperature = useUIStore(s => s.temperature);
+```
+
+**Pitfall 2: Mutating state directly**
+```typescript
+// Bad — Zustand uses shallow comparison; mutations don't trigger updates
+state.nodes.push(newNode);
+
+// Good — always create new references
+set(state => ({ nodes: [...state.nodes, newNode] }));
+```
+
+**Pitfall 3: Over-subscribing**
+```typescript
+// Bad — component re-renders on ANY state change
+const store = useCanvasStore();
+
+// Good — only re-render when specific values change
+const nodes = useCanvasStore(s => s.nodes);
+const activeNodeId = useCanvasStore(s => s.activeNodeId);
+```
+
 ### localStorage Limits
 
 localStorage typically has a 5-10 MB limit per origin. Mosaic's data fits comfortably within this:
@@ -440,6 +483,25 @@ localStorage typically has a 5-10 MB limit per origin. Mosaic's data fits comfor
 - RAG documents: Variable (up to 50 MB on disk, but typically much less)
 
 For very large canvases with extensive RAG documents, users may approach localStorage limits. Future versions may implement a Tauri command for file-based storage.
+
+### Data Migration Strategy
+
+When upgrading Mosaic to a newer version, stored data may need migration:
+
+| Version Change | Migration Needed | Automatic? |
+|----------------|-----------------|------------|
+| 0.1.0 → 0.2.0 | Yes (new store fields) | Yes (defaults for new fields) |
+| Future patches | No (backward compatible) | Always |
+| Future minors | Maybe | Validation + defaults |
+
+The validation layer (`validateCanvasData`, `validateUIState`, `validateRagDocs`) handles migration gracefully:
+1. Load stored data
+2. Validate against current schema
+3. If valid, use as-is (extra fields are preserved)
+4. If invalid, reset to defaults (with console warning)
+5. Missing fields get defaults from the store's initial state
+
+This means canvases created in v0.1.0 will still open in v0.2.0 — missing fields like `bookmarkedIds` will simply default to an empty array.
 
 ---
 

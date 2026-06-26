@@ -30,6 +30,49 @@ Main Thread                    Web Worker
 - **Abort support**: The worker can be terminated or messages aborted without affecting the main app
 - **Security boundary**: Even if malicious code breaks out of the sandbox, it's still confined to the worker scope
 
+### Worker Lifecycle
+
+```
+App start
+  │
+  ├── Worker NOT created (lazy initialization)
+  │
+  ├── User clicks "Run" on code block
+  │     │
+  │     ├── Is worker alive? → No → CreateWorker()
+  │     │                              ├── Create Blob URL from worker source
+  │     │                              ├── new Worker(blobURL)
+  │     │                              ├── URL.revokeObjectURL(blobURL)
+  │     │                              └── Worker loads Pyodide (if Python)
+  │     │
+  │     ├── postMessage({ exec_id, lang, code })
+  │     ├── Wait for messages (timeout 30s)
+  │     ├── Return result or error
+  │     └── Worker stays alive (for next execution)
+  │
+  ├── User clicks "Run" again
+  │     └── Reuse existing worker (faster, no init)
+  │
+  ├── User closes Python REPL
+  │     └── replReset() — clears Python globals
+  │
+  └── App unmount
+        └── terminateWorker() — kills worker
+```
+
+The worker is created lazily — no resources are consumed until the user first runs code. Python's Pyodide runtime (~12 MB) is only loaded when the first Python execution is requested.
+
+### Worker Memory Management
+
+| Resource | Approx Size | Loaded When |
+|----------|-------------|-------------|
+| Worker shell (JS) | ~5 KB | First code execution |
+| Pyodide WASM runtime | ~12 MB | First Python execution |
+| Python packages (numpy, etc.) | ~8 MB each | On first import |
+| User code output | Variable | Per execution |
+
+For performance, Pyodide and imported packages remain cached in the worker's memory across executions. Only `replReset()` clears the Python state. The worker stays alive until the app closes, avoiding repeated Pyodide load times.
+
 ---
 
 ## Worker Communication Protocol
@@ -155,6 +198,62 @@ Any attempt to use these APIs throws a ReferenceError:
 ### Execution Model
 
 Python code runs via **Pyodide v0.26.2** — a build of CPython compiled to WebAssembly. Pyodide is loaded from the CDN on first use.
+
+### Pyodide Initialization
+
+```typescript
+async function initPyodide(): Promise<void> {
+  if (pyodideInstance) return; // Already initialized
+  
+  // Step 1: Load Pyodide WASM from CDN
+  // The script tag is injected with integrity checking
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js';
+  script.integrity = 'sha384-...';
+  document.head.appendChild(script);
+  
+  await new Promise((resolve) => (script.onload = resolve));
+  
+  // Step 2: Initialize Pyodide
+  pyodideInstance = await globalThis.loadPyodide({
+    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/',
+  });
+  
+  // Step 3: Apply security patches
+  await patchNetworkAccess();
+  await blockPlatformModules();
+  await setupPackageAllowlist();
+}
+```
+
+The initialization:
+1. Downloads the Pyodide JavaScript loader (~1 MB)
+2. Downloads the Python WASM binary (~12 MB)
+3. Initializes the CPython interpreter in WebAssembly
+4. Patches security-sensitive modules
+5. Sets up the package allowlist
+
+This takes 2-5 seconds on first load. Subsequent executions are instant.
+
+### How Python Execution Works in WASM
+
+```
+User Python Code
+      │
+      ▼
+Pyodide.pyodide.runPython(code)
+      │
+      ├── CPython bytecode compiler (WASM)
+      ├── CPython bytecode interpreter (WASM)
+      ├── stdout/stderr redirected to JS
+      └── Result converted to JS object
+```
+
+Pyodide bridges Python and JavaScript:
+- Python objects can be accessed from JavaScript
+- JavaScript objects can be passed to Python
+- stdout/stderr is captured via Python's `sys.stdout` redirection
+- Errors are caught and converted to Python tracebacks
 
 ```python
 # This works:

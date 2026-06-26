@@ -285,20 +285,46 @@ position += velocity × dt
 
 Despite its simplicity, this produces smooth, natural-feeling animations that respond to user input with realistic momentum.
 
+### Spring Parameter Tuning Guide
+
+| Application | Stiffness | Damping | Mass | Behavior |
+|-------------|-----------|---------|------|----------|
+| FluidSlider (idle) | 180 | 15 | 1 | Gentle settling |
+| FluidSlider (dragging) | 300 | 20 | 1 | Responsive tracking |
+| TactileSwitch | 250 | 18 | 1 | Satisfying snap |
+| Interactive lens warp | 120 | 10 | 1 | Fluid deformation |
+
+The stiffness/damping ratio determines the spring's behavior:
+- **Underdamped** (stiffness high relative to damping): Oscillates before settling (bouncy)
+- **Critically damped** (stiffness proportional to damping): Fastest settling without oscillation
+- **Overdamped** (damping high relative to stiffness): Slow settling, no oscillation
+
+Mosaic's springs are tuned to be slightly underdamped — fast enough to feel responsive, with just enough overshoot to feel natural.
+
 ### Usage in FluidSlider
 
 ```typescript
-// Idle state
+// Idle state — gentle, natural feel
 const idleSpring = createSpring({ stiffness: 180, damping: 15 });
 
-// During drag
+// During drag — tight, responsive tracking
 const dragSpring = createSpring({ stiffness: 300, damping: 20 });
 
-// Each frame:
-const currentValue = tickSpring(spring, targetValue);
+// Rendering loop (simplified)
+function renderSlider() {
+  const currentValue = tickSpring(spring, targetValue);
+  const knobPosition = mapValueToPosition(currentValue);
+  
+  // Apply to DOM
+  knobElement.style.transform = `translateX(${knobPosition}px)`;
+  
+  if (Math.abs(currentValue - targetValue) > 0.001) {
+    requestAnimationFrame(renderSlider);
+  }
+}
 ```
 
-When the user starts dragging, the spring stiffness increases for more responsive tracking. When released, the lower stiffness creates a gentle settling motion.
+When the user starts dragging, the spring stiffness increases for more responsive tracking. When released, the lower stiffness creates a gentle settling motion with a slight overshoot (underdamped behavior).
 
 ### Usage in TactileSwitch
 

@@ -103,6 +103,16 @@ ollama serve
 - Re-enter the API key in Settings
 - Check that your browser isn't set to clear localStorage on exit
 - If using a privacy-focused browser, add an exception for Mosaic
+- Note: each provider has its own key field — ensure you've entered the key under the correct provider section
+
+#### "No API key configured for this provider"
+
+**Cause**: You've selected a model from a provider that has no API key configured.
+
+**Solution**:
+- Open Settings and enter the API key for the provider you're using
+- If using Ollama, no key is needed — ensure Ollama is running and connected
+- Mistral is the default provider — if no keys are configured, configure at least Mistral or switch to Ollama
 
 ---
 
@@ -299,7 +309,7 @@ A: Only your messages and API keys are sent to the LLM provider you select. Docu
 
 **Q: How are API keys stored?**
 
-A: API keys are XOR-encrypted and stored in your browser's localStorage. They are decrypted in memory for use. This is not production-grade encryption (see [[Security Model]] for details).
+A: Each provider's API key is stored separately under `mosaic-api-key-{provider}` in localStorage (e.g., `mosaic-api-key-mistral`, `mosaic-api-key-openai`). Keys are XOR-encrypted before storage and decrypted in memory for use. This is not production-grade encryption (see [[Security Model]] for details).
 
 **Q: What happens to my uploaded documents?**
 
@@ -313,7 +323,52 @@ A: Open a [GitHub issue](https://github.com/versus184-py/Mosaic/issues) with a c
 
 **Q: Can I use custom LLM endpoints?**
 
-A: Not directly. Mosaic supports Mistral, OpenAI, Anthropic, Gemini (cloud), and Ollama (local). For custom endpoints, consider using Ollama as a proxy or opening a feature request.
+A: Not directly. Mosaic supports Mistral, OpenAI, Anthropic, Gemini (cloud), and Ollama (local). For custom endpoints, consider using Ollama as a proxy with a custom model, or open a feature request for custom provider support.
+
+**Q: How are tokens counted for cost estimation?**
+
+A: Mosaic uses a simple heuristic: `Math.ceil(text.length / 4)`. This estimates ~4 characters per token, which is a reasonable approximation for English text. Actual token counts may vary by provider and language. The estimation is used only for analytics display; providers charge based on their own tokenization.
+
+**Q: Can I delete the localStorage data to reset Mosaic?**
+
+A: Yes. To completely reset Mosaic:
+1. Close the app
+2. Open your browser's DevTools storage inspector (or use a localStorage manager extension)
+3. Delete all keys starting with `mosaic-`: `mosaic-canvases`, `mosaic-canvas-data-*`, `mosaic-ui`, `mosaic-analytics`, `mosaic-rag`
+4. Alternatively, use the Settings drawer's "Clear Canvas" button (clears only the current canvas)
+5. Reopen Mosaic — it will initialize fresh
+
+**Q: Does Mosaic work with corporate proxies/VPNs?**
+
+A: It depends:
+- **Ollama (local)**: Works fine, no internet needed
+- **Cloud providers**: Must be able to reach the provider's API endpoint. Corporate proxies that block unknown HTTPS endpoints may interfere. Configure your proxy to allowlist:
+  - `api.mistral.ai`
+  - `api.openai.com`
+  - `api.anthropic.com`
+  - `generativelanguage.googleapis.com`
+  - `cdn.jsdelivr.net` (for Pyodide)
+  - `files.pythonhosted.org` (for pip packages)
+  - `pyodide-cdn2.iodide.io` (for Pyodide CDN)
+
+**Q: Is there a maximum canvas size?**
+
+A: The practical limit depends on your machine's memory. React Flow uses virtual rendering, so only visible nodes consume rendering resources. However:
+- Each node's data is stored in memory and localStorage
+- undo history stores up to 50 snapshots of the entire node/edge state
+- RAG documents are stored as text chunks (limited to 50 MB total)
+- Most users report good performance up to 200 nodes
+
+**Q: Can I run Mosaic in a browser (not as a desktop app)?**
+
+A: Mosaic is built with Tauri, which requires a native shell. However, you can run the frontend in a browser for development:
+```bash
+npm run dev
+# opens http://localhost:1420 in your browser
+```
+Note: Some features (CSP enforcement, window management) won't work in browser mode. API calls will still work, but localStorage persistence and desktop-specific features won't be available.
+
+---
 
 **Q: What browsers/engines are supported?**
 
@@ -337,6 +392,66 @@ A: Not yet. Collaborative canvases are on the roadmap (see [[Changelog and Roadm
 
 ---
 
+---
+
+## Diagnostic Tools
+
+### Accessing Developer Tools
+
+While running in development mode (`npm run tauri:dev`), you can access the browser DevTools:
+
+- **Windows/Linux**: Right-click → Inspect Element, or press F12
+- **macOS**: Right-click → Inspect Element, or press Cmd+Option+I
+
+In the DevTools console, you can:
+
+```javascript
+// Check store state
+console.log(window.__ZUSTAND_STORES__);  // If exposed
+
+// Manually trigger save
+localStorage.getItem('mosaic-canvases');
+
+// Check RAG data
+localStorage.getItem('mosaic-rag');
+
+// Check analytics
+localStorage.getItem('mosaic-analytics');
+
+// Inspect all localStorage keys
+for (let i = 0; i < localStorage.length; i++) {
+  const key = localStorage.key(i);
+  if (key.startsWith('mosaic-')) {
+    console.log(key, JSON.parse(localStorage.getItem(key)));
+  }
+}
+```
+
+### Checking Network Requests
+
+In the DevTools **Network** tab, you can monitor:
+- API calls to LLM providers (verify streaming is working)
+- CDN requests for Pyodide (verify loading)
+- Any blocked requests (CSP violations)
+
+### Log File Locations
+
+Mosaic does not write log files to disk. All logging goes to:
+- **Browser console** (while running in dev mode)
+- **Tauri logs** (if Tauri processes emit errors)
+
+For production builds, run from the command line to see stdout:
+
+```bash
+# Windows (from the MSI install location)
+"C:\Program Files\Mosaic\Mosaic.exe" 2>&1
+
+# Or if built from source
+npm run tauri:dev
+```
+
+---
+
 ## Still Having Issues?
 
 1. **Search existing issues**: Check [GitHub Issues](https://github.com/versus184-py/Mosaic/issues) for similar problems
@@ -345,6 +460,7 @@ A: Not yet. Collaborative canvases are on the roadmap (see [[Changelog and Roadm
    - Steps to reproduce the problem
    - Expected vs actual behavior
    - Any error messages from the console (F12 → Console tab)
+   - A minimized reproduction case if possible
 3. **Feature requests**: Use the same [GitHub Issues](https://github.com/versus184-py/Mosaic/issues) page with the `feature` label
 
 ---

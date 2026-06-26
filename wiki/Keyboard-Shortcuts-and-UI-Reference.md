@@ -243,6 +243,82 @@ Appears on first use:
 
 ---
 
+## Theme CSS Custom Properties
+
+Each theme defines a set of CSS custom properties used throughout the app. These are defined in `src/styles/globals.css` under `.theme-{void|dusk|sand|snow|sunrise}` classes.
+
+### Core Variables
+
+| Variable | Purpose | Example Values |
+|----------|---------|---------------|
+| `--bg` | Base background | `#0a0a0f` (Void), `#1a0a2e` (Dusk), `#f5e6d3` (Sand) |
+| `--bg-1` | Elevated surface 1 | `#14141f` (Void), `#2a1040` (Dusk) |
+| `--bg-2` | Elevated surface 2 | `#1e1e2e` (Void), `#3a1a50` (Dusk) |
+| `--bg-3` | Elevated surface 3 | `#28283e` (Void) |
+
+### Glass Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--glass` | Glass background color (semi-transparent) |
+| `--glass-hover` | Glass background on hover |
+| `--glass-active` | Glass background when active |
+| `--glass-border` | Glass border color |
+| `--glass-edge` | Glass edge highlight color |
+| `--glass-content-bg` | Inner content background |
+| `--glass-tint-a/b/c` | Tint overlay colors (RGB only) |
+
+### Text Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--text` | Primary text color |
+| `--text-secondary` | Secondary/subtle text |
+| `--text-muted` | Muted text (disabled, hints) |
+
+### Effect Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--shadow` | Drop shadow color (semi-transparent) |
+| `--accent` | Accent color (interactive elements) |
+| `--accent-alpha` | Accent with transparency (glows) |
+| `--grid-color` | Canvas background grid color |
+| `--dialog-bg` | Modal/dialog backdrop |
+
+### Example: Void Theme
+
+```css
+.theme-void {
+  --bg: #0a0a0f;
+  --bg-1: #14141f;
+  --bg-2: #1e1e2e;
+  --bg-3: #28283e;
+  --glass: rgba(20, 20, 35, 0.7);
+  --glass-hover: rgba(30, 30, 50, 0.8);
+  --glass-active: rgba(40, 40, 65, 0.9);
+  --glass-border: rgba(100, 100, 140, 0.2);
+  --glass-edge: rgba(150, 150, 200, 0.1);
+  --text: #e8e8f0;
+  --text-secondary: #a0a0b8;
+  --text-muted: #606078;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --accent: #3b82f6;
+  --accent-alpha: rgba(59, 130, 246, 0.3);
+  --grid-color: rgba(100, 100, 140, 0.08);
+  --dialog-bg: rgba(0, 0, 0, 0.6);
+}
+```
+
+### Adding a Custom Theme
+
+1. Add a new class in `src/styles/globals.css` (e.g., `.theme-ocean { ... }`)
+2. Define all required CSS custom properties
+3. Add the theme name to the theme selector in Settings
+4. The `uiStore.setTheme()` function will handle the class toggle automatically
+
+---
+
 ## Next Steps
 
 - [[Canvas and Node System]] — Node types, operations, and edge types

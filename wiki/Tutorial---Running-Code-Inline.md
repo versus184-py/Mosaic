@@ -219,6 +219,34 @@ for (let i = 0; i < 10; i++) {
 
 ---
 
+## What Happens When You Click Run
+
+Understanding the execution pipeline helps debug issues and set expectations:
+
+```
+1. User clicks "Run" on code block
+2. CodeBlock component extracts language and code text
+3. codeRunner.runCode(lang, code) called
+4.   → Creates Web Worker if not already running
+5.   → Generates unique execution ID (UUID)
+6.   → Sets 30-second timeout
+7.   → Posts message to Worker: { exec_id, lang, code }
+8. Worker receives message:
+9.   → JavaScript: new Function(...sandboxGlobals)(...globals)
+10.  → Python: pyodide.runPython(code) with output capture
+11. Worker sends messages back:
+12.  → stdout: captured console.log/print output
+13.  → result: return value
+14.  → error: error message + stack trace
+15. codeRunner collects output messages
+16. Promise resolves with CodeResult: { output, error?, executionTime? }
+17. CodeBlock component displays output/error in the output pane
+```
+
+**Total round trip**: For simple JavaScript, typically 5-50ms. For Python (first run): 2-5 seconds (Pyodide loading). For Python (subsequent runs): 50-500ms.
+
+---
+
 ## Troubleshooting
 
 | Problem | Cause | Solution |
@@ -228,6 +256,8 @@ for (let i = 0; i < 10; i++) {
 | "fetch is not defined" | JavaScript sandbox blocks fetch | Use Python with `requests` instead (allowlisted) |
 | "Module 'xyz' not found" | Package not in allowlist | Use an allowlisted package or implement without the dependency |
 | Python execution hangs | Large computation in WASM | WASM Python is slower than native; consider smaller datasets |
+| Output is empty | Code didn't produce output | Add `console.log()` or `print()` statements |
+| "ReferenceError: X is not defined" | X is not in the allowlist | Use only allowlisted globals or restructure code |
 
 ---
 

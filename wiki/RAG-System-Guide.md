@@ -123,6 +123,31 @@ When available, Mosaic uses **embeddings** for semantic search:
 
 **Embedding provider priority**: Ollama → Mistral → OpenAI → Gemini
 
+### Understanding Embeddings
+
+Embeddings are **numerical vector representations** of text that capture semantic meaning:
+
+```typescript
+// Example embedding vectors (1536 dimensions for text-embedding-3-small)
+"Python is a programming language" → [0.023, -0.045, 0.112, ..., 0.008]  // 1536 numbers
+"JavaScript is for web development" → [0.018, -0.039, 0.098, ..., 0.012]  // Similar to above
+"Banana bread recipe" → [-0.042, 0.067, -0.088, ..., 0.031]  // Different from above
+```
+
+The key insight: similar meanings produce similar vectors. Cosine similarity measures the angle between vectors:
+
+```
+cosine_similarity(A, B) = (A · B) / (||A|| × ||B||)
+```
+
+Where:
+- `A · B` is the dot product of the two vectors
+- `||A||` and `||B||` are the magnitudes (lengths) of each vector
+- Result ranges from -1 (opposite meaning) to 1 (identical meaning)
+- Values above 0.8 indicate strong semantic similarity
+
+This is why embeddings can find relevant chunks even when they use different words than the query — they match on meaning, not just keywords.
+
 ### TF-IDF Cosine Similarity (Fallback)
 
 If no embedding provider is available, Mosaic falls back to **TF-IDF** (Term Frequency-Inverse Document Frequency):
@@ -135,10 +160,34 @@ IDF(t) = log(total documents / number of documents containing term t)
 TF-IDF(t, d) = TF(t, d) × IDF(t)
 ```
 
-1. A TF-IDF vector is computed for the query
-2. A TF-IDF vector is computed for each chunk
-3. Cosine similarity is computed between query vector and each chunk vector
-4. The top 3 most similar chunks are returned
+**How TF-IDF works step by step:**
+
+1. **Tokenization**: Split all text into individual words (tokens)
+2. **Vocabulary building**: Collect all unique tokens across all chunks
+3. **TF calculation**: For each token in each chunk, compute Term Frequency:
+   - If "Python" appears 3 times in a 100-word chunk: TF = 3/100 = 0.03
+4. **IDF calculation**: For each token, compute Inverse Document Frequency:
+   - If "Python" appears in 2 out of 10 chunks: IDF = log(10/2) = 0.699
+5. **TF-IDF calculation**: Multiply TF × IDF for each token
+6. **Vector construction**: Each chunk becomes a vector of TF-IDF values (one per vocabulary token)
+7. **Query vector**: The same process is applied to the query
+8. **Similarity scoring**: Cosine similarity between query vector and each chunk vector
+9. **Ranking**: Return the top K chunks with highest similarity scores
+
+**Example**: Consider two chunks and a query:
+
+```
+Chunk 1: "Python is great for data science and machine learning"
+Chunk 2: "JavaScript is used for web development and frontend"
+Query: "data science with Python"
+```
+
+TF-IDF would give:
+- "Python" appears in Chunk 1 → higher TF-IDF in Chunk 1
+- "data" appears in Chunk 1 and Query → higher similarity score for Chunk 1
+- Chunk 1 would be ranked higher than Chunk 2 for this query
+
+**When TF-IDF is used**: TF-IDF is the fallback when no embedding provider is available. It works entirely in the browser with zero external API calls. It's fast and doesn't require any provider configuration. The tradeoff is that TF-IDF is **keyword-based** — it won't find semantic matches that use different vocabulary. For example, searching for "automobile" won't match a chunk containing "car" unless the same document also uses "automobile."
 
 This is a lightweight, zero-dependency approach that works entirely in the browser without external API calls.
 

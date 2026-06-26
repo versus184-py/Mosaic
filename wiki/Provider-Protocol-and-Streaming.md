@@ -24,18 +24,27 @@ Main Thread:
        └── On stream end → resolve promise
 ```
 
-### Shared StreamConfig
+### Shared Streaming Interface
+
+All provider streaming functions share a consistent `AsyncGenerator<string>` signature:
 
 ```typescript
-interface StreamConfig {
-  temperature?: number;       // 0.0 - 2.0 (provider-specific mapping)
-  systemPrompt?: string;     // System message
-  signal?: AbortSignal;      // For cancellation
-  onChunk?: (chunk: string) => void;  // Called with each text delta
-}
+export async function* streamProvider(
+  messages: { role: string; content: string }[],
+  temperature: number,
+  signal: AbortSignal,
+  model: string
+): AsyncGenerator<string>
 ```
 
-All provider functions accept this config and return a `Promise<ReadableStreamDefaultReader>`.
+Each provider-specific function follows the same pattern. The hook consuming the stream iterates with `for await...of`:
+
+```typescript
+for await (const chunk of streamProvider(messages, temperature, signal, model)) {
+  // Append chunk to response node
+  updateNode(nodeId, { label: currentLabel + chunk });
+}
+```
 
 ---
 
@@ -258,7 +267,7 @@ data: {"candidates":[{"index":0,"content":{"role":"model","parts":[{"text":" wor
 
 **Stream end**: Detected by `done: true` field.
 
-**Embeddings**: `POST {ollama_url}/api/embed` with model `nomic-embed-text`.
+**Embeddings**: `POST {ollama_url}/api/embeddings` with model `nomic-embed-text`.
 
 ---
 
@@ -275,43 +284,57 @@ data: {"candidates":[{"index":0,"content":{"role":"model","parts":[{"text":" wor
 | Timeout | AbortController | "Request timed out." |
 | Provider down | HTTP 5xx | "Provider error. Try again later." |
 
-### Implementation
+### Provider Error Responses
 
-```typescript
-async function streamProvider(model: string, messages: Message[], config: StreamConfig) {
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: getHeaders(model),
-      body: getBody(model, messages, config),
-      signal: config.signal,
-    });
-    
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new ProviderError(
-        error.error?.message || `HTTP ${response.status}`,
-        response.status
-      );
-    }
-    
-    return response.body.getReader();
-  } catch (err) {
-    if (err instanceof ProviderError) throw err;
-    if ((err as Error).name === 'AbortError') throw new AbortError();
-    throw new NetworkError('Failed to connect to provider');
-  }
-}
+Each provider returns errors in a different format. Mosaic normalizes these:
+
+**Mistral / OpenAI** (standard HTTP errors):
+```json
+// HTTP 401
+{ "error": { "message": "Incorrect API key", "type": "authentication_error" } }
+
+// HTTP 429
+{ "error": { "message": "Rate limit exceeded", "type": "rate_limit_error" } }
+
+// HTTP 400
+{ "error": { "message": "Model 'gpt-5' does not exist", "type": "invalid_request_error" } }
 ```
+
+**Anthropic**:
+```json
+// HTTP 400
+{ "type": "error", "error": { "type": "invalid_request_error", "message": "messages: ..." } }
+
+// HTTP 529 (overloaded)
+{ "type": "error", "error": { "type": "overloaded_error", "message": "..." } }
+```
+
+**Gemini** (error in response, not HTTP status):
+```json
+// HTTP 403 (auth via URL param)
+{ "error": { "code": 403, "message": "API key not valid.", "status": "PERMISSION_DENIED" } }
+```
+
+**Ollama**:
+```json
+// Various errors
+{ "error": "model 'llama3' not found" }
+{ "error": "ollama server not running" }
+```
+
+### Error Response Formats
+
+Each provider returns errors in a different JSON format. Mosaic normalizes these into consistent error messages.
 
 ### Retry Logic
 
 Currently, Mosaic does **not** implement automatic retry. When a stream fails:
 1. The streaming flag on the node is cleared
-2. An error message is displayed on the node
-3. The user can click a retry button to resend
+2. An error message is displayed on the response node
+3. The user can click a retry button to resend the message
+4. The retry sends the same message through the same streaming pipeline
 
-Future versions may add exponential backoff retry for transient failures.
+Future versions may add exponential backoff retry for transient failures (HTTP 429, 5xx).
 
 ---
 
@@ -346,28 +369,29 @@ When aborted:
 The `embedTexts()` function (used by RAG) tries providers in order:
 
 ```typescript
-async function embedTexts(texts: string[]): Promise<number[][]> {
+export async function embedTexts(texts: string[]): Promise<number[][] | null> {
   // Priority: Ollama → Mistral → OpenAI → Gemini
-  const providers = [
-    tryOllamaEmbed,
-    tryMistralEmbed,
-    tryOpenAIEmbed,
-    tryGeminiEmbed,
+  const attempts = [
+    { provider: "ollama", fn: embedOllama },
+    { provider: "mistral", fn: embedMistral },
+    { provider: "openai", fn: embedOpenAI },
+    { provider: "gemini", fn: embedGemini },
   ];
   
-  for (const tryProvider of providers) {
+  for (const { fn } of attempts) {
     try {
-      return await tryProvider(texts);
-    } catch {
-      continue; // Try next provider
-    }
+      const result = await fn(texts);
+      if (result && result.length > 0 && result[0].length > 0) {
+        return result;
+      }
+    } catch { /* try next */ }
   }
   
-  throw new Error('No embedding provider available');
+  return null; // All providers failed — never throws
 }
 ```
 
-If all providers fail, `ragStore.searchChunks()` falls back to TF-IDF cosine similarity, which requires no external API.
+If `embedTexts()` returns `null`, `ragStore.searchChunks()` falls back to TF-IDF cosine similarity, which requires no external API.
 
 ---
 
@@ -377,7 +401,7 @@ If all providers fail, `ragStore.searchChunks()` falls back to TF-IDF cosine sim
 |---------|---------|--------|-----------|--------|--------|
 | Auth | Bearer | Bearer | x-api-key | URL param | None |
 | Streaming | SSE | SSE | Event-based SSE | SSE | JSON lines |
-| Embeddings | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Embeddings | ✅ (`mistral-embed`) | ✅ (`text-embedding-3-small`) | ❌ | ✅ (`text-embedding-004`) | ✅ (`nomic-embed-text`) |
 | Free tier | ✅ Credits | ❌ | ❌ | ✅ | ✅ (local) |
 | Speed | Fast | Fast | Medium | Fast | Variable |
 | Quality | High | High | Very High | High | Variable |

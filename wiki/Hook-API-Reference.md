@@ -44,9 +44,9 @@ When `sendMessage` is called:
 
 1. **Create branch node**: Adds a `branch` node for the user's message
 2. **Build conversation path**: Walks up parent edges via `getConversationPath()` to build message history
-3. **Check RAG context**: If RAG is enabled, calls `ragStore.searchChunks()` for top 3 chunks
+3. **Check RAG context**: If RAG is enabled, calls `ragStore.searchChunks()` for top 3 chunks (with optional query embedding from `embedTexts()`)
 4. **Inject context**: Appends RAG context to the system prompt
-5. **Send to provider**: Calls `streamProvider()` with the model, messages, and abort controller
+5. **Send to provider**: Calls `streamProvider()` which returns an `AsyncGenerator<string>`. The hook iterates with `for await...of` to receive text chunks.
 6. **Stream chunks**: Each chunk updates the response node's label incrementally
 7. **Post-processing**: 
    - Calls `useConfidenceScore` (if enabled) to score the response
@@ -347,10 +347,9 @@ if (doc) {
 
 ```typescript
 function useOllamaDetect(): {
-  detect: () => Promise<void>;
-  isDetecting: boolean;
-  isConnected: boolean;
-  models: string[];
+  checking: boolean;
+  retry: () => Promise<void>;
+  connected: boolean;
 }
 ```
 
@@ -358,23 +357,22 @@ function useOllamaDetect(): {
 
 | Value | Type | Description |
 |-------|------|-------------|
-| `detect` | `() => Promise<void>` | Checks connection, updates store |
-| `isDetecting` | `boolean` | True during detection |
-| `isConnected` | `boolean` | True if Ollama is reachable |
-| `models` | `string[]` | Available Ollama models |
+| `checking` | `boolean` | True while detection is in progress |
+| `retry` | `() => Promise<void>` | Manually trigger re-detection |
+| `connected` | `boolean` | Current connection state from uiStore |
 
 ### Behavior
 
-1. Contacts Ollama API at `uiStore.ollamaUrl` (default `http://localhost:11434`)
-2. If reachable, fetches model list
+1. On mount, polls Ollama API at `uiStore.ollamaUrl` (default `http://localhost:11434`)
+2. Calls `checkOllamaConnection()` — if reachable, calls `listOllamaModels()`
 3. Updates `uiStore.ollamaConnected` and `uiStore.ollamaModels`
-4. Runs on component mount (Settings drawer)
+4. Runs automatically on app mount via `App.tsx` — no manual triggering needed
 
 ### Usage
 
 ```typescript
-const { detect, isDetecting, isConnected, models } = useOllamaDetect();
-useEffect(() => { detect(); }, []);
+const { checking, retry, connected } = useOllamaDetect();
+// Auto-detects on mount — retry() for manual re-check
 ```
 
 ---
@@ -423,6 +421,57 @@ return (
   </div>
 );
 ```
+
+## Hook Lifecycle and Side Effects
+
+Understanding when hooks fire and what side effects they trigger is important for debugging and extending Mosaic.
+
+### useStreamMessage Lifecycle
+
+```
+1. User presses Enter
+2. sendMessage({ parentNodeId, text }) called
+3.   → Create branch node (side effect: canvasStore mutation)
+4.   → Set isStreaming = true
+5.   → Build conversation path (getConversationPath up the tree)
+6.   → If RAG enabled: searchChunks(query) (side effect: API call)
+7.   → Send to streamProvider(model, messages, config)
+8.     → For each chunk: updateNode(nodeId, { label: label + chunk })
+9.       → (side effect: canvasStore mutation → React Flow re-render)
+10.  → Stream complete
+11.  → Set isStreaming = false
+12.  → Parallel side effects (Promise.all):
+13.    → useConfidenceScore.scoreResponse() (if enabled)
+14.    → useSuggestionTendrils.generateTendrils() (if enabled)
+15.    → analyticsStore.recordCompletion()
+16.  → Debounced save to canvasManagerStore
+```
+
+### Error States and Recovery
+
+| Hook | Error State | Recovery |
+|------|-------------|----------|
+| useStreamMessage | Node shows error message + retry button | Click retry → re-sends message |
+| useConfidenceScore | No badge shown (silent) | Next response re-attempts |
+| useSuggestionTendrils | No suggestion nodes created (silent) | Next response re-attempts |
+| useBranchPruning | Partial results (some branches scored) | Retry pruning |
+| useDistillation | No distillation node created | Retry distillation |
+| useParallelDebate | Failed models show error; successful models shown | Retry individual failed branches |
+| useDocumentParser | File rejected with error message | Fix file and re-upload |
+| useOllamaDetect | Ollama option grayed out | Click "Detect" to retry |
+| useSpeechRecognition | Error message shown | Click mic again |
+
+### Performance Considerations
+
+| Hook | Computation Cost | Network Cost | When to Optimize |
+|------|-----------------|-------------|------------------|
+| useStreamMessage | Low (concatenation) | High (full streaming) | Large conversation history |
+| useConfidenceScore | Low | Medium (one completion) | High-volume use (disable if not needed) |
+| useSuggestionTendrils | Low | Medium (one completion) | High-volume use (disable if not needed) |
+| useBranchPruning | Low | High (one completion per leaf) | Large canvases (many leaves) |
+| useDistillation | Low | High (large context) | Very large canvases |
+| useParallelDebate | Low | Very High (N completions) | Many models selected |
+| useDocumentParser | Medium (chunking) | None | Large files (many chunks) |
 
 ---
 

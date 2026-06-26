@@ -14,14 +14,23 @@ The easiest way to get started is to download the latest release for your platfo
 3. Run the installer and follow the on-screen instructions
 4. Launch Mosaic from the Start Menu or desktop shortcut
 
-### macOS / Linux
-Prebuilt installers for macOS and Linux are not yet available. Please build from source (see below). If you'd like binaries for your platform, open a [feature request](https://github.com/versus184-py/Mosaic/issues).
+### macOS
+1. Go to the [Releases page](https://github.com/versus184-py/Mosaic/releases)
+2. Download the latest `.dmg` disk image
+3. Open the DMG and drag Mosaic to your Applications folder
+4. Launch Mosaic from Applications
+
+### Linux
+1. Go to the [Releases page](https://github.com/versus184-py/Mosaic/releases)
+2. Download the latest `.AppImage` file
+3. Make it executable: `chmod +x Mosaic*.AppImage`
+4. Run it: `./Mosaic*.AppImage`
 
 ---
 
 ## Build from Source
 
-Building from source gives you the latest code and is required for macOS and Linux.
+Building from source gives you the latest code and is useful for development and testing.
 
 ### Prerequisites
 
@@ -70,11 +79,23 @@ npm run tauri:dev
 ```
 
 This launches the application in development mode with:
-- Hot module reloading for the frontend
-- The Tauri webview window
-- DevTools available (right-click → Inspect Element)
+- Hot module reloading for the frontend (changes appear instantly)
+- The Tauri webview window (1280x800 by default)
+- DevTools available (right-click → Inspect Element, or F12)
+- Source maps for debugging TypeScript directly
+- Unminified code with descriptive variable names
 
-The app opens a window at 1280x800 by default.
+**What happens when you run `npm run tauri:dev`:**
+
+```
+1. Vite starts a dev server on http://localhost:1420
+2. Vite compiles TypeScript → JavaScript (esbuild, fast)
+3. Vite processes Tailwind CSS → compiled CSS
+4. Tauri CLI launches the native window
+5. The webview loads http://localhost:1420
+6. Vite injects HMR client into the page
+7. Any file change triggers HMR (sub-second refresh)
+```
 
 ### Step 5: Build for Production
 
@@ -83,15 +104,20 @@ npm run tauri:build
 ```
 
 The build process:
-1. Compiles TypeScript with `tsc`
-2. Bundles the frontend with Vite
-3. Compiles the Rust backend with Cargo
-4. Packages everything into a platform-specific installer
+1. **TypeScript check**: `tsc --noEmit` verifies type safety
+2. **Frontend bundling**: Vite bundles with code splitting, tree shaking, minification
+3. **Rust compilation**: Cargo builds the Tauri backend in release mode
+4. **App bundling**: Tauri packages everything into platform-specific installers
 
 Build output goes to `src-tauri/target/release/bundle/`:
 - Windows: `src-tauri/target/release/bundle/msi/Mosaic_*.msi`
 - macOS: `src-tauri/target/release/bundle/dmg/Mosaic_*.dmg`
 - Linux: `src-tauri/target/release/bundle/appimage/Mosaic_*.AppImage`
+
+**Build time expectations:**
+- First build: 2-5 minutes (Rust compilation + npm install)
+- Subsequent builds: 30-60 seconds (incremental Rust compilation + cached Vite)
+- The Rust backend is small (2 source files), so recompilation is fast
 
 ### Troubleshooting Build Issues
 
@@ -99,9 +125,45 @@ Build output goes to `src-tauri/target/release/bundle/`:
 |---------|-------------|----------|
 | `rustc not found` | Rust not installed | Run `rustup-init` or install via your package manager |
 | `Failed to run custom build command for 'tauri'` | Missing system dependencies | See Tauri docs for your OS |
-| WebKit issues (Linux) | Missing WebKit2GTK | `sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev` |
+| WebKit issues (Linux) | Missing WebKit2GTK | `sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsoup-3.0-dev` |
 | `npm ERR!` during install | Network or version issues | Try `npm cache clean --force` then `npm install` again |
 | Build is very slow | First build compiles all Rust crates | Subsequent builds are much faster (incremental compilation) |
+| `MSI` build fails (Windows) | Missing WiX Toolset | Install [WiX Toolset v3](https://wixtoolset.org/) |
+| `dmg` build fails (macOS) | Missing create-dmg | `brew install create-dmg` |
+| Permission denied on AppImage (Linux) | AppImage not executable | `chmod +x Mosaic*.AppImage` |
+| Blank white window | Dev/build mismatch | Check that Vite dev server is running (dev mode) or frontend was built (production) |
+
+### Verifying the Build
+
+After a successful build, verify the installation:
+
+```bash
+# Check that the binary exists and has the right permissions
+ls -la src-tauri/target/release/bundle/
+
+# Run directly (without installer)
+# Windows:
+./src-tauri/target/release/mosaic.exe
+# macOS/Linux:
+./src-tauri/target/release/mosaic
+
+# Check the version
+./src-tauri/target/release/mosaic --version  # if implemented
+```
+
+The app should launch and show the Mosaic welcome screen.
+
+### Dev Mode vs Production Mode
+
+| Aspect | Development (`npm run tauri:dev`) | Production (`npm run tauri:build`) |
+|--------|----------------------------------|-------------------------------------|
+| Performance | Slower (unminified code, HMR) | Optimized (minified, tree-shaken) |
+| Debugging | DevTools, React DevTools, source maps | Limited |
+| Hot reload | Yes (instant frontend updates) | No |
+| Console | Full logging | Minimal |
+| Rust | Debug compilation (faster build) | Release compilation (optimized binary) |
+
+For daily use, always use the production build. Use development mode for contributing and debugging.
 
 ---
 

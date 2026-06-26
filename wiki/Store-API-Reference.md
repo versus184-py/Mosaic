@@ -4,6 +4,77 @@ Mosaic uses **Zustand v5** for state management with seven stores. This page doc
 
 ---
 
+## Zustand Patterns Used
+
+Mosaic uses several Zustand patterns to keep state management clean and predictable:
+
+### Pattern 1: Direct Store Creation
+
+```typescript
+// No middleware, no persistence — simple and fast
+import { create } from 'zustand';
+
+interface SimpleStore {
+  count: number;
+  increment: () => void;
+}
+
+const useSimpleStore = create<SimpleStore>((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+}));
+```
+
+This pattern is used for `toastStore` and `pruneStore` (in-memory, no persistence).
+
+### Pattern 2: Manual localStorage Persistence
+
+```typescript
+// Subscribe to changes and save manually
+const usePersistedStore = create<PersistedStore>((set, get) => ({
+  ...defaultState,
+  
+  // Load on initialization:
+  ...loadFromStorage(),
+}));
+
+// Save on changes:
+usePersistedStore.subscribe((state) => {
+  saveToStorage(state);
+});
+```
+
+This pattern is used for all persistent stores. The persistence is manual (not using Zustand's `persist` middleware) because:
+1. More control over what fields persist (some fields are transient)
+2. Custom validation on load
+3. Debouncing for canvas data
+
+### Pattern 3: Debounced Persistence
+
+```typescript
+// canvasStore uses debounced saves
+let saveTimer: number | null = null;
+
+const useCanvasStore = create<CanvasStore>((set, get) => ({
+  // ... state and actions
+  updateNodePosition: (id, pos) => {
+    set((state) => ({
+      nodes: state.nodes.map((n) =>
+        n.id === id ? { ...n, position: pos } : n
+      ),
+    }));
+    
+    // Debounce save (300ms)
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      saveToManagerStore(get());
+    }, 300);
+  },
+}));
+```
+
+This prevents excessive localStorage writes during rapid operations (like dragging a node).
+
 ## canvasStore
 
 **File**: `src/store/canvasStore.ts`
@@ -186,17 +257,29 @@ setOllamaUrl(url: string): void
 Returns the full model info for the currently selected model.
 
 #### `getAvailableModels(): ModelOption[]`
-Returns all available models across all configured providers, including auto-detected Ollama models. Groups by provider with color indicators.
+Returns all available models across all configured providers, including auto-detected Ollama models. Groups by provider with color indicators (blue → Mistral, green → OpenAI, orange → Anthropic, yellow → Gemini, purple → Ollama).
 
-#### `getActiveProvider(): string`
-Returns the provider name for the currently selected model.
+#### `getActiveProvider(): ProviderId`
+Returns the provider ID for the currently selected model. Used by the UI to show/hide provider-specific controls.
 
 #### `hasApiKeyForCurrent(): boolean`
-Returns whether the API key is configured for the currently selected provider.
+Returns whether the API key is configured for the currently selected provider. Always returns `true` for Ollama (no key needed).
+
+### Ollama State Management
+
+Ollama connection state is managed through three fields and their setters:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `ollamaConnected` | `boolean` | `false` | Whether Ollama is reachable |
+| `ollamaModels` | `string[]` | `[]` | List of available Ollama model names |
+| `ollamaUrl` | `string` | `http://localhost:11434` | Configured Ollama server URL |
+
+The `useOllamaDetect` hook (called in `App.tsx` on mount) polls the Ollama API and updates these fields automatically.
 
 ### Theme Application
 
-When `setTheme()` is called, the store sets `document.documentElement.classList` to `theme-{name}`. On initialization, it auto-detects OS dark/light preference.
+When `setTheme()` is called, the store sets `document.documentElement.classList` to `theme-{name}`. On initialization, it respects the OS `prefers-color-scheme` setting — dark mode defaults to `void`, light mode defaults to `sand`.
 
 ---
 
@@ -243,11 +326,12 @@ interface CompletionRecord {
 
 ### Pricing Table (built-in)
 
+Only Mistral model pricing is built-in. Other providers use a default fallback of $0.50/M input and $1.50/M output tokens:
+
 ```typescript
 const PRICING: Record<string, { input: number; output: number }> = {
   'mistral-large-latest':      { input: 2.00, output: 6.00 },
   'mistral-small-latest':      { input: 0.20, output: 0.60 },
-  // Other models use sensible defaults
 };
 ```
 

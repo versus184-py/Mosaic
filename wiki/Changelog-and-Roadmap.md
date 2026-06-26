@@ -4,9 +4,56 @@
 
 ## Changelog
 
+### v0.3.0 — Multi-Provider AI, Semantic Search, Cross-Platform Builds & Test Suite
+
+**Release date**: June 26, 2026
+
+#### New Features
+
+- **Multi-provider AI** — Five LLM providers with full streaming support:
+  - **OpenAI** — GPT-4o and GPT-4o Mini via streaming completions and embeddings
+  - **Anthropic** — Claude Sonnet 4 and Claude Haiku 3.5 via SSE streaming
+  - **Gemini** — Gemini 2.5 Pro and Gemini 2.5 Flash with API key in query parameter
+  - **Ollama** — Local model support with auto-detection, dynamic model listing from `/api/tags`, and embedding via `nomic-embed-text`
+- **Semantic search (RAG v2)** — Document chunks are embedded at upload time using the first available embedder. Embeddings stored alongside chunks. Queries are embedded at search time for semantic similarity matching. Falls back to TF-IDF when no embedder is available.
+- **Embedding provider priority**: Ollama → Mistral → OpenAI → Gemini (Anthropic skipped — no embeddings API)
+- **Model selector** — Provider-grouped dropdown with colored indicators (blue → Mistral, green → OpenAI, orange → Anthropic, yellow → Gemini, purple → Ollama)
+- **Settings drawer** — Per-provider API key inputs with encrypted localStorage storage, Ollama connection panel with URL input and live status indicator, system instruction textarea (4000 char limit)
+- **Ollama auto-detection** — `useOllamaDetect` hook polls `/api/tags` on startup
+- **Streaming architecture** — All providers use `AsyncGenerator<string>` pattern via `yield*` delegation
+
+#### Testing
+
+- 191 automated tests across 11 test files
+- API layer: config (XOR encrypt/decrypt, cache, provider resolution), provider routing, Ollama URL management
+- Stores: ragStore (vector search, limit boundaries), uiStore (all 5 providers, theme class, persistence), canvasStore (cascade, undo stack, bookmarks, conversation path)
+- Utilities: validation (all edge cases), layout (radial positioning, deep clone, tree layout)
+- Components: SettingsDrawer and TopBar with user-event interaction
+- Hooks: chunkText algorithm (boundary detection, overlap, unicode)
+- Canvas mock for jsdom compatibility
+
+#### Platform & CI/CD
+
+- CI/CD via GitHub Actions: `ubuntu-latest` for type-check + test + build
+- Release workflow: matrix build for `windows-latest`, `macos-latest`, `ubuntu-latest` with `fail-fast: false`
+- Artifacts: `.msi` + NSIS `.exe` (Windows), `.dmg` (macOS), `.AppImage` (Linux)
+- Assets uploaded via `softprops/action-gh-release@v2`
+
+#### Other
+
+- MIT License added
+- Removed CSP meta tag from `index.html` (CSP lives only in Tauri config)
+- Fixed `tauri.conf.json` schema URL to official `tauri-apps/tauri` repo
+- Replaced `any` types with proper TypeScript types across store and API layers
+- `ProviderId` union type (`"mistral" | "openai" | "anthropic" | "gemini" | "ollama"`)
+- `streamProvider` now uses `AsyncGenerator` pattern with `yield*` delegation
+- `embedTexts` returns `null` (never throws) when all providers fail
+
+---
+
 ### v0.2.0 — Glass UI, Confidence Scoring, Tendrils, Distillation & More
 
-**Release date**: TBD
+**Release date**: June 26, 2026
 
 #### New Features
 
@@ -107,46 +154,115 @@
 - [ ] **Custom provider endpoints** — Allow users to configure arbitrary API endpoints
 - [ ] **Search improvements** — Regex search, search filters, saved searches
 
+### Medium Term
+
+- [ ] **Visual branching indicators** — Better visual distinction between branches
+- [ ] **Node grouping and labels** — Group related nodes with custom labels and colors
+- [ ] **Performance optimizations** — Handle larger canvases (500+ nodes) smoothly with virtual scrolling and lazy loading
+- [ ] **Custom provider endpoints** — Allow users to configure arbitrary API endpoints with custom auth
+- [ ] **Search improvements** — Regex search, search filters, saved searches, search within specific branches
+- [ ] **Canvas templates** — Pre-built prompt templates and canvas layouts for common workflows
+- [ ] **Code execution improvements** — More allowlisted packages, larger timeout option, multi-file support
+- [ ] **RAG enhancements** — Smarter chunk boundaries (paragraph-aware, code-aware), hybrid search (TF-IDF + embeddings)
+
 ### Long Term
 
-- [ ] **Collaborative canvases** — Real-time multi-user collaboration
-- [ ] **Plugin system** — Third-party extensions for providers, tools, UI
-- [ ] **Local model support** — Full integration with llama.cpp, GPT4All, etc.
-- [ ] **Mobile companion** — View and interact with canvases on mobile
-- [ ] **Version history** — Per-canvas version history with diffs
-- [ ] **Tauri v2 commands** — Native file I/O, system notifications, deep links
+- [ ] **Collaborative canvases** — Real-time multi-user collaboration with cursor presence, comments, and conflict resolution. Users working on the same canvas would see each other's cursors, nodes would sync in real-time via WebSocket or WebRTC, and changes would be merged using CRDT (Conflict-free Replicated Data Types) for offline support.
+- [ ] **Plugin system** — Third-party extensions for providers, tools, UI components, and canvas integrations. Plugin API would allow registering custom node types, provider integrations, toolbar buttons, and context menu items. Plugins could be distributed as npm packages or loaded from URLs.
+- [ ] **Local model support** — Full integration with llama.cpp, GPT4All, Ollama, and other local inference engines. Beyond basic chat completion, this would include embedding generation, function calling, and structured output support.
+- [ ] **Mobile companion** — View and interact with canvases on mobile devices. Sync via local network or cloud storage. Optimized touch interactions for canvas navigation and node manipulation.
+- [ ] **Version history** — Per-canvas version history with diffs, branching, and rollback. Git-like commit model with author attribution and merge capabilities. Visual diff view showing what changed between versions.
+- [ ] **Tauri v2 commands** — Native file I/O, system notifications, deep links, system tray integration, and custom title bar. Move beyond localStorage for data persistence — use SQLite or file-based storage for larger datasets and better performance.
+- [ ] **AI-powered features** — Automatic conversation summarization, smart suggestions based on canvas context, automatic branch naming, semantic canvas search, AI-assisted node organization and layout.
 
 ---
 
 ## Feature Status
 
-| Feature | v0.1.0 | v0.2.0 | Next | Future |
-|---------|--------|--------|------|--------|
-| Spatial canvas | ✅ | ✅ | ✅ | ✅ |
-| Conversation branching | ✅ | ✅ | ✅ | ✅ |
-| Mistral AI integration | ✅ | ✅ | ✅ | ✅ |
-| Multi-provider (OpenAI, Anthropic, Gemini, Ollama) | — | — | 🔄 | ✅ |
-| Inline code execution (JS + Python) | ✅ | ✅ | ✅ | ✅ |
-| RAG from documents | ✅ | ✅ | ✅ | ✅ |
-| Multi-canvas tabs | ✅ | ✅ | ✅ | ✅ |
-| Export/Import | ✅ | ✅ | ✅ | ✅ |
-| Analytics | ✅ | ✅ | ✅ | ✅ |
-| Keyboard shortcuts | ✅ | ✅ | ✅ | ✅ |
-| 5 themes | ✅ | ✅ | ✅ | ✅ |
-| Undo history | ✅ | ✅ | ✅ | ✅ |
-| Glass UI system | — | ✅ | ✅ | ✅ |
-| Confidence scoring | — | ✅ | ✅ | ✅ |
-| Suggestion tendrils | — | ✅ | ✅ | ✅ |
-| Branch distillation | — | ✅ | ✅ | ✅ |
-| Branch pruning | — | ✅ | ✅ | ✅ |
-| Parallel debate | — | ✅ | ✅ | ✅ |
-| Security hardening | — | ✅ | ✅ | ✅ |
-| Collaborative canvases | — | — | — | 🔄 |
-| Node grouping | — | — | 🔄 | — |
-| macOS/Linux builds | — | — | 🔄 | ✅ |
-| Plugin system | — | — | — | 🔄 |
+| Feature | v0.1.0 | v0.2.0 | v0.3.0 | Next | Future |
+|---------|--------|--------|--------|------|--------|
+| Spatial canvas | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Conversation branching | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Mistral AI integration | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Multi-provider (OpenAI, Anthropic, Gemini, Ollama) | — | — | ✅ | ✅ | ✅ |
+| Semantic search (embeddings) | — | — | ✅ | ✅ | ✅ |
+| Inline code execution (JS + Python) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| RAG from documents | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Multi-canvas tabs | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Export/Import | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Analytics | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Keyboard shortcuts | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 5 themes | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Undo history | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Glass UI system | — | ✅ | ✅ | ✅ | ✅ |
+| Confidence scoring | — | ✅ | ✅ | ✅ | ✅ |
+| Suggestion tendrils | — | ✅ | ✅ | ✅ | ✅ |
+| Branch distillation | — | ✅ | ✅ | ✅ | ✅ |
+| Branch pruning | — | ✅ | ✅ | ✅ | ✅ |
+| Parallel debate | — | ✅ | ✅ | ✅ | ✅ |
+| Security hardening | — | ✅ | ✅ | ✅ | ✅ |
+| Test suite (191 tests) | — | — | ✅ | ✅ | ✅ |
+| CI/CD pipeline | — | — | ✅ | ✅ | ✅ |
+| Cross-platform builds | — | — | ✅ | ✅ | ✅ |
+| Collaborative canvases | — | — | — | — | 🔄 |
+| Node grouping | — | — | — | 🔄 | — |
+| Plugin system | — | — | — | — | 🔄 |
 
 ✅ = Complete | 🔄 = In progress/planned
+
+---
+
+### Completed in v0.3.0
+
+The following features from the previous roadmap were delivered in v0.3.0:
+
+**New Providers** ✅
+- [x] Full OpenAI integration (GPT-4o, GPT-4o-mini)
+- [x] Anthropic integration (Claude Sonnet 4, Haiku 3.5)
+- [x] Gemini integration (2.5 Pro, 2.5 Flash)
+- [x] Ollama integration (auto-detect, local models)
+- [x] Provider router with fallback chain
+
+**RAG Improvements** ✅
+- [x] Embedding-based semantic search (hybrid TF-IDF + embeddings)
+- [x] Embedding provider priority chain (Ollama → Mistral → OpenAI → Gemini)
+- [x] Embeddings computed at upload time and stored alongside chunks
+
+**Platform & Testing** ✅
+- [x] Cross-platform builds: Windows (.msi + .exe), macOS (.dmg), Linux (.AppImage)
+- [x] CI/CD pipeline (GitHub Actions: type-check, test, build)
+- [x] 191 automated tests across 11 test files
+- [x] MIT License added
+
+### Planned v0.4.0
+
+**UI/UX**
+- [ ] Visual branching indicators (colored edge highlights per branch)
+- [ ] Node grouping with custom labels and colors
+- [ ] Improved canvas performance for 500+ nodes
+- [ ] Custom provider endpoint configuration
+
+**Developer Experience**
+- [ ] Tauri v2 commands for native file I/O
+- [ ] File-based persistence (optional, beyond localStorage)
+- [ ] Canvas templates and starter packs
+- [ ] Export to Markdown/PDF
+
+### Future Major Features
+
+**v1.0.0 Milestone**
+- Stable API and data format
+- All 5 providers fully integrated and tested
+- Cross-platform support (Windows, macOS, Linux)
+- Comprehensive test coverage
+- Security audit completed
+
+**Beyond v1.0.0**
+- Real-time collaborative canvases (WebSocket sync)
+- Plugin system for third-party extensions
+- Mobile companion app (view and share canvases)
+- Version history with diff and rollback
+- AI-powered canvas organization (auto-grouping, smart naming)
 
 ---
 

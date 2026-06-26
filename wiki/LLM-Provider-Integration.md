@@ -45,6 +45,27 @@ The `embedTexts()` function similarly routes embedding requests through availabl
 
 ## Provider Configuration
 
+### Request Construction
+
+Each provider function constructs the appropriate HTTP request:
+
+```typescript
+// Common interface
+interface ProviderRequest {
+  url: string;
+  method: 'POST';
+  headers: Record<string, string>;
+  body: string;  // JSON-serialized
+  signal?: AbortSignal;
+}
+```
+
+The differences between providers are primarily in:
+- **Authentication**: Bearer token vs. x-api-key header vs. URL parameter
+- **Message format**: OpenAI-compatible format vs. Anthropic's content blocks vs. Gemini's contents/parts
+- **System prompt placement**: Part of messages array vs. separate system parameter vs. systemInstruction field
+- **Streaming response format**: Standard SSE vs. event-based SSE vs. JSON lines
+
 ### API Key Storage
 
 API keys are stored in `localStorage` using **XOR encryption** with a salt key (`MosaicKeySalt`):
@@ -139,8 +160,8 @@ Keys are cached in memory after decryption to avoid repeated decoding. This is n
 
 | Model | ID |
 |-------|-----|
-| Gemini 2.5 Pro | `gemini-2.5-pro-exp-03-25` |
-| Gemini 2.0 Flash | `gemini-2.0-flash-exp` |
+| Gemini 2.5 Pro | `gemini/gemini-2.5-pro` |
+| Gemini 2.5 Flash | `gemini/gemini-2.5-flash` |
 
 **Streaming**: SSE with `candidates[0].content.parts[0].text` chunk extraction.
 
@@ -152,7 +173,7 @@ Keys are cached in memory after decryption to avoid repeated decoding. This is n
 
 **Authentication**: None required.
 
-**Model Discovery**: Mosaic auto-detects available models by calling the Ollama API's list endpoint. Click **Detect** in the Settings drawer.
+**Model Discovery**: Mosaic auto-detects available models on startup via the `useOllamaDetect` hook, which polls `http://localhost:11434/api/tags`. Connection status and model list are updated automatically in the Settings drawer.
 
 **Streaming**: JSON-lines streaming from Ollama's `/api/chat` endpoint.
 
@@ -163,7 +184,7 @@ Keys are cached in memory after decryption to avoid repeated decoding. This is n
 2. Run `ollama serve`
 3. Pull models: `ollama pull llama3.2` (or any model)
 4. In Mosaic Settings, set URL to `http://localhost:11434`
-5. Click **Detect**
+5. Mosaic auto-detects on startup — no manual detection needed
 
 > **Note**: Ollama must be running on the same machine. Mosaic checks the connection on startup and grays out Ollama options if unavailable.
 
@@ -248,6 +269,44 @@ The UI automatically detects which provider is selected and:
 - Validates that the required API key is configured
 - Shows a warning if no key is available for the selected model
 
+### Provider Factory Pattern
+
+Each provider module exports a consistent interface — an `AsyncGenerator` for streaming and a `Promise` for embeddings:
+
+```typescript
+// src/api/mistral.ts
+export async function* streamMistral(
+  messages: { role: string; content: string }[],
+  temperature: number,
+  signal: AbortSignal,
+  model: string
+): AsyncGenerator<string> { ... }
+
+export async function embedMistral(
+  texts: string[]
+): Promise<number[][]> { ... }
+```
+
+The central `streamProvider()` router in `providers.ts` uses `yield*` to delegate to each provider's generator:
+
+```typescript
+export async function* streamProvider(
+  messages: { role: string; content: string }[],
+  temperature: number,
+  signal: AbortSignal,
+  model: string
+): AsyncGenerator<string> {
+  const provider = getProviderForModel(model);
+  switch (provider) {
+    case "mistral": yield* streamMistral(...); break;
+    case "openai":  yield* streamOpenAI(...);  break;
+    // ...
+  }
+}
+```
+
+This pattern makes it easy to add new providers — implement `stream*` (AsyncGenerator) and `embed*`, register the model in `config.ts`, and add the routing case in `providers.ts`.
+
 ---
 
 ## Embeddings for RAG
@@ -259,7 +318,7 @@ Mosaic's RAG system uses embeddings for semantic search. The `embedTexts()` func
 3. **OpenAI** — `text-embedding-3-small`
 4. **Gemini** — `text-embedding-004`
 
-Each provider is tried in sequence; if one fails (e.g., Ollama not running, API key missing), the next is attempted. If all embedding providers fail, the RAG system falls back to **TF-IDF cosine similarity** (a statistical method that doesn't require an external API).
+Each provider is tried in sequence; if one fails, the next is attempted. `embedTexts()` returns `null` only if **all** providers fail — it never throws. If `null` is returned, the RAG system falls back to **TF-IDF cosine similarity** (a statistical method that requires no external API).
 
 ---
 

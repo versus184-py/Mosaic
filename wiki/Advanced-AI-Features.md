@@ -46,6 +46,17 @@ The confidence badge appears in the top-right of response nodes:
 - **Failure behavior**: No badge is shown; no error is raised (silent fail)
 - **Cost**: Each confidence check counts as one additional completion (tokens tracked in analytics)
 
+### How to Interpret Confidence Scores
+
+| Score Range | Meaning | Recommended Action |
+|-------------|---------|-------------------|
+| 90-100 | High confidence — AI is certain | Trust the answer |
+| 70-89 | Moderate confidence | Check specific claims |
+| 50-69 | Low confidence — AI is uncertain | Verify with another source |
+| 0-49 | Very low confidence | Request clarification or rephrase |
+
+**Important caveat**: Confidence scoring is the AI evaluating its own output. It is not a measure of objective correctness. The AI may be confidently wrong (scoring 95 on an incorrect answer) or diffidently right (scoring 60 on a perfect answer). Use it as a general guide, not an absolute truth indicator.
+
 ---
 
 ## Suggestion Tendrils
@@ -206,7 +217,7 @@ Parallel debate sends the **same user input** to **multiple AI models simultaneo
 ### Setup
 
 1. Open Settings → **Debate Models**
-2. Select 2+ models (e.g., Mistral Large, GPT-4o, Claude Sonnet)
+2. Select 2+ models from any provider (e.g., Mistral Large, GPT-4o, Claude Sonnet, Gemini 2.5 Flash)
 3. Close Settings
 4. When typing, use **Shift+Enter** instead of Enter to trigger debate
 
@@ -223,6 +234,52 @@ Parallel debate sends the **same user input** to **multiple AI models simultaneo
 - **Failure handling**: One model failing doesn't affect others
 - **Node placement**: Fan layout based on the number of models
 - **Analytics**: Each response is tracked separately in analytics
+
+---
+
+## Best Practices and Use Cases
+
+### When to Use Each Feature
+
+**Confidence scoring** is most useful when:
+- Evaluating factual or technical answers where accuracy matters
+- Comparing responses from parallel debate
+- Gauging the AI's certainty about its own output
+- Building trust with the AI's responses over time
+
+**Suggestion tendrils** are most useful when:
+- You're in an exploration phase and want ideas for where to go next
+- You're learning about a topic and want to discover related areas
+- You want to quickly branch into multiple directions without typing
+
+**Branch distillation** is most useful when:
+- You've explored several parallel paths and want a summary
+- You're preparing to archive or export a canvas
+- You need to present findings to someone who doesn't need all the details
+- You want to compare the distilled output across different approaches
+
+**Branch pruning** is most useful when:
+- Your canvas has grown large (15+ nodes) and feels cluttered
+- You have a specific goal and want to focus on relevant branches
+- Before distillation — to ensure only relevant branches are synthesized
+
+**Parallel debate** is most useful when:
+- You want to compare how different models approach the same problem
+- Fact-checking by asking multiple models the same question
+- Cost/quality analysis — comparing a cheap model's output with an expensive one
+- Creative tasks where diverse perspectives are valuable
+
+### Performance Considerations
+
+| Feature | API Calls | Token Consumption | Time Impact |
+|---------|-----------|------------------|-------------|
+| Confidence scoring | 1 per response | Small (calibration prompt ~50 tokens) | ~2-8s |
+| Suggestion tendrils | 1 per response | Small (generation prompt ~100 tokens) | ~3-10s |
+| Branch distillation | 1 per trigger | Large (all leaf content as context) | ~10-30s |
+| Branch pruning | 1 per leaf | Medium (branch content + scoring prompt) | ~5-15s per leaf |
+| Parallel debate | N per trigger | N × normal response tokens | ~same as slowest model |
+
+For very large canvases, pruning before distillation can significantly reduce the number of leaves to process, saving both time and token costs.
 
 ---
 

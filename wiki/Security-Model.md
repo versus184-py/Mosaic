@@ -19,7 +19,7 @@ Layer 6: API Key Encryption (Storage protection)
 
 ## Layer 1: Content Security Policy (CSP)
 
-The CSP is enforced at the Tauri level in `tauri.conf.json`:
+The CSP is enforced at the Tauri level in `tauri.conf.json` (the old CSP meta tag in `index.html` was removed in v0.3.0 to avoid duplication):
 
 ```json
 {
@@ -91,6 +91,25 @@ Only `"core:default"` is granted. This includes basic window management, but **n
 - HTTP requests (all networking is done from the webview, not the Rust backend)
 
 This is intentionally minimal. The Rust backend serves only as a webview container — all application logic runs in the sandboxed frontend.
+
+### Capability Comparison
+
+| System Access | Mosaic | Typical Electron App | Typical Tauri App |
+|--------------|--------|---------------------|-------------------|
+| File system | ❌ (blocked by capabilities) | ✅ (Node.js fs) | ✅ (via commands) |
+| Network (system level) | ❌ (blocked by capabilities) | ✅ (Node.js net) | ✅ (via commands) |
+| Process spawning | ❌ | ✅ (child_process) | ✅ (via shell plugin) |
+| Clipboard | ❌ (blocked by capabilities) | ✅ (navigator.clipboard) | ✅ (via clipboard plugin) |
+| Global shortcuts | ❌ | ✅ (globalShortcut) | ✅ (via plugin) |
+| Window management | ✅ (core:default) | ✅ | ✅ |
+| HTTP requests (webview) | ✅ (restricted by CSP) | ✅ | ✅ |
+| WebSocket (webview) | ❌ (blocked by CSP) | ✅ | ✅ |
+
+By using the minimalist capability set, Mosaic significantly reduces the attack surface. Even if an attacker gains code execution in the webview, they cannot:
+- Read or write files on the user's system
+- Execute shell commands
+- Access system-level APIs
+- Register global shortcuts (which could be used for keylogging)
 
 ---
 
@@ -236,9 +255,20 @@ function decryptKey(encoded: string): string {
 - A determined attacker with access to the binary can extract the salt and decrypt keys
 - For production use, consider OS-level credential storage (Keychain, Credential Manager, Secret Service)
 
+### Per-Provider Key Storage
+
+In v0.3.0, API key storage was upgraded from a single shared key to per-provider keys:
+
+| Provider | localStorage Key |
+|----------|-----------------|
+| Mistral | `mosaic-api-key-mistral` |
+| OpenAI | `mosaic-api-key-openai` |
+| Anthropic | `mosaic-api-key-anthropic` |
+| Gemini | `mosaic-api-key-gemini` |
+
 ### Key Caching
 
-After decryption, API keys are cached in memory (a simple `Map<string, string>`) to avoid repeated decryption:
+After decryption, API keys are cached in memory (a `Map<ProviderId, string>`) to avoid repeated decryption:
 
 ```typescript
 const keyCache = new Map<string, string>();
@@ -254,6 +284,103 @@ function getApiKey(provider: string): string | null {
   return decrypted;
 }
 ```
+
+---
+
+### Worker Creation and Initialization Security
+
+The Web Worker is created with strict controls:
+
+```typescript
+function createSandboxedWorker(): Worker {
+  // Create worker from a blob URL (inline worker)
+  const workerCode = `
+    // Worker code for sandboxed execution
+    self.onmessage = function(event) {
+      const { exec_id, lang, code } = event.data;
+      executeCode(exec_id, lang, code);
+    };
+  `;
+  
+  const blob = new Blob([workerCode], { type: 'application/javascript' });
+  const url = URL.createObjectURL(blob);
+  const worker = new Worker(url);
+  
+  // Clean up blob URL
+  URL.revokeObjectURL(url);
+  
+  // Set up message handler
+  worker.onmessage = handleWorkerMessage;
+  worker.onerror = handleWorkerError;
+  
+  return worker;
+}
+```
+
+Using a Blob URL instead of an external file prevents:
+- Path traversal attacks (cannot load arbitrary worker files)
+- Import/require in the worker (Blob workers have no URL to resolve imports from)
+- Source mapping leaks (worker source is embedded, not served from filesystem)
+
+### Worker Termination Strategy
+
+The worker can be terminated in three scenarios:
+
+| Scenario | Trigger | Behavior |
+|----------|---------|----------|
+| Execution timeout | 30-second timer expires | `worker.terminate()` → new worker created |
+| User abort | User clicks stop button | AbortController aborts fetch; worker continues |
+| App unmount | Component unmounts | `worker.terminate()` for cleanup |
+
+When a worker is terminated due to timeout, a **fresh worker** is always created to replace it. This ensures that even if the worker's internal state was corrupted by malicious code, subsequent executions start clean.
+
+---
+
+## Layer 4: Code Sandboxes
+
+### JavaScript Sandbox
+
+JavaScript code is executed via `new Function()` with explicit parameter injection:
+
+```javascript
+// Safe: Every global must be explicitly passed
+const fn = new Function(
+  'Math', 'Date', 'JSON', 'console',
+  // ... 40+ allowlisted globals
+  code
+);
+return fn(Math, Date, JSON, console, /* ... */);
+```
+
+Any reference to a non-passed symbol (like `fetch`, `document`, `localStorage`, `process`) throws a `ReferenceError`. This is a **strict allowlist approach** — everything is blocked by default, only explicitly listed symbols are available.
+
+**Blocked APIs**: fetch, XMLHttpRequest, WebSocket, Worker, SharedWorker, localStorage, sessionStorage, indexedDB, open, close, import(), Document, Window, Navigator, Location, History, Screen.
+
+### Python Sandbox
+
+Python code runs in Pyodite (CPython in WebAssembly) with additional restrictions:
+
+- **Pip packages**: Only 15 allowlisted packages can be installed
+- **Network**: Python's `urllib`/`requests`/`http.client` are patched to only allow CDN hosts
+- **Platform modules**: `msvcrt`, `termios`, `fcntl`, `mmap` are blocked or restricted
+- **C extensions**: Platform-specific C extensions are blocked (they don't work in WASM anyway)
+- **Execution timeout**: 30 seconds maximum
+
+### Why a Function Sandbox Instead of iframe?
+
+Mosaic considered using iframes for sandboxing but chose Web Workers for these reasons:
+
+| Aspect | Web Worker | iframe |
+|--------|-----------|--------|
+| DOM access | None | Requires sandbox attribute |
+| Network access | None (unless code allows) | Blocked by CSP |
+| Thread isolation | Separate OS thread | Same thread (event loop) |
+| Message passing | postMessage | postMessage |
+| Termination | `terminate()` available | Cannot be reliably killed |
+| Performance | Low overhead | Full browser context overhead |
+| Shared state | None | Can access parent via frameElement |
+
+Workers are strictly more isolated than iframes for code execution scenarios.
 
 ---
 

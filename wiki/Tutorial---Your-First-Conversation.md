@@ -178,6 +178,62 @@ As your canvas grows, use bookmarks to keep track of important nodes:
 
 ---
 
+## Step 10: Understand Streaming Responses
+
+Watch how the AI responds in real time:
+
+1. Click a node and ask a question that requires a longer response
+2. Observe the **typing indicator** (three animated dots) appear on the response node
+3. Watch as the response appears character by character — no waiting for the full response
+4. Notice: you can click **elsewhere** on the canvas while streaming continues (non-blocking)
+5. Try pressing the **stop** button if you want to interrupt a response mid-stream
+
+**Why streaming matters**: Unlike traditional chat UIs that show a loading spinner and then the full response, Mosaic's streaming lets you read the beginning of a response while the rest is still being generated. This feels faster and lets you decide early if the response is going in the right direction.
+
+---
+
+## Step 11: Use Undo
+
+Mistyped a message or accidentally moved a node in the wrong place?
+
+1. **Move a node** by dragging it to a new position
+2. Press `Ctrl+Z` — the node jumps back to its previous position
+3. Undo works for: node position changes, node additions, node deletions, and canvas clears
+4. Undo history stores the last 50 actions
+
+---
+
+## Step 12: Start a New Canvas
+
+Finished exploring and want to start fresh without losing your work?
+
+1. Press `Ctrl+N` or click the **+** button in the TopBar
+2. A new canvas tab appears with a fresh root node
+3. Your previous canvas is saved automatically
+4. Switch between canvases by clicking their tabs at the top
+5. Rename a canvas by double-clicking its tab label
+
+---
+
+## Complete Cheat Sheet for First Session
+
+| Goal | Action |
+|------|--------|
+| Start chatting | Click root node → type message → Enter |
+| Continue conversation | Click any response → type → Enter |
+| Branch | Click an earlier response → type different follow-up |
+| Pan canvas | Drag empty space |
+| Zoom | Scroll or + / - keys |
+| Fit all | Press F |
+| Delete a node | Select it → press Delete |
+| Bookmark a node | Right-click → Bookmark |
+| Open search | Ctrl+F |
+| Undo | Ctrl+Z |
+| Settings | Click gear icon (⚙️) |
+| New canvas | Ctrl+N |
+
+---
+
 ## What's Next?
 
 You've completed your first conversation with Mosaic! Here's what to try next:

@@ -9,28 +9,28 @@ This page documents how Mosaic is built, packaged, and distributed across platfo
 Mosaic uses **GitHub Actions** for automated builds and releases. The workflow is triggered by pushing a tag matching `v*`.
 
 ```
-Developer pushes tag v0.2.0
+Developer pushes tag v0.3.0
        │
        ▼
 GitHub Actions: release.yml
        │
-       ├── Matrix build:
-       │   ├── Windows (ubuntu-latest + windows-latest)
-       │   ├── macOS (macos-latest)
-       │   └── Linux (ubuntu-latest)
+       ├── Matrix build (fail-fast: false):
+       │   ├── windows-latest
+       │   ├── macos-latest
+       │   └── ubuntu-latest
        │
        ├── Each platform:
        │   ├── Checkout code
        │   ├── Setup Node.js 20
        │   ├── Setup Rust toolchain
+       │   ├── Install Linux deps (if ubuntu)
        │   ├── npm ci
-       │   ├── npm run tauri:build
-       │   └── Upload artifact
+       │   └── npm run tauri:build
        │
-       └── GitHub Release:
-           ├── Windows: Mosaic_0.2.0_x64.msi
-           ├── macOS: Mosaic_0.2.0_x64.dmg
-           └── Linux: Mosaic_0.2.0_x86_64.AppImage
+       └── GitHub Release (softprops/action-gh-release@v2):
+           ├── Windows: Mosaic_0.3.0_x64.msi + .exe (NSIS)
+           ├── macOS: Mosaic_0.3.0_x64.dmg
+           └── Linux: Mosaic_0.3.0_x86_64.AppImage
 ```
 
 ### Release Workflow File (`.github/workflows/release.yml`)
@@ -42,9 +42,13 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
     
@@ -57,18 +61,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev libgtk-3-dev \
-            libayatana-appindicator3-dev librsvg2-dev \
-            libsoup-3.0-dev
+            libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf
       
       - name: Install dependencies
         run: npm ci
@@ -77,10 +80,10 @@ jobs:
         run: npm run tauri:build
       
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: softprops/action-gh-release@v2
         with:
-          name: mosaic-${{ matrix.platform }}
-          path: src-tauri/target/release/bundle/
+          files: |
+            src-tauri/target/release/bundle/**/*
 ```
 
 ---
@@ -89,7 +92,7 @@ jobs:
 
 | Platform | Bundle Format | Output Path |
 |----------|--------------|-------------|
-| Windows | `.msi` (Windows Installer) | `src-tauri/target/release/bundle/msi/` |
+| Windows | `.msi` (Windows Installer) + `.exe` (NSIS) | `src-tauri/target/release/bundle/msi/` + `nsis/` |
 | macOS | `.dmg` (Disk Image) | `src-tauri/target/release/bundle/dmg/` |
 | Linux | `.AppImage` (Portable) | `src-tauri/target/release/bundle/appimage/` |
 
@@ -149,10 +152,10 @@ jobs:
 | Step | Command | Purpose |
 |------|---------|---------|
 | TypeScript check | `tsc --noEmit` | Verifies type safety without emitting files |
-| Unit tests | `vitest run --coverage` | Runs test suite with coverage report |
+| Unit tests | `vitest run` | Runs 191 tests across 11 test files |
 | Production build | `npm run build` | Verifies the app builds successfully |
 
-Note: Unit tests (vitest) are configured in the CI pipeline but no test files exist yet. Contributions adding tests are welcome!
+The full test suite covers API config, provider routing, all stores (canvas, rag, ui), utility functions (validation, layout), components (SettingsDrawer, TopBar), and hooks (useDocumentParser).
 
 ---
 
@@ -163,7 +166,7 @@ The build configuration is in `src-tauri/tauri.conf.json`:
 ```json
 {
   "productName": "Mosaic",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "identifier": "com.mosaic.app",
   "build": {
     "frontendDist": "../dist",
@@ -231,10 +234,10 @@ Mosaic follows **Semantic Versioning** (SemVer):
 | Version | Example | When |
 |---------|---------|------|
 | Major | `1.0.0` | Breaking changes |
-| Minor | `0.1.0` → `0.2.0` | New features, non-breaking |
-| Patch | `0.1.0` → `0.1.1` | Bug fixes, non-breaking |
+| Minor | `0.2.0` → `0.3.0` | New features, non-breaking |
+| Patch | `0.3.0` → `0.3.1` | Bug fixes, non-breaking |
 
-Current version: `0.2.0` (beta — API may change)
+Current version: `0.3.0` (beta — API may change)
 
 ---
 
@@ -277,7 +280,102 @@ npm run tauri:build
 - **Code splitting**: `@xyflow/react` → `flow` chunk, `framer-motion` → `motion` chunk
 - **Minification**: Vite's built-in Terser/Rollup minification
 - **Tree shaking**: Unused code is removed
-- **Asset hashing**: Cache-busting filenames
+- **Asset hashing**: Cache-busting filenames (e.g., `main.a1b2c3d4.js`)
+
+### Vite Configuration (vite.config.ts)
+
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 1420,
+    strictPort: true,
+  },
+  build: {
+    target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          flow: ['@xyflow/react'],
+          motion: ['framer-motion'],
+        },
+      },
+    },
+  },
+  // Prevent Vite from obscuring Rust errors
+  clearScreen: false,
+});
+```
+
+### Release Checklist
+
+Before publishing a new release:
+
+- [ ] Version bumped in `package.json` and `tauri.conf.json`
+- [ ] CHANGELOG updated with new version's changes
+- [ ] CI passes on `main` (TypeScript check, tests, build)
+- [ ] Test on all target platforms (Windows, macOS, Linux)
+- [ ] Git tag created (`v0.x.x`)
+- [ ] Release workflow triggered
+- [ ] Release artifacts verified (download and install)
+- [ ] Release notes written with highlights and upgrade instructions
+
+### Manual Build and Deployment Steps
+
+For maintainers who need to build and release manually:
+
+```bash
+# 1. Update version
+# Edit package.json and tauri.conf.json with new version
+
+# 2. Commit and tag
+git add package.json src-tauri/tauri.conf.json
+git commit -m "chore: bump version to 0.x.x"
+git tag v0.x.x
+git push origin main --tags
+
+# 3. GitHub Actions will automatically run release.yml
+# Monitor progress at: https://github.com/versus184-py/Mosaic/actions
+
+# 4. After successful build, verify artifacts
+# Download from the Release page and test on each platform
+
+# 5. Write release notes
+# Include: highlights, breaking changes, upgrade instructions, contributors
+```
+
+### Environment Variables for Build
+
+| Variable | Purpose | Required | Example |
+|----------|---------|----------|---------|
+| `TAURI_SIGNING_PRIVATE_KEY` | Code signing private key path | For signed builds | `./certs/key.pem` |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Code signing key password | For signed builds | (password) |
+| `APPLE_DEVELOPER_ID` | macOS signing identity | For macOS builds | `Developer ID Application: ...` |
+| `APPLE_NOTARIZATION_USERNAME` | Apple ID for notarization | For macOS builds | `user@example.com` |
+| `APPLE_NOTARIZATION_PASSWORD` | App-specific password for notarization | For macOS builds | (app-specific password) |
+| `GITHUB_TOKEN` | GitHub API token (auto-set by Actions) | For GitHub releases | (auto-set in CI) |
+
+### Rollback Procedure
+
+If a release contains a critical bug:
+
+1. **Tag the previous working version**:
+   ```bash
+   git tag v0.x.x-stable
+   git push origin v0.x.x-stable
+   ```
+2. **Patch the bug** and create a new release (`v0.x.x+1`)
+3. **Update the release notes** to warn users about the affected version
+4. **Mark the affected release** as "Pre-release" on GitHub
 
 ---
 

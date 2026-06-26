@@ -46,26 +46,47 @@ interface CanvasData {
 }
 ```
 
-### Model Types
+### Provider Types (v0.3.0+)
 
 ```typescript
+type ProviderId = 'mistral' | 'openai' | 'anthropic' | 'gemini' | 'ollama';
+
+type ProviderType = ProviderId; // Alias for compatibility
+
 interface ModelOption {
-  id: string;                // Model identifier (e.g., 'mistral-large-latest')
-  name: string;              // Display name
-  provider: ProviderType;
-  providerLabel: string;     // Human-readable provider name
-  color: string;             // Provider color for UI
+  id: string;                // Model identifier (e.g., 'mistral-large-latest', 'openai/gpt-4o')
+  label: string;             // Display name (e.g., 'Mistral Large', 'GPT-4o')
+  provider: ProviderId;
+  supportsEmbeddings: boolean; // Whether this model can produce embeddings
 }
 
-type ProviderType = 'mistral' | 'openai' | 'anthropic' | 'gemini' | 'ollama';
-
-interface ProviderConfig {
-  name: string;
-  models: ModelOption[];
+interface ProviderDefinition {
+  id: ProviderId;
+  name: string;              // Human-readable name (e.g., 'Mistral AI')
+  baseUrl: string;           // API base URL
   requiresKey: boolean;
-  color: string;
+  color: string;             // UI indicator color
 }
 ```
+
+### Built-in Models
+
+The `BUILT_IN_MODELS` array in `src/api/config.ts` defines all statically known models:
+
+```typescript
+const BUILT_IN_MODELS: ModelOption[] = [
+  { id: 'mistral-large-latest',     label: 'Mistral Large',     provider: 'mistral',  supportsEmbeddings: true },
+  { id: 'mistral-small-latest',     label: 'Mistral Small',     provider: 'mistral',  supportsEmbeddings: true },
+  { id: 'openai/gpt-4o',            label: 'GPT-4o',            provider: 'openai',   supportsEmbeddings: true },
+  { id: 'openai/gpt-4o-mini',       label: 'GPT-4o Mini',       provider: 'openai',   supportsEmbeddings: true },
+  { id: 'anthropic/claude-sonnet-4-20250514', label: 'Claude Sonnet 4', provider: 'anthropic', supportsEmbeddings: false },
+  { id: 'anthropic/claude-3-5-haiku-20241022', label: 'Claude Haiku 3.5', provider: 'anthropic', supportsEmbeddings: false },
+  { id: 'gemini/gemini-2.5-pro',    label: 'Gemini 2.5 Pro',    provider: 'gemini',   supportsEmbeddings: true },
+  { id: 'gemini/gemini-2.5-flash',  label: 'Gemini 2.5 Flash',  provider: 'gemini',   supportsEmbeddings: true },
+];
+```
+
+Ollama models are not in this list â€” they are dynamically detected at runtime via the Ollama API.
 
 ### RAG Types
 
@@ -290,29 +311,29 @@ Used for API key storage in localStorage. **Not production-grade encryption** â€
 ## Provider Config (`src/api/config.ts`)
 
 ```typescript
-const PROVIDERS: Record<string, ProviderConfig> = {
-  mistral: {
-    name: 'Mistral AI',
-    baseUrl: 'https://api.mistral.ai/v1',
-    models: [
-      { id: 'mistral-large-latest', name: 'Mistral Large', ... },
-      { id: 'mistral-small-latest', name: 'Mistral Small', ... },
-    ],
-    requiresKey: true,
-    color: '#3B82F6',
-  },
-  openai: { ... },
-  anthropic: { ... },
-  gemini: { ... },
-  ollama: {
-    name: 'Ollama',
-    baseUrl: '',  // Configurable
-    models: [],   // Auto-detected
-    requiresKey: false,
-    color: '#A855F7',
-  },
+const PROVIDER_DEFS: Record<ProviderId, ProviderDefinition> = {
+  mistral:   { id: 'mistral',   name: 'Mistral AI', baseUrl: 'https://api.mistral.ai/v1',  requiresKey: true,  color: '#3B82F6' },
+  openai:    { id: 'openai',    name: 'OpenAI',     baseUrl: 'https://api.openai.com/v1',   requiresKey: true,  color: '#22C55E' },
+  anthropic: { id: 'anthropic', name: 'Anthropic',  baseUrl: 'https://api.anthropic.com/v1', requiresKey: true,  color: '#F97316' },
+  gemini:    { id: 'gemini',    name: 'Gemini',     baseUrl: 'https://generativelanguage.googleapis.com/v1beta', requiresKey: true, color: '#EAB308' },
+  ollama:    { id: 'ollama',    name: 'Ollama',     baseUrl: '',  requiresKey: false, color: '#A855F7' },
 };
 ```
+
+### API Key Storage
+
+```typescript
+// Store keys in localStorage with per-provider keys
+const STORAGE_KEYS = {
+  mistral: 'mosaic-api-key-mistral',
+  openai: 'mosaic-api-key-openai',
+  anthropic: 'mosaic-api-key-anthropic',
+  gemini: 'mosaic-api-key-gemini',
+};
+// Ollama has no API key
+```
+
+Keys are XOR-encrypted before storage and decrypted on read. Cached in a runtime `Map<ProviderId, string>` for performance.
 
 ### API Key Storage
 

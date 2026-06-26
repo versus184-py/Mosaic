@@ -63,6 +63,23 @@ Help fill the [gallery](https://github.com/versus184-py/Mosaic#gallery) by shari
 | Rust | Latest stable | [rustup.rs](https://rustup.rs/) |
 | Git | Latest | [git-scm.com](https://git-scm.com/) |
 
+### Recommended Tools
+
+| Tool | Purpose |
+|------|---------|
+| VS Code | Primary IDE with TypeScript support |
+| ESLint | Code linting (configured via tsconfig strict mode) |
+| React DevTools | Component inspection and profiling |
+| Tauri DevTools | Native window debugging |
+
+---
+
+| Tool | Version | Installation |
+|------|---------|-------------|
+| Node.js | 18+ | [nodejs.org](https://nodejs.org/) |
+| Rust | Latest stable | [rustup.rs](https://rustup.rs/) |
+| Git | Latest | [git-scm.com](https://git-scm.com/) |
+
 ### Step-by-Step Setup
 
 ```bash
@@ -184,6 +201,9 @@ Branch naming:
 # TypeScript check
 npx tsc --noEmit
 
+# Tests
+npx vitest run
+
 # Build
 npm run build
 ```
@@ -226,6 +246,7 @@ Then open a pull request on GitHub against the `main` branch.
 Before submitting, verify:
 
 - [ ] TypeScript check passes (`tsc --noEmit`)
+- [ ] Tests pass (`vitest run`)
 - [ ] Build succeeds (`npm run build`)
 - [ ] No lint warnings in the console
 - [ ] Code follows existing conventions
@@ -233,11 +254,99 @@ Before submitting, verify:
 - [ ] Commits use conventional commit format
 - [ ] Branch is based on latest `main`
 
+### Code Review Guidelines
+
+When reviewing PRs, focus on:
+
+1. **Correctness**: Does the code do what it claims?
+2. **Type safety**: Are there any `any` types or unsafe casts?
+3. **Performance**: Are there unnecessary re-renders or expensive operations?
+4. **Error handling**: Are error states properly handled?
+5. **Edge cases**: What happens with empty data, null values, or unexpected input?
+6. **Security**: Could this introduce XSS, data leaks, or sandbox escapes?
+7. **Testing**: Are there tests for the new functionality?
+8. **Documentation**: Are changes reflected in the wiki or JSDoc comments?
+
+### Debugging Tips
+
+#### React Component Debugging
+
+```typescript
+// 1. Use React DevTools to inspect component tree and state
+// 2. Add temporary console.log to trace component re-renders:
+console.log('MessageNode render', id, data.label.slice(0, 50));
+
+// 3. Use React.memo with custom comparison:
+React.memo(MyComponent, (prev, next) => {
+  return deepEqual(prev.data, next.data);
+});
+
+// 4. Profile with React Profiler
+import { Profiler } from 'react';
+<Profiler id="Canvas" onRender={(id, phase, actualDuration) => {
+  console.log(`${id} ${phase}: ${actualDuration}ms`);
+}}>
+  <MosaicCanvas />
+</Profiler>
+```
+
+#### Zustand Store Debugging
+
+```typescript
+// Subscribe to all store changes
+canvasStore.subscribe((state) => {
+  console.log('canvasStore changed:', {
+    nodes: state.nodes.length,
+    edges: state.edges.length,
+    activeNodeId: state.activeNodeId,
+  });
+});
+
+// Middleware for logging
+import { devtools } from 'zustand/middleware';
+const useStore = create(
+  devtools(storeDefinition, { name: 'MyStore' })
+);
+```
+
+#### Tauri Debugging
+
+```bash
+# Run with verbose logging
+RUST_LOG=debug npm run tauri:dev
+
+# Check Rust compiler warnings
+cargo build 2>&1 | grep warning
+
+# Inspect webview console
+# Right-click → Inspect Element (dev mode only)
+```
+
+#### Performance Profiling
+
+```bash
+# 1. React Profiler (in React DevTools)
+# 2. Chrome DevTools Performance tab (Tauri dev mode)
+# 3. Check for unnecessary re-renders:
+npx why-did-you-render --include "MessageNode"
+
+# 4. Monitor localStorage size
+console.log(
+  JSON.stringify(localStorage).length,
+  'bytes used'
+);
+
+# 5. Track component render counts
+const renderCount = useRef(0);
+renderCount.current++;
+console.log(`${componentName} render #${renderCount.current}`);
+```
+
 ---
 
 ## Testing
 
-Mosaic uses **Vitest** for unit testing. Tests are run in CI but no tests are written yet — contributions adding tests are especially welcome!
+Mosaic uses **Vitest** for unit testing with 191 tests across 11 test files.
 
 ### Test File Location
 
@@ -267,6 +376,23 @@ npx vitest run --coverage
 - Store actions (especially state transformations)
 - Provider-related logic (streaming, error handling)
 - React components (rendering, user interactions)
+- Hook behavior (streaming, document parsing, Ollama detection)
+
+### Existing Test Coverage
+
+| File | Tests |
+|------|-------|
+| `src/api/__tests__/config.test.ts` | API key storage, provider routing, model config |
+| `src/api/__tests__/ollama.test.ts` | Ollama URL management |
+| `src/api/__tests__/providers.test.ts` | Embedding fallback chain |
+| `src/components/__tests__/SettingsDrawer.test.tsx` | Settings drawer rendering and interaction |
+| `src/components/__tests__/TopBar.test.tsx` | Top bar, model dropdown, model switching |
+| `src/hooks/__tests__/useDocumentParser.test.ts` | Chunk algorithm (boundary detection, overlap, unicode) |
+| `src/store/__tests__/canvasStore.test.ts` | Node CRUD, cascade, undo, bookmarks, conversation paths |
+| `src/store/__tests__/ragStore.test.ts` | Document limits, search (TF-IDF + embeddings) |
+| `src/store/__tests__/uiStore.test.ts` | Theme, model selection, Ollama state, all 5 providers |
+| `src/utils/__tests__/layout.test.ts` | Radial positioning, tree layout, deep clone |
+| `src/utils/__tests__/validation.test.ts` | All validation edge cases |
 
 ---
 

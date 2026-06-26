@@ -207,6 +207,38 @@ To revisit this analysis:
 
 ---
 
+## Pro Tips for Power Users
+
+### Tip 1: Combine RAG with Distillation
+Before distilling, upload relevant documents and enable RAG. The distillation will include context from your documents, making the synthesis more informed than one based purely on the AI's training data.
+
+### Tip 2: Use Pruning Before Distillation
+Pruning removes low-value branches before distillation, which means:
+- Less context for the AI to process (lower token cost)
+- Higher quality synthesis (only relevant content included)
+- Faster distillation (fewer leaves to summarize)
+
+### Tip 3: Parallel Debate Then Compare Then Distill
+The most powerful workflow:
+1. Run parallel debate (3-4 models)
+2. Branch from each model's response to explore specific aspects
+3. Compare confidence scores to identify the most reliable answers
+4. Prune branches that don't align with your goal
+5. Distill the remaining branches into a final synthesis
+
+### Tip 4: Save Intermediate States
+Before major operations like pruning or clearing, export your canvas:
+- Settings → Export → `mosaic-before-pruning.json`
+- This gives you a safety net to restore if pruning is too aggressive
+
+### Tip 5: Use Bookmarks as Milestones
+Bookmark nodes that represent key insights or decisions. Later:
+- Filter to bookmarks-only to see the "table of contents" of your canvas
+- Distill only bookmarked branches for a curated synthesis
+- Share exported canvas with bookmarks as a summary document
+
+---
+
 ## Complete Workflow Summary
 
 ```
@@ -229,6 +261,25 @@ This workflow took ~25 minutes and produced:
 - Exportable archive
 
 In a linear chat interface, this would require multiple separate conversations, manual copy-pasting, and significant context-switching. Mosaic's canvas handles it all in one spatial view.
+
+---
+
+## Time-Saving Shortcuts for This Workflow
+
+| Goal | Shortcut / Action |
+|------|-------------------|
+| Start parallel debate | `Shift+Enter` (instead of Enter) |
+| Open Settings | Click gear icon (⚙️) |
+| Fit all nodes | Press `F` |
+| Delete a node | Select it → `Delete` |
+| Undo a mistake | `Ctrl+Z` |
+| Bookmark important node | Right-click → Bookmark |
+| Open search | `Ctrl+F` |
+| New canvas | `Ctrl+N` |
+| Collapse a branch | Right-click → Collapse |
+| Export canvas | Settings → Export |
+
+Practice this workflow a few times. The combination of parallel debate → branching → pruning → distillation is where Mosaic's spatial canvas truly shines compared to traditional linear chat interfaces.
 
 ---
 

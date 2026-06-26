@@ -393,7 +393,8 @@ function TopBar(): JSX.Element
 
 **Elements**:
 - Mosaic logo
-- Model selector dropdown (groups models by provider with colored dots)
+- Model selector dropdown (groups models by provider with colored dots: blue → Mistral, green → OpenAI, orange → Anthropic, yellow → Gemini, purple → Ollama)
+- Ollama models dynamically appended when connected
 - Action buttons: Search, Bookmarks, Documents, Analytics, Distill, Prune, New Chat, Settings
 
 ### SettingsDrawer
@@ -407,7 +408,15 @@ Full settings modal.
 function SettingsDrawer(): JSX.Element
 ```
 
-**Sections**: Theme grid, API keys, Ollama config, System prompt, Temperature, Canvas toggles, Actions (auto-arrange, export, import, clear), Shortcuts button.
+**Sections**:
+- **Theme**: Grid of 5 theme selectors (Void, Dusk, Sand, Snow, Sunrise)
+- **API Keys**: Per-provider masked inputs for Mistral, OpenAI, Anthropic, and Gemini (using a reusable `ApiKeySection` component). Keys are XOR-encrypted before storage.
+- **Ollama**: URL input field, Connect button with live status indicator, auto-detected model list
+- **System Prompt**: Textarea (4000 character max) for custom AI instructions
+- **Temperature**: FluidSlider (0.0–2.0)
+- **Canvas**: Toggles for Minimap, Confidence scoring, Tendrils
+- **Actions**: Auto-arrange, Export JSON, Import JSON, Clear canvas
+- **Shortcuts**: Opens shortcuts modal
 
 ### SearchOverlay
 
@@ -552,7 +561,42 @@ interface ErrorBoundaryState {
 }
 ```
 
-Shows error message with "Try again" button on failure.
+Shows error message with "Try Again" button on failure.
+
+---
+
+## Accessibility Considerations
+
+Mosaic's components follow accessibility best practices:
+
+| Component | Accessibility Features |
+|-----------|----------------------|
+| MessageNode | ARIA labels for node type, role="button" for clickable areas, keyboard tab navigation |
+| NodeInput | Proper label association, aria-describedby for help text, role="textbox" |
+| GlassCard | Focusable when interactive, role="region" with aria-label |
+| TactileSwitch | role="switch", aria-checked, keyboard activation (Enter/Space) |
+| FluidSlider | role="slider", aria-valuemin/max/now, keyboard arrow keys |
+| SearchOverlay | role="dialog", aria-modal, focus trap, aria-live for results |
+| SettingsDrawer | role="dialog", aria-modal, focus trap, Escape to close |
+| ShortcutsModal | role="dialog", aria-label, keyboard navigation |
+| ToastContainer | role="alert", aria-live="polite" |
+| PythonTerminal | role="application", aria-label, keyboard input handling |
+
+All components respect `prefers-reduced-motion` (disables animations) and `prefers-reduced-transparency` (reduces glass effects).
+
+---
+
+## Responsive Behavior
+
+Mosaic's window has a minimum size of 800x600:
+
+| Window Width | Behavior |
+|-------------|----------|
+| ≥ 1280px (default) | Full layout: TopBar, canvas, minimap, zoom controls |
+| 800-1279px | Compact TopBar (icons without labels), canvas fills available space |
+| < 800px | Not allowed (minimum window size enforced by Tauri) |
+
+The Settings drawer, DocumentPanel, and AnalyticsPanel are overlay panels that work at any window size.
 
 ---
 
@@ -561,3 +605,4 @@ Shows error message with "Try again" button on failure.
 - [[Utilities and Types Reference]] — Utility functions and type definitions
 - [[Store API Reference]] — All Zustand stores
 - [[Keyboard Shortcuts and UI Reference]] — Complete UI documentation
+

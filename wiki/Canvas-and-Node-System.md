@@ -219,6 +219,50 @@ Mosaic includes an **auto-layout** algorithm that arranges nodes in a radial tre
 
 Auto-layout also runs automatically when new nodes are created (new nodes are placed at an optimal angle based on existing children count).
 
+### Layout Algorithm Details
+
+The layout uses these parameters:
+- **Level spacing**: 250px between parent and child levels
+- **Child arc**: Children are distributed within a 45-degree arc centered on the parent's outgoing direction
+- **Sibling spacing**: Minimum 200px between sibling nodes
+- **Radial distribution**: Nodes at the same depth form concentric rings
+
+For example, a tree with root at center and 3 levels of branching would be arranged as:
+- Level 0 (root): center (0, 0)
+- Level 1: ring at radius 250px with angular spacing of 2π / (number of children)
+- Level 2: ring at radius 500px, children of each L1 node arranged in their own arc
+- Level 3: ring at radius 750px, same recursive pattern
+
+This creates a natural, easy-to-read conversation tree where related branches cluster together.
+
+### Node Position Calculation for New Nodes
+
+When a new node is created as a child of an existing node, its position is calculated:
+
+```typescript
+function calculateChildPosition(parent: Node, existingChildren: Node[]): { x: number; y: number } {
+  const LEVEL_SPACING = 250;
+  const CHILD_SPACING = 200;
+  
+  // Distribute children in an arc
+  const arcAngle = Math.PI / 3;  // 60 degrees
+  const childCount = existingChildren.length;
+  const newIndex = childCount;  // This child is the (count)th
+  
+  const angleRange = Math.min(arcAngle, (childCount) * 0.3);
+  const startAngle = -angleRange / 2;
+  const stepAngle = childCount > 0 ? angleRange / childCount : 0;
+  const angle = startAngle + newIndex * stepAngle;
+  
+  return {
+    x: parent.position.x + LEVEL_SPACING * Math.cos(angle),
+    y: parent.position.y + LEVEL_SPACING * Math.sin(angle),
+  };
+}
+```
+
+The arc widens as more children are added, ensuring nodes don't overlap regardless of how many times a parent is branched from.
+
 ---
 
 ## Undo History
