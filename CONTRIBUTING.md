@@ -4,7 +4,6 @@ Thank you for considering a contribution. Whether you're fixing a bug, adding a 
 
 ## Quick links
 
-- [Code of Conduct](./CODE_OF_CONDUCT.md) — be excellent to each other
 - [Wiki — Contributing Guide](https://github.com/versus184-py/Mosaic/wiki/Contributing-Guide) — detailed development setup and workflow
 - [Wiki — Architecture Overview](https://github.com/versus184-py/Mosaic/wiki/Overall-Architecture-and-Data-Flow)
 - [Wiki — Changelog & Roadmap](https://github.com/versus184-py/Mosaic/wiki/Changelog-and-Roadmap)
