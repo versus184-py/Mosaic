@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic documentation — Community — Documentation">
+<meta property="og:title" content="Mosaic — Community — Documentation">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — Community — Documentation</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="wiki.html">Docs</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="wiki.html">Docs</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<section class="tech-hero">
+  <h1>Community</h1>
+  <p>Contributing guide, changelog and roadmap, project governance, and future ideas.</p>
+</section>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">Community</div>
+      <a href="#contributing-guide">Contributing Guide</a>
+<a href="#changelog-and-roadmap">Changelog and Roadmap</a>
+<a href="#project-governance-and-community">Project Governance and Community</a>
+<a href="#future-ideas">Future Ideas</a>
+      <a href="wiki.html" style="margin-top:8px;color:var(--accent)">&larr; All docs</a>
+    </div>
+  </aside>
+  <main class="tech-content">
+    <section id="contributing-guide"><h2 id="contributing-guide">Contributing Guide</h2>
+<p>Thank you for your interest in contributing to Mosaic! This guide covers everything you need to know to get started — from setting up your development environment to submitting a pull request.</p>
+<hr>
+<h3 id="code-of-conduct">Code of Conduct</h3>
+<p>This project is committed to providing a welcoming, inclusive experience for everyone. By participating, you agree to:</p>
+<ul>
+<li>Use welcoming and inclusive language</li>
+<li>Be respectful of differing viewpoints and experiences</li>
+<li>Accept constructive criticism gracefully</li>
+<li>Focus on what's best for the community</li>
+<li>Show empathy towards other community members</li>
+</ul>
+<hr>
+<h3 id="how-to-contribute">How to Contribute</h3>
+<h4 id="1-report-bugs">1. Report Bugs</h4>
+<p>Open an <a href="https://github.com/versus184-py/Mosaic/issues">issue</a> with the <code>bug</code> label. Include:</p>
+<ul>
+<li><strong>Operating system and version</strong> (e.g., Windows 11, macOS 14.3)</li>
+<li><strong>Mosaic version</strong> (from package.json or the About screen)</li>
+<li><strong>Steps to reproduce</strong> — be as specific as possible</li>
+<li><strong>Expected behavior</strong> — what should happen</li>
+<li><strong>Actual behavior</strong> — what actually happens</li>
+<li><strong>Screenshots</strong> (if applicable)</li>
+<li><strong>Console logs</strong> (press F12 → Console tab)</li>
+</ul>
+<h4 id="2-suggest-features">2. Suggest Features</h4>
+<p>Open an <a href="https://github.com/versus184-py/Mosaic/issues">issue</a> with the <code>feature</code> label. Include:</p>
+<ul>
+<li><strong>Problem</strong>: What problem does this feature solve?</li>
+<li><strong>Solution</strong>: How would you like it to work?</li>
+<li><strong>Alternatives</strong>: What other approaches have you considered?</li>
+<li><strong>Mockups</strong>: Screenshots or wireframes (if applicable)</li>
+</ul>
+<h4 id="3-submit-code-changes">3. Submit Code Changes</h4>
+<p>See the <a href="#pull-request-process">Pull Request Process</a> section below.</p>
+<h4 id="4-improve-documentation">4. Improve Documentation</h4>
+<p>Documentation improvements — fixing typos, clarifying instructions, adding examples — are always welcome. This wiki is a great place to start.</p>
+<h4 id="5-share-screenshots">5. Share Screenshots</h4>
+<p>Help fill the <a href="https://github.com/versus184-py/Mosaic#gallery">gallery</a> by sharing screenshots of Mosaic in use. Drop them in a GitHub issue.</p>
+<hr>
+<h3 id="development-setup">Development Setup</h3>
+<h4 id="prerequisites">Prerequisites</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Tool</th><th>Version</th><th>Installation</th></tr></thead>
+<tbody>
+<tr><td>Node.js</td><td>18+</td><td><a href="https://nodejs.org/">nodejs.org</a></td></tr>
+<tr><td>Rust</td><td>Latest stable</td><td><a href="https://rustup.rs/">rustup.rs</a></td></tr>
+<tr><td>Git</td><td>Latest</td><td><a href="https://git-scm.com/">git-scm.com</a></td></tr>
+</tbody>
+</table></div>
+<h4 id="recommended-tools">Recommended Tools</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>VS Code</td><td>Primary IDE with TypeScript support</td></tr>
+<tr><td>ESLint</td><td>Code linting (configured via tsconfig strict mode)</td></tr>
+<tr><td>React DevTools</td><td>Component inspection and profiling</td></tr>
+<tr><td>Tauri DevTools</td><td>Native window debugging</td></tr>
+</tbody>
+</table></div>
+<hr>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Tool</th><th>Version</th><th>Installation</th></tr></thead>
+<tbody>
+<tr><td>Node.js</td><td>18+</td><td><a href="https://nodejs.org/">nodejs.org</a></td></tr>
+<tr><td>Rust</td><td>Latest stable</td><td><a href="https://rustup.rs/">rustup.rs</a></td></tr>
+<tr><td>Git</td><td>Latest</td><td><a href="https://git-scm.com/">git-scm.com</a></td></tr>
+</tbody>
+</table></div>
+<h4 id="step-by-step-setup">Step-by-Step Setup</h4>
+<pre><code class="language-bash"># 1. Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/Mosaic.git
+cd Mosaic
+
+# 2. Add upstream remote
+git remote add upstream https://github.com/versus184-py/Mosaic.git
+
+# 3. Install dependencies
+npm install
+
+# 4. Start development mode
+npm run tauri:dev</code></pre>
+<h4 id="verify-your-setup">Verify Your Setup</h4>
+<pre><code class="language-bash"># TypeScript check (should pass with no errors)
+npx tsc --noEmit
+
+# Build (should complete without errors)
+npm run build</code></pre>
+<hr>
+<h3 id="coding-conventions">Coding Conventions</h3>
+<h4 id="typescript-react">TypeScript & React</h4>
+<ul>
+<li><strong>TypeScript strict mode</strong>: Enabled in <code>tsconfig.json</code>. Use strict types everywhere</li>
+<li><strong>Functional components</strong>: All React components are functional (no class components except ErrorBoundary)</li>
+<li><strong>Named exports</strong>: Use named exports for components and functions</li>
+<li><strong>No default exports</strong>: Prefer named exports for better IDE support and tree shaking</li>
+</ul>
+<h4 id="state-management">State Management</h4>
+<ul>
+<li><strong>Zustand stores</strong>: All state management uses Zustand v5</li>
+</ul>
+<p>  - State and actions co-located in a single file</p>
+<p>  - Strong typing for all state and actions</p>
+<p>  - Persistence middleware for data that should survive restarts</p>
+<ul>
+<li><strong>No prop drilling</strong>: Use stores or hooks for shared state</li>
+<li><strong>Local state</strong>: Use <code>useState</code> for truly local component state</li>
+</ul>
+<h4 id="react-flow">React Flow</h4>
+<ul>
+<li>Custom nodes extend <code>NodeProps</code></li>
+<li>Custom edges extend <code>EdgeProps</code></li>
+<li>Node data is typed via <code>NodeData</code> interface</li>
+<li>Edge data is typed via <code>EdgeData</code> interface</li>
+</ul>
+<h4 id="css-styling">CSS & Styling</h4>
+<ul>
+<li><strong>Tailwind CSS</strong>: Use utility classes for styling</li>
+<li><strong>Glass UI</strong>: Create glass-themed components in <code>src/components/glass/</code></li>
+<li><strong>Theme variables</strong>: Use CSS custom properties from the theme system</li>
+<li><strong>No inline styles</strong>: Except for dynamic values (positions, animations)</li>
+</ul>
+<h4 id="file-organization">File Organization</h4>
+<pre><code>src/
+  api/          # LLM provider integrations
+  components/
+    canvas/     # React Flow nodes and edges
+    glass/      # Glass UI component library
+    modals/     # Modal dialogs
+    ui/         # All other UI components
+  hooks/        # Custom React hooks
+  liquid-glass/ # Physics engine
+  store/        # Zustand stores
+  styles/       # CSS (globals.css)
+  types/        # TypeScript definitions
+  utils/        # Utility functions
+  workers/      # Web Workers</code></pre>
+<h4 id="naming-conventions">Naming Conventions</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Entity</th><th>Convention</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>Components</td><td>PascalCase</td><td><code>MessageNode</code>, <code>GlassCard</code></td></tr>
+<tr><td>Hooks</td><td>camelCase with <code>use</code> prefix</td><td><code>useStreamMessage</code></td></tr>
+<tr><td>Stores</td><td>camelCase with <code>Store</code> suffix</td><td><code>canvasStore</code>, <code>uiStore</code></td></tr>
+<tr><td>Files</td><td>camelCase</td><td><code>codeRunner.ts</code>, <code>useStreamMessage.ts</code></td></tr>
+<tr><td>Types/Interfaces</td><td>PascalCase</td><td><code>NodeData</code>, <code>CanvasStats</code></td></tr>
+<tr><td>Functions</td><td>camelCase</td><td><code>sendMessage</code>, <code>getConversationPath</code></td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="pull-request-process">Pull Request Process</h3>
+<h4 id="step-1-create-a-branch">Step 1: Create a Branch</h4>
+<pre><code class="language-bash">git checkout -b feature/my-feature-name</code></pre>
+<p>Branch naming:</p>
+<ul>
+<li><code>feature/</code> — new features</li>
+<li><code>fix/</code> — bug fixes</li>
+<li><code>docs/</code> — documentation</li>
+<li><code>refactor/</code> — code refactoring</li>
+<li><code>chore/</code> — build, CI, dependencies</li>
+</ul>
+<h4 id="step-2-make-changes">Step 2: Make Changes</h4>
+<ul>
+<li>Write clean, type-safe TypeScript</li>
+<li>Follow existing code patterns</li>
+<li>Update documentation if needed</li>
+<li>Test your changes manually</li>
+</ul>
+<h4 id="step-3-run-checks">Step 3: Run Checks</h4>
+<pre><code class="language-bash"># TypeScript check
+npx tsc --noEmit
+
+# Tests
+npx vitest run
+
+# Build
+npm run build</code></pre>
+<h4 id="step-4-commit">Step 4: Commit</h4>
+<pre><code class="language-bash">git add .
+git commit -m "feat: add my feature"</code></pre>
+<p>Commit message format (Conventional Commits):</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Prefix</th><th>Usage</th></tr></thead>
+<tbody>
+<tr><td><code>feat:</code></td><td>New feature</td></tr>
+<tr><td><code>fix:</code></td><td>Bug fix</td></tr>
+<tr><td><code>docs:</code></td><td>Documentation</td></tr>
+<tr><td><code>refactor:</code></td><td>Code restructuring</td></tr>
+<tr><td><code>chore:</code></td><td>Build/config changes</td></tr>
+<tr><td><code>style:</code></td><td>Formatting (no logic change)</td></tr>
+<tr><td><code>test:</code></td><td>Adding/updating tests</td></tr>
+</tbody>
+</table></div>
+<h4 id="step-5-push-and-open-pr">Step 5: Push and Open PR</h4>
+<pre><code class="language-bash">git push origin feature/my-feature-name</code></pre>
+<p>Then open a pull request on GitHub against the <code>main</code> branch.</p>
+<h4 id="step-6-pr-review">Step 6: PR Review</h4>
+<ul>
+<li>Maintainers will review your PR</li>
+<li>Address any feedback with additional commits</li>
+<li>Once approved, a maintainer will merge your PR</li>
+</ul>
+<h4 id="pr-checklist">PR Checklist</h4>
+<p>Before submitting, verify:</p>
+<ul>
+<li>[ ] TypeScript check passes (<code>tsc --noEmit</code>)</li>
+<li>[ ] Tests pass (<code>vitest run</code>)</li>
+<li>[ ] Build succeeds (<code>npm run build</code>)</li>
+<li>[ ] No lint warnings in the console</li>
+<li>[ ] Code follows existing conventions</li>
+<li>[ ] Documentation is updated (if needed)</li>
+<li>[ ] Commits use conventional commit format</li>
+<li>[ ] Branch is based on latest <code>main</code></li>
+</ul>
+<h4 id="code-review-guidelines">Code Review Guidelines</h4>
+<p>When reviewing PRs, focus on:</p>
+<ol>
+<li><strong>Correctness</strong>: Does the code do what it claims?</li>
+<li><strong>Type safety</strong>: Are there any <code>any</code> types or unsafe casts?</li>
+<li><strong>Performance</strong>: Are there unnecessary re-renders or expensive operations?</li>
+<li><strong>Error handling</strong>: Are error states properly handled?</li>
+<li><strong>Edge cases</strong>: What happens with empty data, null values, or unexpected input?</li>
+<li><strong>Security</strong>: Could this introduce XSS, data leaks, or sandbox escapes?</li>
+<li><strong>Testing</strong>: Are there tests for the new functionality?</li>
+<li><strong>Documentation</strong>: Are changes reflected in the wiki or JSDoc comments?</li>
+</ol>
+<h4 id="debugging-tips">Debugging Tips</h4>
+<h4 id="react-component-debugging">React Component Debugging</h4>
+<pre><code class="language-typescript">// 1. Use React DevTools to inspect component tree and state
+// 2. Add temporary console.log to trace component re-renders:
+console.log('MessageNode render', id, data.label.slice(0, 50));
+
+// 3. Use React.memo with custom comparison:
+React.memo(MyComponent, (prev, next) =&gt; {
+  return deepEqual(prev.data, next.data);
+});
+
+// 4. Profile with React Profiler
+import { Profiler } from 'react';
+&lt;Profiler id="Canvas" onRender={(id, phase, actualDuration) =&gt; {
+  console.log(`${id} ${phase}: ${actualDuration}ms`);
+}}&gt;
+  &lt;MosaicCanvas /&gt;
+&lt;/Profiler&gt;</code></pre>
+<h4 id="zustand-store-debugging">Zustand Store Debugging</h4>
+<pre><code class="language-typescript">// Subscribe to all store changes
+canvasStore.subscribe((state) =&gt; {
+  console.log('canvasStore changed:', {
+    nodes: state.nodes.length,
+    edges: state.edges.length,
+    activeNodeId: state.activeNodeId,
+  });
+});
+
+// Middleware for logging
+import { devtools } from 'zustand/middleware';
+const useStore = create(
+  devtools(storeDefinition, { name: 'MyStore' })
+);</code></pre>
+<h4 id="tauri-debugging">Tauri Debugging</h4>
+<pre><code class="language-bash"># Run with verbose logging
+RUST_LOG=debug npm run tauri:dev
+
+# Check Rust compiler warnings
+cargo build 2&gt;&amp;1 | grep warning
+
+# Inspect webview console
+# Right-click → Inspect Element (dev mode only)</code></pre>
+<h4 id="performance-profiling">Performance Profiling</h4>
+<pre><code class="language-bash"># 1. React Profiler (in React DevTools)
+# 2. Chrome DevTools Performance tab (Tauri dev mode)
+# 3. Check for unnecessary re-renders:
+npx why-did-you-render --include "MessageNode"
+
+# 4. Monitor localStorage size
+console.log(
+  JSON.stringify(localStorage).length,
+  'bytes used'
+);
+
+# 5. Track component render counts
+const renderCount = useRef(0);
+renderCount.current++;
+console.log(`${componentName} render #${renderCount.current}`);</code></pre>
+<hr>
+<h3 id="testing">Testing</h3>
+<p>Mosaic uses <strong>Vitest</strong> for unit testing with 191 tests across 11 test files.</p>
+<h4 id="test-file-location">Test File Location</h4>
+<p>Tests should be placed alongside the code they test:</p>
+<pre><code>src/utils/__tests__/validation.test.ts
+src/hooks/__tests__/useStreamMessage.test.ts</code></pre>
+<h4 id="running-tests">Running Tests</h4>
+<pre><code class="language-bash"># Run all tests
+npx vitest run
+
+# Run tests with watcher
+npx vitest
+
+# Run with coverage
+npx vitest run --coverage</code></pre>
+<h4 id="what-to-test">What to Test</h4>
+<ul>
+<li>Utility functions (validation, encryption, deep clone)</li>
+<li>Store actions (especially state transformations)</li>
+<li>Provider-related logic (streaming, error handling)</li>
+<li>React components (rendering, user interactions)</li>
+<li>Hook behavior (streaming, document parsing, Ollama detection)</li>
+</ul>
+<h4 id="existing-test-coverage">Existing Test Coverage</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>File</th><th>Tests</th></tr></thead>
+<tbody>
+<tr><td><code>src/api/<strong>tests</strong>/config.test.ts</code></td><td>API key storage, provider routing, model config</td></tr>
+<tr><td><code>src/api/<strong>tests</strong>/ollama.test.ts</code></td><td>Ollama URL management</td></tr>
+<tr><td><code>src/api/<strong>tests</strong>/providers.test.ts</code></td><td>Embedding fallback chain</td></tr>
+<tr><td><code>src/components/<strong>tests</strong>/SettingsDrawer.test.tsx</code></td><td>Settings drawer rendering and interaction</td></tr>
+<tr><td><code>src/components/<strong>tests</strong>/TopBar.test.tsx</code></td><td>Top bar, model dropdown, model switching</td></tr>
+<tr><td><code>src/hooks/<strong>tests</strong>/useDocumentParser.test.ts</code></td><td>Chunk algorithm (boundary detection, overlap, unicode)</td></tr>
+<tr><td><code>src/store/<strong>tests</strong>/canvasStore.test.ts</code></td><td>Node CRUD, cascade, undo, bookmarks, conversation paths</td></tr>
+<tr><td><code>src/store/<strong>tests</strong>/ragStore.test.ts</code></td><td>Document limits, search (TF-IDF + embeddings)</td></tr>
+<tr><td><code>src/store/<strong>tests</strong>/uiStore.test.ts</code></td><td>Theme, model selection, Ollama state, all 5 providers</td></tr>
+<tr><td><code>src/utils/<strong>tests</strong>/layout.test.ts</code></td><td>Radial positioning, tree layout, deep clone</td></tr>
+<tr><td><code>src/utils/<strong>tests</strong>/validation.test.ts</code></td><td>All validation edge cases</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="project-architecture">Project Architecture</h3>
+<p>Understanding the architecture is essential for making meaningful contributions:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Area</th><th>Key Files</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>State</td><td><code>src/store/*.ts</code></td><td>7 Zustand stores</td></tr>
+<tr><td>Canvas</td><td><code>src/components/canvas/*.tsx</code></td><td>React Flow nodes/edges</td></tr>
+<tr><td>API</td><td><code>src/api/*.ts</code></td><td>LLM provider integrations</td></tr>
+<tr><td>Hooks</td><td><code>src/hooks/*.ts</code></td><td>Custom React hooks for features</td></tr>
+<tr><td>Glass UI</td><td><code>src/liquid-glass/*.ts</code></td><td>Physics-based glass rendering</td></tr>
+<tr><td>Code exec</td><td><code>src/workers/codeWorker.ts</code></td><td>Sandboxed code execution</td></tr>
+<tr><td>Validation</td><td><code>src/utils/validation.ts</code></td><td>Data validation utilities</td></tr>
+<tr><td>Themes</td><td><code>src/styles/globals.css</code></td><td>CSS custom properties for 5 themes</td></tr>
+</tbody>
+</table></div>
+<p>See the <a href="architecture.html#overall-architecture-and-data-flow">Overall Architecture and Data Flow</a> page for a complete walkthrough.</p>
+<hr>
+<h3 id="getting-help">Getting Help</h3>
+<ul>
+<li><strong>GitHub Issues</strong>: For bugs, features, and questions</li>
+<li><strong>Code/Documentation</strong>: Read the source and wiki</li>
+<li><strong>Existing PRs</strong>: See what others are working on</li>
+</ul>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="community.html#changelog-and-roadmap">Changelog and Roadmap</a> — What's been done and what's planned</li>
+<li><a href="community.html#project-governance-and-community">Project Governance and Community</a> — Project maintainers and community guidelines</li>
+<li><a href="architecture.html#overall-architecture-and-data-flow">Overall Architecture and Data Flow</a> — Understand how the pieces fit together</li>
+</ul>
+</section>
+<section id="changelog-and-roadmap"><h2 id="changelog-and-roadmap">Changelog and Roadmap</h2>
+<hr>
+<h3 id="changelog">Changelog</h3>
+<h4 id="v0-3-0-multi-provider-ai-semantic-search-cross-platform-builds-test-suite">v0.3.0 — Multi-Provider AI, Semantic Search, Cross-Platform Builds & Test Suite</h4>
+<p><strong>Release date</strong>: June 26, 2026</p>
+<h4 id="new-features">New Features</h4>
+<ul>
+<li><strong>Multi-provider AI</strong> — Five LLM providers with full streaming support:</li>
+</ul>
+<p>  - <strong>OpenAI</strong> — GPT-4o and GPT-4o Mini via streaming completions and embeddings</p>
+<p>  - <strong>Anthropic</strong> — Claude Sonnet 4 and Claude Haiku 3.5 via SSE streaming</p>
+<p>  - <strong>Gemini</strong> — Gemini 2.5 Pro and Gemini 2.5 Flash with API key in query parameter</p>
+<p>  - <strong>Ollama</strong> — Local model support with auto-detection, dynamic model listing from <code>/api/tags</code>, and embedding via <code>nomic-embed-text</code></p>
+<ul>
+<li><strong>Semantic search (RAG v2)</strong> — Document chunks are embedded at upload time using the first available embedder. Embeddings stored alongside chunks. Queries are embedded at search time for semantic similarity matching. Falls back to TF-IDF when no embedder is available.</li>
+<li><strong>Embedding provider priority</strong>: Ollama → Mistral → OpenAI → Gemini (Anthropic skipped — no embeddings API)</li>
+<li><strong>Model selector</strong> — Provider-grouped dropdown with colored indicators (blue → Mistral, green → OpenAI, orange → Anthropic, yellow → Gemini, purple → Ollama)</li>
+<li><strong>Settings drawer</strong> — Per-provider API key inputs with encrypted localStorage storage, Ollama connection panel with URL input and live status indicator, system instruction textarea (4000 char limit)</li>
+<li><strong>Ollama auto-detection</strong> — <code>useOllamaDetect</code> hook polls <code>/api/tags</code> on startup</li>
+<li><strong>Streaming architecture</strong> — All providers use <code>AsyncGenerator<string></code> pattern via <code>yield*</code> delegation</li>
+</ul>
+<h4 id="testing">Testing</h4>
+<ul>
+<li>191 automated tests across 11 test files</li>
+<li>API layer: config (XOR encrypt/decrypt, cache, provider resolution), provider routing, Ollama URL management</li>
+<li>Stores: ragStore (vector search, limit boundaries), uiStore (all 5 providers, theme class, persistence), canvasStore (cascade, undo stack, bookmarks, conversation path)</li>
+<li>Utilities: validation (all edge cases), layout (radial positioning, deep clone, tree layout)</li>
+<li>Components: SettingsDrawer and TopBar with user-event interaction</li>
+<li>Hooks: chunkText algorithm (boundary detection, overlap, unicode)</li>
+<li>Canvas mock for jsdom compatibility</li>
+</ul>
+<h4 id="platform-ci-cd">Platform & CI/CD</h4>
+<ul>
+<li>CI/CD via GitHub Actions: <code>ubuntu-latest</code> for type-check + test + build</li>
+<li>Release workflow: matrix build for <code>windows-latest</code>, <code>macos-latest</code>, <code>ubuntu-latest</code> with <code>fail-fast: false</code></li>
+<li>Artifacts: <code>.msi</code> + NSIS <code>.exe</code> (Windows), <code>.dmg</code> (macOS), <code>.AppImage</code> (Linux)</li>
+<li>Assets uploaded via <code>softprops/action-gh-release@v2</code></li>
+</ul>
+<h4 id="other">Other</h4>
+<ul>
+<li>MIT License added</li>
+<li>Removed CSP meta tag from <code>index.html</code> (CSP lives only in Tauri config)</li>
+<li>Fixed <code>tauri.conf.json</code> schema URL to official <code>tauri-apps/tauri</code> repo</li>
+<li>Replaced <code>any</code> types with proper TypeScript types across store and API layers</li>
+<li><code>ProviderId</code> union type (<code>"mistral" | "openai" | "anthropic" | "gemini" | "ollama"</code>)</li>
+<li><code>streamProvider</code> now uses <code>AsyncGenerator</code> pattern with <code>yield*</code> delegation</li>
+<li><code>embedTexts</code> returns <code>null</code> (never throws) when all providers fail</li>
+</ul>
+<hr>
+<h4 id="v0-2-0-glass-ui-confidence-scoring-tendrils-distillation-more">v0.2.0 — Glass UI, Confidence Scoring, Tendrils, Distillation & More</h4>
+<p><strong>Release date</strong>: June 26, 2026</p>
+<h4 id="new-features">New Features</h4>
+<ul>
+<li><strong>Glass UI system</strong> — Physics-based refractive glass components:</li>
+</ul>
+<p>  - Lens — SVG displacement map refraction</p>
+<p>  - GlassCard — Universal glass container with lens/standard modes</p>
+<p>  - FluidSlider — Spring-animated slider</p>
+<p>  - TactileSwitch — Spring-animated toggle</p>
+<p>  - SegmentControl — Segmented button group with lens highlight</p>
+<p>  - DragLens — Floating draggable lens overlay</p>
+<p>  - GlassEffectContainer — Shared backdrop context</p>
+<ul>
+<li><strong>Confidence scoring</strong> — AI auto-scores responses (0-100) after each completion</li>
+<li><strong>Suggestion tendrils</strong> — Auto-generated follow-up suggestions that appear after AI responses, auto-dismiss after 30s</li>
+<li><strong>Branch distillation</strong> — Summarize entire conversation branches into a single synthesis node with gold DistillEdge connections</li>
+<li><strong>Branch pruning</strong> — AI-driven relevance scoring against user-provided goal; dims low-scoring branches</li>
+<li><strong>Parallel debate</strong> — Run responses from multiple models simultaneously on the same input with fan-out layout</li>
+<li><strong>Validation utilities</strong> — <code>validateNodeData</code>, <code>validateImportedCanvas</code>, <code>validateCanvasData</code>, <code>validateRagDocs</code>, <code>validateUIState</code></li>
+<li><strong>Undo history</strong> — Now captures add/remove/clear operations (previously only position changes)</li>
+<li><strong>New edge types</strong>:</li>
+</ul>
+<p>  - DistillEdge — Gold dashed edge for distillation connections</p>
+<p>  - TendrilEdge — Dotted edge for suggestion connections</p>
+<h4 id="ui-ux">UI/UX</h4>
+<ul>
+<li>Floating draggable lens overlay on canvas (DragLens)</li>
+<li>Spring-animated FluidSlider and TactileSwitch components</li>
+<li>Prune banner with restore-all button</li>
+<li>Confidence badges on response nodes</li>
+<li>Pruned node dimming (reduced opacity)</li>
+<li>Search highlights on matched nodes</li>
+<li>Settings drawer:</li>
+</ul>
+<p>  - Confidence scoring toggle</p>
+<p>  - Tendrils toggle</p>
+<p>  - Improved API key UX (masked inputs)</p>
+<ul>
+<li>Zoom controls now use FluidSlider</li>
+</ul>
+<h4 id="security">Security</h4>
+<ul>
+<li>Sandboxed JS execution with complete network blocking</li>
+<li>Pyodide fetch restricted to allowlisted CDN hosts:</li>
+</ul>
+<p>  - <code>cdn.jsdelivr.net</code></p>
+<p>  - <code>pyodide-cdn2.iodide.io</code></p>
+<p>  - <code>files.pythonhosted.org</code></p>
+<ul>
+<li>Pip installs limited to allowlist (15 packages):</li>
+</ul>
+<p>  numpy, pandas, scipy, matplotlib, sympy, requests, beautifulsoup4, lxml, Pillow, markdown, jinja2, pyyaml, toml, colorama, tqdm</p>
+<ul>
+<li>CSP enforced at Tauri level (was previously null)</li>
+<li>Integrity checks on Pyodide module load</li>
+<li>Imported canvas data validated before use</li>
+</ul>
+<h4 id="fixes">Fixes</h4>
+<ul>
+<li>Added <code>deepClone</code> utility with <code>structuredClone</code> fallback for undo snapshots</li>
+<li><code>analyticsStore</code>: type fixes in <code>computeNodeStats</code>, data validation on localStorage load</li>
+<li><code>canvasManagerStore</code>: validate canvas data on load, reset invalid data</li>
+<li><code>ragStore</code>: enforce document count (50) and total size (50 MB) limits</li>
+<li><code>codeWorker</code>: strict sandboxed globals with blocked APIs (fetch, XHR, WebSocket, Worker, localStorage, etc.)</li>
+</ul>
+<hr>
+<h4 id="v0-1-0-initial-beta-release">v0.1.0 — Initial Beta Release</h4>
+<p><strong>Release date</strong>: TBD</p>
+<h4 id="features">Features</h4>
+<ul>
+<li>Infinite spatial canvas using React Flow (@xyflow/react v12)</li>
+<li>Conversation branching — fork from any message, explore paths in parallel</li>
+<li>Mistral AI integration — streaming responses, configurable temperature, model selection</li>
+<li>5 glass UI themes: Void, Dusk, Sand, Snow, Sunrise</li>
+<li>Inline code execution:</li>
+</ul>
+<p>  - JavaScript via sandboxed Web Worker</p>
+<p>  - Python via Pyodide (WASM)</p>
+<ul>
+<li>RAG from uploaded documents — automatic chunking and TF-IDF cosine similarity search</li>
+<li>Multi-canvas tabs — create, rename, duplicate, switch canvases</li>
+<li>Export/import canvases as JSON</li>
+<li>Analytics tracking — token usage, cost, node counts, branching stats</li>
+<li>Minimap, full-text search, bookmarks, node collapsing</li>
+<li>Keyboard shortcuts — Ctrl+N, Ctrl+F, Ctrl+Z, zoom, fit, delete</li>
+<li>Onboarding hints for new users</li>
+<li>Undo support for node positions</li>
+</ul>
+<hr>
+<h3 id="roadmap">Roadmap</h3>
+<h4 id="short-term-next-release">Short Term (Next Release)</h4>
+<ul>
+<li>[ ] <strong>macOS / Linux builds</strong> — Provide prebuilt binaries for all platforms</li>
+<li>[ ] <strong>OpenAI, Anthropic, Gemini integration</strong> — Support beyond Mistral (in progress)</li>
+<li>[ ] <strong>Improved RAG chunking</strong> — Smarter chunk boundaries (paragraph-aware, code-aware)</li>
+<li>[ ] <strong>Better RAG embeddings</strong> — Improved embedding pipeline with caching</li>
+</ul>
+<h4 id="medium-term">Medium Term</h4>
+<ul>
+<li>[ ] <strong>Visual branching indicators</strong> — Better visual distinction between branches</li>
+<li>[ ] <strong>Node grouping and labels</strong> — Group related nodes with custom labels</li>
+<li>[ ] <strong>Performance optimizations</strong> — Handle larger canvases (500+ nodes) smoothly</li>
+<li>[ ] <strong>Custom provider endpoints</strong> — Allow users to configure arbitrary API endpoints</li>
+<li>[ ] <strong>Search improvements</strong> — Regex search, search filters, saved searches</li>
+</ul>
+<h4 id="medium-term">Medium Term</h4>
+<ul>
+<li>[ ] <strong>Visual branching indicators</strong> — Better visual distinction between branches</li>
+<li>[ ] <strong>Node grouping and labels</strong> — Group related nodes with custom labels and colors</li>
+<li>[ ] <strong>Performance optimizations</strong> — Handle larger canvases (500+ nodes) smoothly with virtual scrolling and lazy loading</li>
+<li>[ ] <strong>Custom provider endpoints</strong> — Allow users to configure arbitrary API endpoints with custom auth</li>
+<li>[ ] <strong>Search improvements</strong> — Regex search, search filters, saved searches, search within specific branches</li>
+<li>[ ] <strong>Canvas templates</strong> — Pre-built prompt templates and canvas layouts for common workflows</li>
+<li>[ ] <strong>Code execution improvements</strong> — More allowlisted packages, larger timeout option, multi-file support</li>
+<li>[ ] <strong>RAG enhancements</strong> — Smarter chunk boundaries (paragraph-aware, code-aware), hybrid search (TF-IDF + embeddings)</li>
+</ul>
+<h4 id="long-term">Long Term</h4>
+<ul>
+<li>[ ] <strong>Collaborative canvases</strong> — Real-time multi-user collaboration with cursor presence, comments, and conflict resolution. Users working on the same canvas would see each other's cursors, nodes would sync in real-time via WebSocket or WebRTC, and changes would be merged using CRDT (Conflict-free Replicated Data Types) for offline support.</li>
+<li>[ ] <strong>Plugin system</strong> — Third-party extensions for providers, tools, UI components, and canvas integrations. Plugin API would allow registering custom node types, provider integrations, toolbar buttons, and context menu items. Plugins could be distributed as npm packages or loaded from URLs.</li>
+<li>[ ] <strong>Local model support</strong> — Full integration with llama.cpp, GPT4All, Ollama, and other local inference engines. Beyond basic chat completion, this would include embedding generation, function calling, and structured output support.</li>
+<li>[ ] <strong>Mobile companion</strong> — View and interact with canvases on mobile devices. Sync via local network or cloud storage. Optimized touch interactions for canvas navigation and node manipulation.</li>
+<li>[ ] <strong>Version history</strong> — Per-canvas version history with diffs, branching, and rollback. Git-like commit model with author attribution and merge capabilities. Visual diff view showing what changed between versions.</li>
+<li>[ ] <strong>Tauri v2 commands</strong> — Native file I/O, system notifications, deep links, system tray integration, and custom title bar. Move beyond localStorage for data persistence — use SQLite or file-based storage for larger datasets and better performance.</li>
+<li>[ ] <strong>AI-powered features</strong> — Automatic conversation summarization, smart suggestions based on canvas context, automatic branch naming, semantic canvas search, AI-assisted node organization and layout.</li>
+</ul>
+<hr>
+<h3 id="feature-status">Feature Status</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Feature</th><th>v0.1.0</th><th>v0.2.0</th><th>v0.3.0</th><th>Next</th><th>Future</th></tr></thead>
+<tbody>
+<tr><td>Spatial canvas</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Conversation branching</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Mistral AI integration</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Multi-provider (OpenAI, Anthropic, Gemini, Ollama)</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Semantic search (embeddings)</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Inline code execution (JS + Python)</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>RAG from documents</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Multi-canvas tabs</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Export/Import</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Analytics</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Keyboard shortcuts</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>5 themes</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Undo history</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Glass UI system</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Confidence scoring</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Suggestion tendrils</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Branch distillation</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Branch pruning</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Parallel debate</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Security hardening</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Test suite (191 tests)</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>CI/CD pipeline</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Cross-platform builds</td><td>—</td><td>—</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Collaborative canvases</td><td>—</td><td>—</td><td>—</td><td>—</td><td>🔄</td></tr>
+<tr><td>Node grouping</td><td>—</td><td>—</td><td>—</td><td>🔄</td><td>—</td></tr>
+<tr><td>Plugin system</td><td>—</td><td>—</td><td>—</td><td>—</td><td>🔄</td></tr>
+</tbody>
+</table></div>
+<p>✅ = Complete | 🔄 = In progress/planned</p>
+<hr>
+<h4 id="completed-in-v0-3-0">Completed in v0.3.0</h4>
+<p>The following features from the previous roadmap were delivered in v0.3.0:</p>
+<p><strong>New Providers</strong> ✅</p>
+<ul>
+<li>[x] Full OpenAI integration (GPT-4o, GPT-4o-mini)</li>
+<li>[x] Anthropic integration (Claude Sonnet 4, Haiku 3.5)</li>
+<li>[x] Gemini integration (2.5 Pro, 2.5 Flash)</li>
+<li>[x] Ollama integration (auto-detect, local models)</li>
+<li>[x] Provider router with fallback chain</li>
+</ul>
+<p><strong>RAG Improvements</strong> ✅</p>
+<ul>
+<li>[x] Embedding-based semantic search (hybrid TF-IDF + embeddings)</li>
+<li>[x] Embedding provider priority chain (Ollama → Mistral → OpenAI → Gemini)</li>
+<li>[x] Embeddings computed at upload time and stored alongside chunks</li>
+</ul>
+<p><strong>Platform & Testing</strong> ✅</p>
+<ul>
+<li>[x] Cross-platform builds: Windows (.msi + .exe), macOS (.dmg), Linux (.AppImage)</li>
+<li>[x] CI/CD pipeline (GitHub Actions: type-check, test, build)</li>
+<li>[x] 191 automated tests across 11 test files</li>
+<li>[x] MIT License added</li>
+</ul>
+<h4 id="planned-v0-4-0">Planned v0.4.0</h4>
+<p><strong>UI/UX</strong></p>
+<ul>
+<li>[ ] Visual branching indicators (colored edge highlights per branch)</li>
+<li>[ ] Node grouping with custom labels and colors</li>
+<li>[ ] Improved canvas performance for 500+ nodes</li>
+<li>[ ] Custom provider endpoint configuration</li>
+</ul>
+<p><strong>Developer Experience</strong></p>
+<ul>
+<li>[ ] Tauri v2 commands for native file I/O</li>
+<li>[ ] File-based persistence (optional, beyond localStorage)</li>
+<li>[ ] Canvas templates and starter packs</li>
+<li>[ ] Export to Markdown/PDF</li>
+</ul>
+<h4 id="future-major-features">Future Major Features</h4>
+<p><strong>v1.0.0 Milestone</strong></p>
+<ul>
+<li>Stable API and data format</li>
+<li>All 5 providers fully integrated and tested</li>
+<li>Cross-platform support (Windows, macOS, Linux)</li>
+<li>Comprehensive test coverage</li>
+<li>Security audit completed</li>
+</ul>
+<p><strong>Beyond v1.0.0</strong></p>
+<ul>
+<li>Real-time collaborative canvases (WebSocket sync)</li>
+<li>Plugin system for third-party extensions</li>
+<li>Mobile companion app (view and share canvases)</li>
+<li>Version history with diff and rollback</li>
+<li>AI-powered canvas organization (auto-grouping, smart naming)</li>
+</ul>
+<hr>
+<h3 id="how-to-influence-the-roadmap">How to Influence the Roadmap</h3>
+<p>The roadmap is driven by user feedback. If you'd like to see a feature prioritized:</p>
+<ol>
+<li><strong>Upvote existing issues</strong>: Add a 👍 reaction to GitHub issues you care about</li>
+<li><strong>Create new issues</strong>: Suggest features with clear use cases</li>
+<li><strong>Contribute</strong>: Submit a pull request implementing a feature</li>
+<li><strong>Share feedback</strong>: Tell us what's working and what's not</li>
+</ol>
+<p>See the <a href="community.html#contributing-guide">Contributing Guide</a> for details.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="community.html#contributing-guide">Contributing Guide</a> — Help build the features on this roadmap</li>
+<li><a href="community.html#project-governance-and-community">Project Governance and Community</a> — Learn about project leadership</li>
+<li><a href="getting-started.html#installation-guide">Installation Guide</a> — Get started with the latest release</li>
+</ul>
+</section>
+<section id="project-governance-and-community"><h2 id="project-governance-and-community">Project Governance and Community</h2>
+<hr>
+<h3 id="license">License</h3>
+<p>Mosaic is released under the <strong>MIT License</strong>. This is a permissive open-source license that allows you to use, modify, distribute, and sublicense the software with minimal restrictions.</p>
+<h4 id="key-points">Key Points</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td><strong>License</strong></td><td>MIT</td></tr>
+<tr><td><strong>Copyright</strong></td><td>Copyright (c) 2025 versus184-py</td></tr>
+<tr><td><strong>Commercial use</strong></td><td>✅ Allowed</td></tr>
+<tr><td><strong>Modification</strong></td><td>✅ Allowed</td></tr>
+<tr><td><strong>Distribution</strong></td><td>✅ Allowed</td></tr>
+<tr><td><strong>Sublicensing</strong></td><td>✅ Allowed</td></tr>
+<tr><td><strong>Liability</strong></td><td>❌ No liability</td></tr>
+<tr><td><strong>Warranty</strong></td><td>❌ No warranty</td></tr>
+</tbody>
+</table></div>
+<h4 id="full-license-text">Full License Text</h4>
+<pre><code>MIT License
+
+Copyright (c) 2025 versus184-py
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</code></pre>
+<hr>
+<h3 id="third-party-licenses">Third-Party Licenses</h3>
+<p>Mosaic uses several open-source libraries. Below are their licenses:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Library</th><th>License</th><th>Usage</th></tr></thead>
+<tbody>
+<tr><td>React 19</td><td>MIT</td><td>UI framework</td></tr>
+<tr><td>Tauri v2</td><td>MIT / Apache 2.0</td><td>Desktop shell</td></tr>
+<tr><td>React Flow (@xyflow/react)</td><td>MIT</td><td>Canvas/graph</td></tr>
+<tr><td>Framer Motion</td><td>MIT</td><td>Animations</td></tr>
+<tr><td>Tailwind CSS</td><td>MIT</td><td>Styling</td></tr>
+<tr><td>Zustand</td><td>MIT</td><td>State management</td></tr>
+<tr><td>Pyodide</td><td>MPL-2.0</td><td>Python in browser</td></tr>
+<tr><td>Vite</td><td>MIT</td><td>Bundler</td></tr>
+<tr><td>react-markdown</td><td>MIT</td><td>Markdown rendering</td></tr>
+<tr><td>remark-gfm</td><td>MIT</td><td>GitHub Flavored Markdown</td></tr>
+</tbody>
+</table></div>
+<p>Each library is used in accordance with its license terms. The combined work is distributed under the MIT License.</p>
+<hr>
+<h3 id="project-maintainers">Project Maintainers</h3>
+<p>Mosaic is currently maintained by:</p>
+<ul>
+<li><strong>versus184-py</strong> — Creator and primary maintainer</li>
+</ul>
+<h4 id="maintainer-responsibilities">Maintainer Responsibilities</h4>
+<ul>
+<li>Reviewing and merging pull requests</li>
+<li>Managing issues and feature requests</li>
+<li>Planning releases and roadmap</li>
+<li>Ensuring code quality and project direction</li>
+<li>Community moderation</li>
+</ul>
+<h4 id="becoming-a-maintainer">Becoming a Maintainer</h4>
+<p>Active contributors who demonstrate:</p>
+<ul>
+<li>Consistent, high-quality contributions</li>
+<li>Deep understanding of the codebase</li>
+<li>Helpful and constructive community participation</li>
+<li>Reliability and responsiveness</li>
+</ul>
+<p>May be invited to become a maintainer. Express interest by contacting the current maintainer via GitHub.</p>
+<hr>
+<h3 id="community-guidelines">Community Guidelines</h3>
+<h4 id="communication-channels">Communication Channels</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Channel</th><th>Purpose</th><th>Link</th></tr></thead>
+<tbody>
+<tr><td>GitHub Issues</td><td>Bug reports, feature requests, questions</td><td><a href="https://github.com/versus184-py/Mosaic/issues">Issues</a></td></tr>
+<tr><td>GitHub Discussions</td><td>General discussion, ideas, help</td><td><a href="https://github.com/versus184-py/Mosaic/discussions">Discussions</a></td></tr>
+<tr><td>Pull Requests</td><td>Code contributions</td><td><a href="https://github.com/versus184-py/Mosaic/pulls">PRs</a></td></tr>
+</tbody>
+</table></div>
+<h4 id="expected-behavior">Expected Behavior</h4>
+<ul>
+<li><strong>Be respectful</strong>: Disagreement is fine, personal attacks are not</li>
+<li><strong>Be constructive</strong>: Criticism should be specific and actionable</li>
+<li><strong>Be patient</strong>: Maintainers and contributors have other commitments</li>
+<li><strong>Be helpful</strong>: Answer questions when you can</li>
+<li><strong>Be inclusive</strong>: Welcome newcomers and diverse perspectives</li>
+</ul>
+<h4 id="unacceptable-behavior">Unacceptable Behavior</h4>
+<ul>
+<li>Harassment, intimidation, or discrimination</li>
+<li>Trolling, insulting, or derogatory comments</li>
+<li>Spam or off-topic content</li>
+<li>Publishing others' private information</li>
+<li>Any other conduct that would be inappropriate in a professional setting</li>
+</ul>
+<hr>
+<h3 id="how-to-get-help">How to Get Help</h3>
+<h4 id="before-asking">Before Asking</h4>
+<ol>
+<li><strong>Search the wiki</strong>: Many questions are answered here</li>
+<li><strong>Search GitHub Issues</strong>: Check if someone else had the same problem</li>
+<li><strong>Search GitHub Discussions</strong>: Community discussions may have solutions</li>
+</ol>
+<h4 id="asking-questions">Asking Questions</h4>
+<p>If you can't find an answer:</p>
+<ol>
+<li>Open a <strong>GitHub Discussion</strong> for general questions</li>
+<li>Open a <strong>GitHub Issue</strong> for bug reports or feature requests</li>
+<li>Provide as much context as possible:</li>
+</ol>
+<p>   - What you're trying to do</p>
+<p>   - What you've tried</p>
+<p>   - What happened (error messages, screenshots)</p>
+<p>   - Your environment (OS, Mosaic version)</p>
+<hr>
+<h3 id="supporting-mosaic">Supporting Mosaic</h3>
+<h4 id="ways-to-support">Ways to Support</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Method</th><th>How to Help</th></tr></thead>
+<tbody>
+<tr><td><strong>Star the repo</strong></td><td>★ on GitHub — helps with visibility</td></tr>
+<tr><td><strong>Report bugs</strong></td><td>Open detailed bug reports</td></tr>
+<tr><td><strong>Suggest features</strong></td><td>Open feature requests with use cases</td></tr>
+<tr><td><strong>Contribute code</strong></td><td>Submit pull requests</td></tr>
+<tr><td><strong>Improve docs</strong></td><td>Fix typos, clarify instructions, add examples</td></tr>
+<tr><td><strong>Share screenshots</strong></td><td>Help build the gallery</td></tr>
+<tr><td><strong>Spread the word</strong></td><td>Tell others about Mosaic</td></tr>
+</tbody>
+</table></div>
+<h4 id="financial-support">Financial Support</h4>
+<p>There is currently no financial support mechanism (no donations, sponsorships, or paid features). If this changes, it will be announced in the repository.</p>
+<hr>
+<h3 id="versioning-and-stability">Versioning and Stability</h3>
+<p>Mosaic is currently in <strong>beta</strong> (v0.x.x). While we strive for stability, the API and data format may change between minor versions.</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Phase</th><th>Version</th><th>Stability</th></tr></thead>
+<tbody>
+<tr><td>Beta</td><td>0.1.x - 0.9.x</td><td>Breaking changes possible</td></tr>
+<tr><td>Stable</td><td>1.0.0+</td><td>Backward compatible</td></tr>
+</tbody>
+</table></div>
+<h4 id="data-migration">Data Migration</h4>
+<p>Canvas data is stored in localStorage and may need migration between versions. Mosaic includes validation utilities that detect incompatible data and reset to defaults when necessary. Always export important canvases before updating.</p>
+<hr>
+<h3 id="frequently-asked-community-questions">Frequently Asked Community Questions</h3>
+<p><strong>Q: How do I request a new feature?</strong></p>
+<p>A: Open a GitHub issue with the <code>feature</code> label. Describe the problem you're trying to solve, not just your proposed solution. Include use cases and examples.</p>
+<p><strong>Q: Can I use Mosaic for commercial purposes?</strong></p>
+<p>A: Yes. The MIT license allows commercial use, modification, and distribution. You can use Mosaic for your business, build on top of it, or embed it in commercial products.</p>
+<p><strong>Q: I found a security issue. What should I do?</strong></p>
+<p>A: Open a GitHub issue with the <code>security</code> label. Do not publicly disclose the vulnerability until it has been addressed.</p>
+<p><strong>Q: How long does it take for PRs to be reviewed?</strong></p>
+<p>A: PRs are reviewed on a best-effort basis. Small, focused PRs with clear descriptions are reviewed fastest. If you haven't heard back in 2 weeks, feel free to ping the thread.</p>
+<p><strong>Q: Can I become a maintainer?</strong></p>
+<p>A: Maintainers are invited based on sustained, high-quality contributions. If you're interested, start by contributing regularly and engaging constructively in discussions.</p>
+<p><strong>Q: Is there a roadmap I can follow?</strong></p>
+<p>A: Yes — see the <a href="community.html#changelog-and-roadmap">Changelog and Roadmap</a> page for planned features and priorities.</p>
+<hr>
+<h3 id="project-vision">Project Vision</h3>
+<p>Mosaic was created with a specific vision: <strong>AI conversations should be non-linear and deeply interactive.</strong> The traditional chat interface — a linear string of alternating messages — is a poor fit for how humans actually think and explore ideas. We explore, backtrack, branch, compare, and synthesize. A spatial canvas is the natural medium for this kind of thinking.</p>
+<h4 id="core-design-principles">Core Design Principles</h4>
+<ol>
+<li><strong>Spatial first</strong>: The canvas is the primary interface, not an afterthought. Every interaction is designed around spatial thinking.</li>
+<li><strong>Security by design</strong>: Code execution, data storage, and network access are sandboxed by default. The user should never have to worry that a conversation could compromise their system.</li>
+<li><strong>Local first</strong>: Your data belongs to you. All data is stored locally unless you explicitly connect to external services. No telemetry, no cloud dependency.</li>
+<li><strong>Provider agnostic</strong>: Mosaic should work with any AI provider. The provider system is designed to be extensible — adding a new provider requires implementing just two functions.</li>
+<li><strong>Interactive by default</strong>: Code blocks have run buttons, responses have confidence scores, suggestions appear automatically. The app is designed for active exploration, not passive consumption.</li>
+</ol>
+<h4 id="what-makes-mosaic-different">What Makes Mosaic Different</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Aspect</th><th>Traditional Chat</th><th>Mosaic</th></tr></thead>
+<tbody>
+<tr><td>Conversation shape</td><td>Linear (line)</td><td>Tree/branching (spatial)</td></tr>
+<tr><td>Code interaction</td><td>Read-only text</td><td>Run inline, see output</td></tr>
+<tr><td>Document usage</td><td>Manual copy-paste</td><td>Automatic RAG context injection</td></tr>
+<tr><td>Multi-model</td><td>One at a time</td><td>Parallel debate across models</td></tr>
+<tr><td>Spatial organization</td><td>None</td><td>Drag, arrange, zoom, collapse</td></tr>
+<tr><td>Statefulness</td><td>One session</td><td>Multiple canvases with tabs</td></tr>
+<tr><td>Confidence</td><td>None</td><td>AI self-scores responses</td></tr>
+<tr><td>Suggestions</td><td>Users think of them</td><td>AI generates tendrils</td></tr>
+</tbody>
+</table></div>
+<h3 id="acknowledgements">Acknowledgements</h3>
+<p>Mosaic was built with the support of these amazing open-source projects:</p>
+<ul>
+<li><strong><a href="https://tauri.app/">Tauri</a></strong> — For providing a lightweight, secure desktop shell that makes cross-platform development a joy</li>
+<li><strong><a href="https://react.dev/">React</a></strong> — For the component model and ecosystem that enables complex UIs to remain maintainable</li>
+<li><strong><a href="https://xyflow.com/">React Flow</a></strong> — For the powerful node-based canvas that made the spatial interface possible</li>
+<li><strong><a href="https://mistral.ai/">Mistral AI</a></strong> — For their excellent API and models that power the default AI experience</li>
+<li><strong><a href="https://pyodide.org/">Pyodide</a></strong> — For bringing Python to the browser, enabling inline code execution without a backend</li>
+<li><strong><a href="https://github.com/pmndrs/zustand">Zustand</a></strong> — For simple and powerful state management with minimal boilerplate</li>
+<li><strong><a href="https://tailwindcss.com/">Tailwind CSS</a></strong> — For rapid UI development and consistent styling</li>
+<li><strong><a href="https://www.framer.com/motion/">Framer Motion</a></strong> — For smooth, declarative animations that make the UI feel alive</li>
+<li><strong><a href="https://vitejs.dev/">Vite</a></strong> — For fast, modern frontend tooling</li>
+<li><strong><a href="https://tauri.app/">Tauri CLI</a></strong> — For the build tools and bundler</li>
+</ul>
+<p>And all the contributors who have reported bugs, suggested features, and submitted code — thank you!</p>
+<h4 id="dependencies">Dependencies</h4>
+<p>Mosaic distributes these third-party libraries in its build:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Library</th><th>License</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>React</td><td>MIT</td><td>UI framework</td></tr>
+<tr><td>React DOM</td><td>MIT</td><td>DOM renderer</td></tr>
+<tr><td>@xyflow/react</td><td>MIT</td><td>React Flow canvas</td></tr>
+<tr><td>framer-motion</td><td>MIT</td><td>Animations</td></tr>
+<tr><td>react-markdown</td><td>MIT</td><td>Markdown rendering</td></tr>
+<tr><td>remark-gfm</td><td>MIT</td><td>GitHub Flavored Markdown</td></tr>
+<tr><td>zustand</td><td>MIT</td><td>State management</td></tr>
+<tr><td>Tauri</td><td>MIT/Apache 2.0</td><td>Desktop shell</td></tr>
+<tr><td>Pyodide</td><td>MPL-2.0</td><td>Python WASM runtime</td></tr>
+</tbody>
+</table></div>
+<p>Each library is used in compliance with its license terms.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="community.html#contributing-guide">Contributing Guide</a> — Start contributing</li>
+<li><a href="community.html#changelog-and-roadmap">Changelog and Roadmap</a> — See what's coming</li>
+<li><a href="getting-started.html#installation-guide">Installation Guide</a> — Get started with Mosaic</li>
+</ul>
+</section>
+<section id="future-ideas"><h2 id="future-ideas">Future Ideas</h2>
+<p>This page is a <strong>brainstorming collection</strong> of ideas that could extend Mosaic. These are not commitments — they're possibilities to inspire contributors and spark discussion. Ideas range from small quality-of-life tweaks to major architectural changes.</p>
+<p>Feel free to open a <a href="https://github.com/versus184-py/Mosaic/issues">GitHub issue</a> if any of these excite you, or add your own ideas!</p>
+<hr>
+<h3 id="canvas-ux">Canvas & UX</h3>
+<h4 id="split-view-canvas-comparison">Split-view canvas comparison</h4>
+<p>Side-by-side mode to compare two canvases or two branches visually, with synchronized scrolling and diff highlighting.</p>
+<h4 id="node-templates">Node templates</h4>
+<p>Save a node's system prompt, temperature, and model as a reusable template. "New node from template" option in the context menu.</p>
+<h4 id="mini-map-interactions">Mini-map interactions</h4>
+<p>Click on the mini-map to jump to that location. Drag the mini-map viewport to pan the canvas.</p>
+<h4 id="canvas-backgrounds">Canvas backgrounds</h4>
+<p>Custom background images or colors per canvas. Useful for visual organization (e.g., green background for "done", yellow for "in progress").</p>
+<h4 id="node-colors-and-labels">Node colors and labels</h4>
+<p>User-assignable colors and custom labels on nodes for visual categorization. Filter by color or label.</p>
+<h4 id="edge-labels">Edge labels</h4>
+<p>Small text labels on edges to describe the relationship (e.g., "refines", "critiques", "expands on").</p>
+<h4 id="collapse-all-expand-all">Collapse all / Expand all</h4>
+<p>One-click buttons to collapse or expand every branch on the canvas simultaneously.</p>
+<h4 id="auto-save-with-version-history">Auto-save with version history</h4>
+<p>Save snapshots of the canvas at regular intervals, with the ability to browse and restore previous versions.</p>
+<h4 id="canvas-health-dashboard">Canvas health dashboard</h4>
+<p>A panel showing canvas size, node count, token usage, and warnings (e.g., "This canvas has 300 nodes — consider splitting").</p>
+<h4 id="drag-and-drop-nodes-between-canvases">Drag-and-drop nodes between canvases</h4>
+<p>Drag a node from one canvas tab to another to copy or move it between conversations.</p>
+<h4 id="node-grouping-with-containers">Node grouping with containers</h4>
+<p>Visual containers (boxes with titles) that group related nodes together. Collapse/expand the entire group.</p>
+<h4 id="undo-redo-for-all-actions">Undo/redo for all actions</h4>
+<p>Expand undo to cover text edits, bookmark toggles, collapse state changes — not just position changes.</p>
+<h4 id="focus-mode">"Focus mode"</h4>
+<p>Temporarily dim everything except the active branch, reducing visual noise.</p>
+<hr>
+<h3 id="ai-providers">AI & Providers</h3>
+<h4 id="local-llm-runner">Local LLM runner</h4>
+<p>Bundle a lightweight local LLM (like Llama 3.2 1B via WASM or Tauri sidecar) so Mosaic works fully offline without any API key.</p>
+<h4 id="multi-step-agentic-loops">Multi-step agentic loops</h4>
+<p>The AI autonomously runs code, reads the output, and continues refining without user intervention — useful for data analysis tasks.</p>
+<h4 id="ai-canvas-summarization">AI canvas summarization</h4>
+<p>An AI-generated summary of the entire canvas or a specific branch, displayed as a sticky note overlay.</p>
+<h4 id="auto-branch-naming">Auto-branch naming</h4>
+<p>Let the AI suggest names for each branch based on its content, displayed as a small label on the branch's first node.</p>
+<h4 id="chat-history-export-with-metadata">Chat history export with metadata</h4>
+<p>Export conversations as Markdown, HTML, or PDF with timestamps, model info, and confidence scores.</p>
+<h4 id="tool-function-calling">Tool/function calling</h4>
+<p>Let the AI call external tools (web search, calculator, code execution) as part of its response. Structured tool definitions.</p>
+<h4 id="ai-persona-library">AI persona library</h4>
+<p>Pre-built system prompts for common personas (tutor, code reviewer, creative writer, debate opponent) that users can browse and apply.</p>
+<h4 id="custom-model-parameters">Custom model parameters</h4>
+<p>Expose advanced parameters: top-p, top-k, frequency penalty, presence penalty, stop sequences, response format (JSON mode).</p>
+<h4 id="prompt-variable-injection">Prompt variable injection</h4>
+<p>Use <code>{{variable}}</code> syntax in system prompts that get replaced with canvas metadata (node count, total tokens, date, etc.).</p>
+<h4 id="multi-modal-support">Multi-modal support</h4>
+<p>Image input/output, audio transcription, file generation — leveraging provider vision and audio APIs.</p>
+<h4 id="response-temperature-fading">Response temperature fading</h4>
+<p>Gradually decrease temperature across a branch so early responses are creative and later ones converge to a refined answer.</p>
+<hr>
+<h3 id="code-execution">Code Execution</h3>
+<h4 id="output-visualization">Output visualization</h4>
+<p>Auto-detect chart generation (matplotlib, plotly) and render it inline as an image, not just text output.</p>
+<h4 id="multi-file-code-projects">Multi-file code projects</h4>
+<p>Let users create small code projects with multiple files. Run, test, and share them within a node.</p>
+<h4 id="interactive-widgets">Interactive widgets</h4>
+<p>Render simple UI widgets (sliders, buttons, text inputs) from code output that can modify variables and re-execute.</p>
+<h4 id="persistent-file-system">Persistent file system</h4>
+<p>A virtual in-memory file system within the code sandbox so files written in one execution persist to the next.</p>
+<h4 id="wasm-plugin-execution">WASM plugin execution</h4>
+<p>Allow running any WebAssembly module, not just Pyodide — Rust, C, Go compiled to WASM.</p>
+<h4 id="code-block-sharing">Code block sharing</h4>
+<p>A "share this code" button that creates a permalink to a gist or pastebin with the code and output.</p>
+<h4 id="package-explorer">Package explorer</h4>
+<p>Browse available packages within the sandbox, search for specific functions, and see documentation without leaving Mosaic.</p>
+<h4 id="live-code-collaboration">Live code collaboration</h4>
+<p>Multiple users editing the same code block simultaneously (Operational Transform / CRDT).</p>
+<h4 id="sql-execution">SQL execution</h4>
+<p>Built-in SQLite in WASM for querying CSV/JSON data with SQL directly in chat.</p>
+<h4 id="shell-command-execution">Shell command execution</h4>
+<p>A sandboxed shell (like WebContainers) for running shell commands, npm install, git operations — all in WASM.</p>
+<hr>
+<h3 id="rag-knowledge">RAG & Knowledge</h3>
+<h4 id="web-page-ingestion">Web page ingestion</h4>
+<p>Paste a URL and have Mosaic fetch, parse, and chunk the web page content for RAG — no manual save-and-upload needed.</p>
+<h4 id="image-ocr-for-pdf">Image OCR for PDF</h4>
+<p>Extract text from scanned PDFs and images using OCR (tesseract in WASM or via provider vision API).</p>
+<h4 id="multi-turn-rag-conversation">Multi-turn RAG conversation</h4>
+<p>Remember which chunks were used in previous turns and avoid repeating them. Track conversation context with document references.</p>
+<h4 id="rag-source-citation-per-sentence">RAG source citation per sentence</h4>
+<p>When the AI uses RAG context, highlight which source document and chunk each sentence came from.</p>
+<h4 id="automated-document-tagging">Automated document tagging</h4>
+<p>AI-generated tags for uploaded documents (e.g., "technical", "finance", "code") for better organization.</p>
+<h4 id="rag-knowledge-graph">RAG knowledge graph</h4>
+<p>Build a graph of concepts extracted from documents, showing relationships between ideas across documents.</p>
+<h4 id="document-q-a-history">Document Q&A history</h4>
+<p>Show previous questions and answers for each document, so users can see what insights have already been extracted.</p>
+<h4 id="hybrid-search-ranking">Hybrid search ranking</h4>
+<p>Combine keyword (BM25/TF-IDF) and semantic (embedding) scores with configurable weights.</p>
+<h4 id="chunk-overlap-visualization">Chunk overlap visualization</h4>
+<p>Show how chunks overlap in the original document, with the ability to adjust chunk size and overlap interactively.</p>
+<h4 id="incremental-re-indexing">Incremental re-indexing</h4>
+<p>When a document is updated, only re-index the changed chunks instead of the entire document.</p>
+<hr>
+<h3 id="collaboration">Collaboration</h3>
+<h4 id="real-time-collaborative-canvases">Real-time collaborative canvases</h4>
+<p>Multiple users editing the same canvas simultaneously with cursor presence, using CRDTs or WebSocket sync.</p>
+<h4 id="canvas-sharing-via-link">Canvas sharing via link</h4>
+<p>Generate a read-only or editable link to a canvas. Hosted via a lightweight sync server or peer-to-peer.</p>
+<h4 id="comments-and-annotations">Comments and annotations</h4>
+<p>Add comments to specific nodes. Threaded discussions on individual messages.</p>
+<h4 id="branch-merge-requests">Branch merge requests</h4>
+<p>Propose merging one branch into another, with a diff view and approval workflow.</p>
+<h4 id="public-canvas-gallery">Public canvas gallery</h4>
+<p>A place to share and discover interesting canvases — templates, research trees, learning paths.</p>
+<h4 id="change-history-with-author-attribution">Change history with author attribution</h4>
+<p>See who changed what and when on collaborative canvases.</p>
+<h4 id="canvas-embedding">Canvas embedding</h4>
+<p>Embed a read-only canvas view in a web page or blog post.</p>
+<h4 id="mentions-and-notifications">@mentions and notifications</h4>
+<p>Tag other users in comments or nodes. Get notified when someone replies or mentions you.</p>
+<hr>
+<h3 id="platform-integration">Platform & Integration</h3>
+<h4 id="web-version-pwa">Web version (PWA)</h4>
+<p>A Progressive Web App version that runs in the browser without Tauri, with localStorage persistence and optional cloud sync.</p>
+<h4 id="mobile-app">Mobile app</h4>
+<p>Touch-optimized mobile interface for viewing canvases, reading conversations, and basic branching.</p>
+<h4 id="vscode-extension">VSCode extension</h4>
+<p>Open Mosaic canvases from within VS Code. Use selection context to automatically populate questions.</p>
+<h4 id="obsidian-plugin">Obsidian plugin</h4>
+<p>Import/export canvases to/from Obsidian. Link notes to conversation nodes.</p>
+<h4 id="slack-discord-integration">Slack/Discord integration</h4>
+<p>Share nodes or entire branches to Slack or Discord channels.</p>
+<h4 id="github-integration">GitHub integration</h4>
+<p>Link commits, PRs, and issues to conversation nodes. AI-assisted code review with context from related canvases.</p>
+<h4 id="cli-tool">CLI tool</h4>
+<p>A command-line interface for exporting, searching, and managing canvases from the terminal.</p>
+<h4 id="system-tray-integration">System tray integration</h4>
+<p>Minimize to system tray with quick-access menu for recent canvases and new chat.</p>
+<h4 id="global-search-across-canvases">Global search (across canvases)</h4>
+<p>Search across all canvases simultaneously, not just the current one.</p>
+<h4 id="auto-tagging-and-categorization">Auto-tagging and categorization</h4>
+<p>AI tags canvases based on content for automatic organization. Filter canvas list by tag.</p>
+<h4 id="desktop-notifications">Desktop notifications</h4>
+<p>Get notified when a streaming response completes, or when a long code execution finishes.</p>
+<hr>
+<h3 id="data-analytics">Data & Analytics</h3>
+<h4 id="export-analytics-dashboard">Export analytics dashboard</h4>
+<p>See total token usage, cost, and model distribution across all canvases over time.</p>
+<h4 id="canvas-insights">Canvas insights</h4>
+<p>AI-generated insights about your canvas: "You branch most frequently from Mistral Large responses", "Your average branch depth is 4.2 nodes".</p>
+<h4 id="token-budget-alerts">Token budget alerts</h4>
+<p>Set a daily/weekly token budget and get warned when approaching it.</p>
+<h4 id="visual-conversation-flow">Visual conversation flow</h4>
+<p>Export a visual graph (PNG/SVG) of the canvas, suitable for presentations or documentation.</p>
+<h4 id="data-export-in-multiple-formats">Data export in multiple formats</h4>
+<p>Export canvas data as JSON, Markdown, HTML, CSV (flat node list), or OPML (outline format).</p>
+<h4 id="canvas-statistics-history">Canvas statistics history</h4>
+<p>Track how canvas size, depth, and branch count change over time.</p>
+<h4 id="response-time-tracking">Response time tracking</h4>
+<p>Log how long each provider takes to respond and surface performance trends.</p>
+<hr>
+<h3 id="quality-of-life">Quality of Life</h3>
+<h4 id="sound-effects">Sound effects</h4>
+<p>Subtle audio cues for stream completion, errors, and new suggestions. Respects <code>prefers-reduced-motion</code>.</p>
+<h4 id="reading-mode">Reading mode</h4>
+<p>A clean, print-friendly view of a branch or entire canvas, stripping away UI chrome.</p>
+<h4 id="auto-scroll-during-streaming">Auto-scroll during streaming</h4>
+<p>Automatically scroll to keep the currently streaming node in view.</p>
+<h4 id="drag-to-reorder-nodes">Drag-to-reorder nodes</h4>
+<p>Drag a node to change its position in the conversation order (not just spatial position).</p>
+<h4 id="custom-css">Custom CSS</h4>
+<p>Let power users inject custom CSS to personalize the appearance beyond the built-in themes.</p>
+<h4 id="built-in-tutorial-overlay">Built-in tutorial overlay</h4>
+<p>An interactive walkthrough that highlights UI elements and explains features step by step.</p>
+<h4 id="keyboard-shortcut-customization">Keyboard shortcut customization</h4>
+<p>Let users remap keyboard shortcuts to their preference.</p>
+<h4 id="workspaces">Workspaces</h4>
+<p>Group canvases into workspaces (e.g., "Work", "Personal", "Research") with independent settings and themes.</p>
+<h4 id="snooze-feature">Snooze feature</h4>
+<p>Mark a canvas as "snoozed" — it disappears from the main view but can be unsnoozed later.</p>
+<h4 id="pin-important-canvases">Pin important canvases</h4>
+<p>Pin frequently used canvases to the top of the tab bar.</p>
+<h4 id="search-filters">Search filters</h4>
+<p>Filter search by node type, date range, bookmarked status, or provider.</p>
+<hr>
+<h3 id="experimental-wild-ideas">Experimental / Wild Ideas</h3>
+<h4 id="canvas-as-code">Canvas as code</h4>
+<p>Save canvases as a declarative format (YAML/TOML) that can be version-controlled, diffed, and reconstructed.</p>
+<h4 id="llm-voting-system">LLM voting system</h4>
+<p>When multiple models respond, let users vote on which answer is best. Aggregate votes across canvases to rank models by task type.</p>
+<h4 id="conversation-time-travel">Conversation time travel</h4>
+<p>A slider that shows the canvas state at different points in time — scrub forward and backward through the conversation.</p>
+<h4 id="markov-chain-node-prediction">Markov chain node prediction</h4>
+<p>Predict which nodes the user is likely to click next based on their history. Pre-fetch the AI response for instant display.</p>
+<h4 id="reinforcement-learning-from-canvas-interactions">Reinforcement learning from canvas interactions</h4>
+<p>Learn which follow-up suggestions users actually click and improve suggestion quality over time.</p>
+<h4 id="branch-probability-heatmap">Branch probability heatmap</h4>
+<p>Visual overlay showing which branches were most explored, most collapsed, or most bookmarked.</p>
+<h4 id="turing-test-mode">Turing test mode</h4>
+<p>Hide which AI model generated a response and let the user guess — a gamified way to compare providers.</p>
+<h4 id="canvas-generated-from-meeting-transcripts">Canvas generated from meeting transcripts</h4>
+<p>Upload a meeting transcript and have Mosaic automatically build a conversation tree from the discussion flow.</p>
+<h4 id="dreaming-mode">Dreaming mode</h4>
+<p>Let the AI wander autonomously — generate chains of self-directed thought across the canvas, branching on its own curiosities.</p>
+<h4 id="thought-spiral-visualization">Thought spiral visualization</h4>
+<p>Render the canvas as a 3D spiral or radial tree with WebGL, with smooth camera fly-throughs.</p>
+<hr>
+<h3 id="how-to-contribute-an-idea">How to Contribute an Idea</h3>
+<ol>
+<li><strong>Check the existing issues</strong> on <a href="https://github.com/versus184-py/Mosaic/issues">GitHub Issues</a> to avoid duplicates</li>
+<li><strong>Open a new issue</strong> with the <code>idea</code> label</li>
+<li><strong>Describe the idea</strong>: What problem does it solve? How might it work? What would it look like?</li>
+<li><strong>Discuss and refine</strong>: Engage with the community to shape the idea</li>
+</ol>
+<p>The best ideas come with use cases — describing a real problem you've encountered makes it much more compelling.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="community.html#changelog-and-roadmap">Changelog and Roadmap</a> — What's actually planned for upcoming releases</li>
+<li><a href="community.html#contributing-guide">Contributing Guide</a> — How to help implement these ideas</li>
+<li><a href="getting-started.html#home">Home</a> — Back to the wiki home</li>
+</ul>
+</section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking (category pages)
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+<script>
+// Node background
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
+</html>

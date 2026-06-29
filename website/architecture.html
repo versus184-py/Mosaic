@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic documentation — Architecture — Documentation">
+<meta property="og:title" content="Mosaic — Architecture — Documentation">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — Architecture — Documentation</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="wiki.html">Docs</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="wiki.html">Docs</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<section class="tech-hero">
+  <h1>Architecture</h1>
+  <p>Deep dives into overall data flow, the Liquid Glass physics engine, code sandbox, provider protocol, and state management.</p>
+</section>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">Architecture</div>
+      <a href="#overall-architecture-and-data-flow">Overall Architecture and Data Flow</a>
+<a href="#liquid-glass-physics-engine">Liquid-Glass Physics Engine</a>
+<a href="#code-sandbox-architecture">Code Sandbox Architecture</a>
+<a href="#provider-protocol-and-streaming">Provider Protocol and Streaming</a>
+<a href="#state-management-and-persistence">State Management and Persistence</a>
+      <a href="wiki.html" style="margin-top:8px;color:var(--accent)">&larr; All docs</a>
+    </div>
+  </aside>
+  <main class="tech-content">
+    <section id="overall-architecture-and-data-flow"><h2 id="overall-architecture-and-data-flow">Overall Architecture and Data Flow</h2>
+<p>This page provides a comprehensive overview of Mosaic's architecture — how the pieces fit together, how data flows through the system, and the design decisions behind the architecture.</p>
+<hr>
+<h3 id="technology-stack">Technology Stack</h3>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│                      Tauri v2 Shell                      │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │              WebView (Frontend)                    │  │
+│  │  ┌───────────┐ ┌──────────┐ ┌────────────────┐   │  │
+│  │  │   React 19 │ │  React   │ │   Zustand v5    │   │  │
+│  │  │  + TypeScript│ │  Flow    │ │   (7 stores)    │   │  │
+│  │  │           │ │  v12     │ │                │   │  │
+│  │  └───────────┘ └──────────┘ └────────────────┘   │  │
+│  │  ┌───────────┐ ┌──────────┐ ┌────────────────┐   │  │
+│  │  │  Framer   │ │  Tailwind│ │   Glass UI      │   │  │
+│  │  │  Motion   │ │  CSS v3  │ │   Engine        │   │  │
+│  │  └───────────┘ └──────────┘ └────────────────┘   │  │
+│  │  ┌───────────────────────────────────────────┐    │  │
+│  │  │   Web Worker (Code Sandbox)               │    │  │
+│  │  │   - JavaScript via Function()             │    │  │
+│  │  │   - Python via Pyodide (WASM)             │    │  │
+│  │  └───────────────────────────────────────────┘    │  │
+│  └───────────────────────────────────────────────────┘  │
+│                                                         │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │              Rust Backend (lib.rs)                 │  │
+│  │              - Minimal Tauri shell                 │  │
+│  │              - No custom commands                  │  │
+│  │              - CSP enforcement                     │  │
+│  └───────────────────────────────────────────────────┘  │
+│                                                         │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │              localStorage (Persistence)            │  │
+│  │   mosaic-canvases, mosaic-canvas-data-*,           │  │
+│  │   mosaic-ui, mosaic-analytics, mosaic-rag          │  │
+│  └───────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘</code></pre>
+<h4 id="why-tauri">Why Tauri?</h4>
+<p>Mosaic uses <strong>Tauri v2</strong> instead of Electron for several reasons:</p>
+<ul>
+<li><strong>Smaller binary</strong>: Tauri apps are typically 5-10 MB vs. 100+ MB for Electron</li>
+<li><strong>Lower memory usage</strong>: Rust backend uses minimal resources</li>
+<li><strong>Security</strong>: Native CSP enforcement, capability-based permissions</li>
+<li><strong>Performance</strong>: Rust provides native-level performance for the shell</li>
+<li><strong>Cross-platform</strong>: Builds for Windows, macOS, and Linux</li>
+</ul>
+<p>The Rust backend is intentionally minimal — it launches the webview and enforces security. All application logic runs in the frontend.</p>
+<h4 id="detailed-tauri-backend-analysis">Detailed Tauri Backend Analysis</h4>
+<p>The Rust backend consists of just two files:</p>
+<p><strong><code>src-tauri/src/lib.rs</code></strong>:</p>
+<pre><code class="language-rust">use tauri::Builder;
+
+pub fn run() {
+    Builder::default()
+        .invoke_handler(tauri::generate_handler![])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}</code></pre>
+<p><strong><code>src-tauri/src/main.rs</code></strong>:</p>
+<pre><code class="language-rust">#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+fn main() {
+    mosaic_lib::run();
+}</code></pre>
+<p>That's the entire Rust backend. The <code>windows<em>subsystem = "windows"</code> attribute (only in release builds) prevents a console window from appearing on Windows. The build script (<code>build.rs</code>) calls <code>tauri</em>build::build()</code> to compile the frontend and bundle the application.</p>
+<p><strong>Why this matters</strong>:</p>
+<ul>
+<li>No IPC overhead — all communication between UI and data happens in-process in the webview</li>
+<li>No serialization boundaries — Zustand stores are directly accessible from React components</li>
+<li>Easier debugging — all logic is in JavaScript/TypeScript, debuggable with browser devtools</li>
+<li>Faster iteration — frontend changes don't require Rust recompilation (seconds vs. minutes)</li>
+</ul>
+<h4 id="performance-profile">Performance Profile</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Operation</th><th>Tauri</th><th>Electron</th></tr></thead>
+<tbody>
+<tr><td>Cold start</td><td>~500ms</td><td>~2000ms</td></tr>
+<tr><td>Memory (idle)</td><td>~80 MB</td><td>~200 MB</td></tr>
+<tr><td>Installer size</td><td>~8 MB</td><td>~120 MB</td></tr>
+<tr><td>Canvas rendering (100 nodes)</td><td>60fps</td><td>60fps</td></tr>
+<tr><td>Worker isolation</td><td>Native Web Worker</td><td>Native Web Worker</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h4 id="build-pipeline">Build Pipeline</h4>
+<pre><code>npm run tauri:dev
+│
+├── Vite dev server (port 1420)
+│   ├── HMR (hot module replacement)
+│   ├── TypeScript compilation (esbuild)
+│   ├── CSS processing (PostCSS + Tailwind)
+│   └── React Fast Refresh
+│
+└── Tauri window
+    ├── Connected to Vite dev server
+    ├── DevTools enabled
+    └── CSP enforced
+
+npm run tauri:build
+│
+├── tsc --noEmit (TypeScript type checking)
+├── vite build
+│   ├── Code splitting (@xyflow/react → flow chunk)
+│   ├── Tree shaking
+│   ├── Minification (esbuild/terser)
+│   ├── CSS purging (Tailwind)
+│   └── Asset hashing
+│
+└── cargo build (Rust)
+    └── tauri bundle
+        ├── Windows: .msi (WiX installer)
+        ├── macOS: .dmg
+        └── Linux: .AppImage</code></pre>
+<hr>
+<h4 id="cross-platform-considerations">Cross-Platform Considerations</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Component</th><th>Windows</th><th>macOS</th><th>Linux</th></tr></thead>
+<tbody>
+<tr><td>Webview</td><td>WebView2 (Edge Chromium)</td><td>WKWebView (Safari)</td><td>WebKitGTK</td></tr>
+<tr><td>Window manager</td><td>Win32</td><td>Cocoa</td><td>X11/Wayland</td></tr>
+<tr><td>Installer</td><td>WiX (.msi)</td><td>DMG (.dmg)</td><td>AppImage/.deb</td></tr>
+<tr><td>Icons</td><td>.ico</td><td>.icns</td><td>.png</td></tr>
+<tr><td>CSP</td><td>Full support</td><td>Full support</td><td>Full support</td></tr>
+<tr><td>Web Worker</td><td>Full support</td><td>Full support</td><td>Full support</td></tr>
+<tr><td>Web Speech API</td><td>✅</td><td>✅</td><td>❌ (WebKitGTK)</td></tr>
+<tr><td>Pyodide</td><td>✅ (requires WASM)</td><td>✅</td><td>✅</td></tr>
+</tbody>
+</table></div>
+<p>The Web Speech API is limited on Linux (WebKitGTK doesn't support it), so the speech-to-text mic button will not appear on Linux.</p>
+<hr>
+<h3 id="directory-structure">Directory Structure</h3>
+<pre><code>mosaic/
+├── src/                          # Frontend source
+│   ├── api/                      # LLM provider integrations
+│   │   ├── config.ts             # Provider config, API keys
+│   │   ├── providers.ts          # Provider router
+│   │   ├── mistral.ts            # Mistral AI client
+│   │   ├── openai.ts             # OpenAI client
+│   │   ├── anthropic.ts          # Anthropic client
+│   │   ├── gemini.ts             # Gemini client
+│   │   └── ollama.ts             # Ollama client
+│   ├── components/
+│   │   ├── canvas/               # React Flow nodes/edges
+│   │   ├── glass/                # Glass UI components
+│   │   ├── modals/               # ConfirmDialog
+│   │   └── ui/                   # All other UI components
+│   ├── hooks/                    # Custom React hooks
+│   ├── liquid-glass/             # Physics engine
+│   ├── store/                    # Zustand stores
+│   ├── styles/                   # CSS (globals.css)
+│   ├── types/                    # TypeScript definitions
+│   ├── utils/                    # Utilities
+│   ├── workers/                  # Code execution worker
+│   ├── App.tsx                   # Root component
+│   └── main.tsx                  # Entry point
+├── src-tauri/                    # Rust backend
+│   ├── src/
+│   │   ├── main.rs               # Windows subsystem entry
+│   │   └── lib.rs                # Tauri builder
+│   ├── tauri.conf.json           # Tauri configuration
+│   ├── capabilities/
+│   │   └── default.json          # Permissions
+│   └── Cargo.toml                # Rust dependencies</code></pre>
+<hr>
+<h3 id="data-flow">Data Flow</h3>
+<h4 id="primary-flow-user-message-ai-response">Primary Flow: User Message → AI Response</h4>
+<pre><code>User types message
+       │
+       ▼
+NodeInput.textarea onChange
+       │
+       ▼
+Enter key → sendMessage()
+       │
+       ▼
+useStreamMessage.sendMessage({ parentNodeId, text })
+       │
+       ├── 1. Create branch node  ──────────────────► canvasStore.addNode()
+       │
+       ├── 2. Build conversation path  ─────────────► canvasStore.getConversationPath()
+       │
+       ├── 3. Check RAG context  ───────────────────► ragStore.searchChunks()
+       │         │
+       │         └── Embedding API (if available)
+       │                    │
+       │                    └── TF-IDF fallback
+       │
+       ├── 4. Build system prompt + RAG context
+       │
+       ├── 5. Send to streamProvider(model, messages, config)
+       │         │
+       │         ├── Mistral: streamMistral()
+       │         ├── OpenAI: streamOpenAI()
+       │         ├── Anthropic: streamAnthropic()
+       │         ├── Gemini: streamGemini()
+       │         └── Ollama: streamOllama()
+       │
+       ├── 6. Stream chunks ──► canvasStore.updateNode(label += chunk)
+       │         │
+       │         └── React Flow re-render (via Zustand subscription)
+       │
+       ├── 7. Stream complete
+       │
+       ├── 8. Post-processing (parallel):
+       │    ├── useConfidenceScore → calibration prompt → updateNode(confidence)
+       │    ├── useSuggestionTendrils → generation prompt → addNode(suggestion)
+       │    └── analyticsStore.recordCompletion(tokens, cost)
+       │
+       └── 9. Debounced save ──► canvasManagerStore.saveCanvasData()</code></pre>
+<h4 id="secondary-flow-parallel-debate">Secondary Flow: Parallel Debate</h4>
+<pre><code>Shift+Enter → useParallelDebate.debate({ models: [...] })
+       │
+       ├── Create one branch node
+       │
+       └── Promise.allSettled(models.map(model =&gt;
+             streamProvider(model, messages, config)
+           ))
+              │
+              ├── Each model streams into its own response node
+              ├── Fan layout positioning
+              └── Independent confidence/tendrils/analytics per model</code></pre>
+<h4 id="tertiary-flow-canvas-persistence">Tertiary Flow: Canvas Persistence</h4>
+<pre><code>Store update
+       │
+       ▼
+Debounced flush (300ms)
+       │
+       ▼
+canvasStore.flushSave()
+       │
+       ▼
+canvasManagerStore.saveCanvasData(canvasId, {
+  nodes, edges, viewport, bookmarkedIds
+})
+       │
+       ▼
+localStorage.setItem('mosaic-canvas-data-{id}', JSON.stringify(data))</code></pre>
+<hr>
+<h3 id="component-hierarchy">Component Hierarchy</h3>
+<pre><code>&lt;ErrorBoundary&gt;
+  &lt;App&gt;
+    &lt;TopBar /&gt;                    ← Provider selector, actions
+    &lt;CanvasTabs /&gt;                ← Multi-canvas tabs
+    &lt;MosaicCanvas&gt;
+      &lt;ReactFlowProvider&gt;
+        &lt;ReactFlow&gt;
+          &lt;Background /&gt;
+          &lt;MessageNode /&gt;         ← Custom node (repeated per message)
+          &lt;LiquidEdge /&gt;          ← Default edge
+          &lt;TendrilEdge /&gt;         ← Suggestion edges
+          &lt;DistillEdge /&gt;         ← Distillation edges
+          &lt;MiniMap /&gt;             ← Optional minimap
+        &lt;/ReactFlow&gt;
+      &lt;/ReactFlowProvider&gt;
+      &lt;DragLens /&gt;                ← Floating lens overlay
+    &lt;/MosaicCanvas&gt;
+    &lt;ZoomControls /&gt;              ← Bottom-center
+    &lt;SettingsDrawer /&gt;            ← Settings modal
+    &lt;SearchOverlay /&gt;             ← Search modal
+    &lt;ShortcutsModal /&gt;            ← Shortcuts modal
+    &lt;DocumentPanel /&gt;             ← RAG slide-in
+    &lt;AnalyticsPanel /&gt;            ← Analytics slide-in
+    &lt;PruneBanner /&gt;               ← Prune status
+    &lt;ToastContainer /&gt;            ← Notifications
+    &lt;WelcomeScreen /&gt;             ← First-launch overlay
+    &lt;PythonTerminal /&gt;            ← REPL widget
+  &lt;/App&gt;
+&lt;/ErrorBoundary&gt;</code></pre>
+<hr>
+<h3 id="store-dependency-graph">Store Dependency Graph</h3>
+<pre><code>canvasManagerStore (localStorage: mosaic-canvases)
+    │
+    └── canvasStore (debounced save → canvasManagerStore)
+              │
+              ├── Nodes, edges, viewport
+              ├── Position history (undo)
+              └── Bookmarks
+
+uiStore (localStorage: mosaic-ui)
+    ├── Theme, zoom, minimap
+    ├── Settings (system prompt, temperature, model)
+    ├── Ollama state
+    └── UI toggles (search, bookmarks, etc.)
+
+analyticsStore (localStorage: mosaic-analytics)
+    ├── Token usage per model
+    ├── Cost estimation
+    └── Completion history
+
+ragStore (localStorage: mosaic-rag)
+    ├── Documents and chunks
+    ├── RAG enabled toggle
+    └── Search index
+
+toastStore (in-memory)
+    └── Toast notification queue
+
+pruneStore (in-memory)
+    └── Pruning state (active, goal)</code></pre>
+<p>Stores are <strong>independent</strong> — they don't subscribe to each other's changes. Cross-store coordination happens at the hook/component level. This keeps the state management simple and predictable.</p>
+<hr>
+<h3 id="key-architecture-decisions">Key Architecture Decisions</h3>
+<h4 id="testing-ci-layer-added-in-v0-3-0">Testing & CI Layer (Added in v0.3.0)</h4>
+<p>Mosaic includes a comprehensive test suite powered by <strong>Vitest</strong> with 191 tests across 11 files:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Layer</th><th>Tests</th><th>What's Tested</th></tr></thead>
+<tbody>
+<tr><td>API config</td><td>config.test.ts</td><td>XOR encrypt/decrypt, per-provider keys, provider routing</td></tr>
+<tr><td>API providers</td><td>providers.test.ts</td><td><code>embedTexts</code> fallback chain</td></tr>
+<tr><td>API ollama</td><td>ollama.test.ts</td><td>URL management, defaults</td></tr>
+<tr><td>Stores</td><td>canvasStore, ragStore, uiStore test files</td><td>State mutations, persistence, validation</td></tr>
+<tr><td>Utils</td><td>validation, layout test files</td><td>All edge cases, tree layout, deep clone</td></tr>
+<tr><td>Components</td><td>SettingsDrawer, TopBar test files</td><td>Rendering, user interactions</td></tr>
+<tr><td>Hooks</td><td>useDocumentParser test files</td><td>Chunk algorithm (boundary detection, unicode)</td></tr>
+</tbody>
+</table></div>
+<p>The CI pipeline (<code>.github/workflows/ci.yml</code>) runs <code>tsc --noEmit</code>, <code>vitest run</code>, and <code>npm run build</code> on every push/PR. The release pipeline (<code>.github/workflows/release.yml</code>) builds platform-specific installers for Windows, macOS, and Linux.</p>
+<h4 id="why-no-custom-tauri-commands">Why No Custom Tauri Commands?</h4>
+<p>The Rust backend (<code>src-tauri/src/lib.rs</code>) has zero custom commands. All logic runs in the frontend. This was a deliberate choice:</p>
+<ol>
+<li><strong>Simplicity</strong>: No IPC overhead for the core use case (AI chat)</li>
+<li><strong>Portability</strong>: All logic is cross-platform by default (Rust commands would need platform-specific handling)</li>
+<li><strong>Offline capability</strong>: The frontend-only approach makes it easier to add offline features</li>
+<li><strong>Development speed</strong>: Frontend changes don't require Rust recompilation</li>
+</ol>
+<p>The tradeoff is that localStorage is used for persistence instead of the filesystem. Future versions may add Tauri commands for file I/O, native dialogs, and system-level features.</p>
+<h4 id="why-zustand-over-redux-context">Why Zustand Over Redux/Context?</h4>
+<ul>
+<li><strong>Minimal boilerplate</strong>: Actions are just functions, no reducers/dispatchers</li>
+<li><strong>TypeScript-friendly</strong>: Full type inference without extra code</li>
+<li><strong>Selective subscriptions</strong>: Components only re-render when their selected state changes</li>
+<li><strong>Persistence middleware</strong>: Easy localStorage integration</li>
+<li><strong>Bundle size</strong>: ~2KB vs Redux's ~12KB</li>
+</ul>
+<h4 id="why-react-flow">Why React Flow?</h4>
+<ul>
+<li><strong>Purpose-built</strong>: Designed for node-based editors and interactive graphs</li>
+<li><strong>Custom nodes/edges</strong>: Full React component support for custom rendering</li>
+<li><strong>Performance</strong>: Virtual rendering, efficient updates for large graphs</li>
+<li><strong>Pannable/zoomable</strong>: Built-in infinite canvas support</li>
+<li><strong>Event system</strong>: Comprehensive event handling (node drag, edge connection, selection)</li>
+</ul>
+<h4 id="why-pyodide-for-python">Why Pyodide for Python?</h4>
+<ul>
+<li><strong>In-browser WASM</strong>: No server-side Python execution needed</li>
+<li><strong>Pre-compiled packages</strong>: numpy, pandas, scipy, matplotlib available out of the box</li>
+<li><strong>Security</strong>: Sandboxed in the browser with CSP restrictions</li>
+<li><strong>No backend</strong>: All code execution happens client-side, keeping the architecture simple</li>
+</ul>
+<hr>
+<h3 id="event-flow-diagram">Event Flow Diagram</h3>
+<pre><code>┌──────────┐     ┌──────────────┐     ┌──────────────┐
+│  User    │────►│  React       │────►│  Zustand     │
+│  Action  │     │  Component   │     │  Store       │
+└──────────┘     └──────────────┘     └──────┬───────┘
+                                             │
+                                             ▼
+                                      ┌──────────────┐
+                                      │  React Flow   │
+                                      │  (subscribe)  │
+                                      └──────┬───────┘
+                                             │
+                                             ▼
+                                      ┌──────────────┐
+                                      │  DOM Re-     │
+                                      │  render      │
+                                      └──────────────┘</code></pre>
+<p>User actions (typing, clicking, dragging) flow through React components to Zustand stores. Stores notify React Flow (which subscribes via Zustand selectors) of changes. React Flow updates the DOM efficiently using its internal diffing and virtualization.</p>
+<hr>
+<h3 id="error-handling-architecture">Error Handling Architecture</h3>
+<p>Mosaic employs a multi-layered error handling strategy:</p>
+<h4 id="layer-1-react-error-boundary">Layer 1: React Error Boundary</h4>
+<p>The <code><ErrorBoundary></code> component wraps the entire app. It catches unhandled React errors and displays a fallback UI with a "Try Again" button. This prevents the entire app from crashing when a single component fails.</p>
+<pre><code class="language-typescript">class ErrorBoundary extends React.Component&lt;
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+&gt; {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        &lt;div className="error-boundary"&gt;
+          &lt;h2&gt;Something went wrong&lt;/h2&gt;
+          &lt;p&gt;{this.state.error?.message}&lt;/p&gt;
+          &lt;button onClick={() =&gt; this.setState({ hasError: false })}&gt;
+            Try Again
+          &lt;/button&gt;
+        &lt;/div&gt;
+      );
+    }
+    return this.props.children;
+  }
+}</code></pre>
+<h4 id="layer-2-streaming-error-recovery">Layer 2: Streaming Error Recovery</h4>
+<p>When AI streaming fails (network error, API error, timeout), the response node enters an error state:</p>
+<ol>
+<li>The <code>isStreaming</code> flag is cleared</li>
+<li>An <code>error</code> message is set on the node data</li>
+<li>The node displays the error with a retry button</li>
+<li>Clicking retry re-sends the message via <code>useStreamMessage.sendMessage()</code></li>
+</ol>
+<h4 id="layer-3-data-validation-errors">Layer 3: Data Validation Errors</h4>
+<p>All persisted data is validated on load. Corrupted data is discarded and replaced with defaults:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Store</th><th>Validation</th><th>Invalid data behavior</th></tr></thead>
+<tbody>
+<tr><td>canvasManager</td><td><code>validateCanvasData()</code></td><td>Reset to empty canvas list</td></tr>
+<tr><td>uiStore</td><td><code>validateUIState()</code></td><td>Reset to default settings</td></tr>
+<tr><td>ragStore</td><td><code>validateRagDocs()</code></td><td>Clear document list</td></tr>
+</tbody>
+</table></div>
+<h4 id="layer-4-provider-errors">Layer 4: Provider Errors</h4>
+<p>Provider-specific errors (invalid API key, rate limit, model unavailable) are caught and displayed as user-friendly messages:</p>
+<pre><code class="language-typescript">try {
+  await streamProvider(model, messages, config);
+} catch (err) {
+  if (err.status === 401) {
+    showToast('error', 'Invalid API key. Check your settings.');
+  } else if (err.status === 429) {
+    showToast('error', 'Rate limited. Please wait a moment.');
+  } else {
+    showToast('error', `Provider error: ${err.message}`);
+  }
+}</code></pre>
+<h4 id="layer-5-code-execution-errors">Layer 5: Code Execution Errors</h4>
+<p>Code sandbox errors are displayed inline in the output pane:</p>
+<ul>
+<li>Syntax errors show the line and character position</li>
+<li>Runtime errors show the stack trace</li>
+<li>Timeout errors show "Execution timed out after 30s"</li>
+<li>Sandbox violations show "Access denied: [API name] is not available"</li>
+</ul>
+<hr>
+<h3 id="react-flow-integration-details">React Flow Integration Details</h3>
+<p>Mosaic configures React Flow with custom settings for optimal performance and behavior:</p>
+<h4 id="custom-node-types">Custom Node Types</h4>
+<pre><code class="language-typescript">const nodeTypes = {
+  messageNode: MessageNode,  // The only custom node type
+};</code></pre>
+<p>All five node types (root, branch, response, suggestion, distillation) are rendered by <code>MessageNode</code>, which switches visual style based on <code>data.nodeType</code>.</p>
+<h4 id="custom-edge-types">Custom Edge Types</h4>
+<pre><code class="language-typescript">const edgeTypes = {
+  liquidEdge: LiquidEdge,     // Default conversation edge
+  tendrilEdge: TendrilEdge,   // Dotted suggestion edge
+  distillEdge: DistillEdge,   // Gold dashed distillation edge
+};</code></pre>
+<h4 id="react-flow-configuration">React Flow Configuration</h4>
+<pre><code class="language-typescript">&lt;ReactFlow
+  nodes={nodes}
+  edges={edges}
+  onNodesChange={onNodesChange}
+  onEdgesChange={onEdgesChange}
+  onConnect={onConnect}
+  onNodeClick={onNodeClick}
+  nodeTypes={nodeTypes}
+  edgeTypes={edgeTypes}
+  minZoom={0.05}
+  maxZoom={3}
+  defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+  fitView
+  attributionPosition="bottom-left"
+&gt;
+  &lt;Background variant="dots" gap={20} size={1} /&gt;
+  &lt;MiniMap
+    style={{ display: showMiniMap ? 'block' : 'none' }}
+    nodeStrokeColor={getThemeColor('accent')}
+  /&gt;
+&lt;/ReactFlow&gt;</code></pre>
+<h4 id="node-filtering">Node Filtering</h4>
+<p>Before rendering, nodes are filtered to exclude:</p>
+<ol>
+<li><strong>Collapsed nodes</strong>: When a parent is collapsed, all its descendants are hidden</li>
+<li><strong>Descendant nodes</strong>: Same as collapsed filtering</li>
+<li><strong>Non-bookmarked nodes</strong>: When bookmarks-only mode is active, non-bookmarked nodes are hidden</li>
+</ol>
+<p>This filtering prevents React Flow from wasting resources rendering invisible elements.</p>
+<h4 id="connection-validation">Connection Validation</h4>
+<p>Mosaic uses <code>isValidConnection</code> to prevent invalid edge creation:</p>
+<ul>
+<li>Edges must connect different nodes</li>
+<li>Circular connections are prevented</li>
+<li>Only liquidEdge type can be created by user actions (tendrilEdge and distillEdge are programmatically created)</li>
+</ul>
+<hr>
+<h3 id="performance-optimization-strategies">Performance Optimization Strategies</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Strategy</th><th>Implementation</th><th>Impact</th></tr></thead>
+<tbody>
+<tr><td>Code splitting</td><td>Vite config: <code>manualChunks</code> for react-flow and framer-motion</td><td>Smaller initial bundle</td></tr>
+<tr><td>Node memoization</td><td><code>React.memo(MessageNode)</code> with deep comparison</td><td>Prevents re-render of unchanged nodes</td></tr>
+<tr><td>Selective subscriptions</td><td>Zustand selectors in all components</td><td>Only relevant state changes trigger re-renders</td></tr>
+<tr><td>Debounced saves</td><td>300ms debounce on canvas save</td><td>Reduces localStorage writes</td></tr>
+<tr><td>Undo ring buffer</td><td>Max 50 snapshots</td><td>Prevents memory growth</td></tr>
+<tr><td>Debounced streaming</td><td>Chunk coalescing during fast streams</td><td>Smoother UI updates</td></tr>
+<tr><td>Virtual rendering</td><td>React Flow's built-in viewport-based rendering</td><td>Only renders visible nodes</td></tr>
+<tr><td>Worker isolation</td><td>Code execution in separate thread</td><td>UI never blocks during execution</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="architecture.html#state-management-and-persistence">State Management and Persistence</a> — Deep dive into store architecture</li>
+<li><a href="architecture.html#liquid-glass-physics-engine">Liquid-Glass Physics Engine</a> — The SVG filter-based glass rendering system</li>
+<li><a href="architecture.html#code-sandbox-architecture">Code Sandbox Architecture</a> — Secure code execution in Web Workers</li>
+<li><a href="architecture.html#provider-protocol-and-streaming">Provider Protocol and Streaming</a> — SSE streaming implementation details</li>
+</ul>
+</section>
+<section id="liquid-glass-physics-engine"><h2 id="liquid-glass-physics-engine">Liquid-Glass Physics Engine</h2>
+<p>Mosaic's <strong>Liquid-Glass</strong> system is a custom physics-based glass rendering engine built with SVG filters and canvas-based displacement maps. It creates realistic refractive glass effects entirely in the browser, without WebGL or external libraries.</p>
+<hr>
+<h3 id="architecture-overview">Architecture Overview</h3>
+<pre><code>src/liquid-glass/
+├── types.ts              # SurfaceProfile, LensParams, DisplacementMap, etc.
+├── refraction.ts         # Surface height profiles, Snell's law displacement
+├── displacement.ts       # Canvas-based displacement map generation
+├── specular.ts           # Specular highlight map generation
+├── filter.ts             # SVG feDisplacementMap filter chain builder
+├── renderer.ts           # Lens resource lifecycle management
+├── spring.ts             # Physics spring system (for FluidSlider/TactileSwitch)
+└── capture.tsx           # Grid background capture utilities</code></pre>
+<p>The engine works in three stages:</p>
+<pre><code>Displacement Map    →    SVG Filter Chain    →    Refracted Render
+(canvas-based)           (feDisplacementMap)      (lens effect)</code></pre>
+<hr>
+<h3 id="stage-1-surface-profiles">Stage 1: Surface Profiles</h3>
+<p>A <strong>surface profile</strong> defines the shape of the glass lens. The profile is a mathematical function that returns a height value (0-1) for any (x, y) coordinate on the lens surface.</p>
+<h4 id="profile-functions">Profile Functions</h4>
+<p>Each profile is defined in <code>refraction.ts</code>:</p>
+<pre><code class="language-typescript">type SurfaceProfile = 'convex_squircle' | 'convex_circle' | 'concave' | 'lip';</code></pre>
+<h4 id="convex-squircle-default">Convex Squircle (Default)</h4>
+<p>The default profile. A smooth rounded convex shape that approximates a real glass lens.</p>
+<pre><code>Height(x, y) = (1 - (x^4 + y^4))^(1/4)</code></pre>
+<p>Where x and y are normalized to [-1, 1] within the lens bounds. This produces a smooth, gradual curve from the center (highest) to the edges (lowest), with rounded corners instead of sharp circular edges.</p>
+<h4 id="convex-circle">Convex Circle</h4>
+<p>A spherical convex lens profile:</p>
+<pre><code>Height(x, y) = sqrt(max(0, 1 - x^2 - y^2))</code></pre>
+<p>This produces a perfect spherical bulge. More "magnifying glass" than "rounded rectangle."</p>
+<h4 id="concave">Concave</h4>
+<p>An inward-curving lens (opposite of convex):</p>
+<pre><code>Height(x, y) = 1 - sqrt(max(0, 1 - x^2 - y^2))</code></pre>
+<p>Creates a fisheye/minification effect.</p>
+<h4 id="lip">Lip</h4>
+<p>A raised ring around the edge:</p>
+<pre><code>Height(x, y) = edge_rim - center_dip</code></pre>
+<p>Creates a raised border effect, like a watch crystal.</p>
+<h4 id="derivatives">Derivatives</h4>
+<p>Each profile also has a corresponding <strong>derivative function</strong> used for ray displacement calculations. The derivative gives the slope of the surface at any point, which determines how much light rays are bent:</p>
+<pre><code class="language-typescript">type SurfaceDerivative = (x: number, y: number) =&gt; { dx: number; dy: number };</code></pre>
+<hr>
+<h3 id="stage-2-snell-s-law-ray-displacement">Stage 2: Snell's Law Ray Displacement</h3>
+<p>The refraction engine simulates how light bends when passing through the glass surface using <strong>Snell's law</strong>:</p>
+<pre><code>n₁ × sin(θ₁) = n₂ × sin(θ₂)</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>n₁</code> = refractive index of medium 1 (air: ~1.0)</li>
+<li><code>n₂</code> = refractive index of medium 2 (glass: ~1.5)</li>
+<li><code>θ₁</code> = angle of incidence</li>
+<li><code>θ₂</code> = angle of refraction</li>
+</ul>
+<h4 id="implementation">Implementation</h4>
+<p>In <code>refraction.ts</code>, the <code>getRayDisplacement()</code> function calculates how much each pixel should shift based on the surface slope at that point:</p>
+<pre><code class="language-typescript">function getRayDisplacement(
+  x: number,           // Normalized x coordinate [-1, 1]
+  y: number,           // Normalized y coordinate [-1, 1]
+  profile: SurfaceProfile,
+  params: {
+    refractiveIndex: number;  // Default: 1.5
+    thickness: number;        // Glass thickness factor
+  }
+): { dx: number; dy: number }</code></pre>
+<p>The displacement is proportional to:</p>
+<ol>
+<li>The surface slope at the given point (from the derivative)</li>
+<li>The refractive index ratio (air-to-glass)</li>
+<li>The glass thickness parameter</li>
+</ol>
+<p>Higher thickness = more pronounced refraction. Higher refractive index = more bending.</p>
+<hr>
+<h3 id="stage-3-displacement-map-generation">Stage 3: Displacement Map Generation</h3>
+<p>The displacement map is a <strong>canvas</strong> that stores the computed displacement values as pixel data. Each pixel's RGBA values encode the x and y displacement amounts.</p>
+<h4 id="map-structure">Map Structure</h4>
+<pre><code>┌─────────────────────────────┐
+│  Canvas (displacement map)   │
+│                              │
+│  R channel: X displacement   │
+│  G channel: Y displacement   │
+│  B channel: unused (0)       │
+│  A channel: unused (255)     │
+│                              │
+│  Resolution: lens W x H      │
+└─────────────────────────────┘</code></pre>
+<h4 id="generation-process">Generation Process</h4>
+<p>In <code>displacement.ts</code>:</p>
+<ol>
+<li>Create a canvas of the lens dimensions</li>
+<li>For each pixel (x, y):</li>
+</ol>
+<p>   a. Normalize coordinates to [-1, 1]</p>
+<p>   b. Compute surface height from the profile function</p>
+<p>   c. Compute surface slope (derivative) at that point</p>
+<p>   d. Apply Snell's law to get ray displacement</p>
+<p>   e. Encode displacement as R/G values (mapped to 0-255)</p>
+<ol>
+<li>Apply optional <strong>interactive warp</strong> overlay for touch displacement</li>
+</ol>
+<p>The displacement map is generated once per lens and cached. It's regenerated only when the lens dimensions or profile change.</p>
+<h4 id="interactive-displacement">Interactive Displacement</h4>
+<p>When <code>interactive={true}</code>, the lens responds to touch/pointer input:</p>
+<ol>
+<li>On pointer down/move, the pointer position is captured</li>
+<li>A local warp is applied to the displacement map at that position</li>
+<li>The warp simulates pressing on a physical gel/fluid surface</li>
+<li>On pointer up, the warp gradually relaxes back to the base profile (spring animation)</li>
+</ol>
+<hr>
+<h3 id="stage-4-svg-filter-chain">Stage 4: SVG Filter Chain</h3>
+<p>The displacement map is applied via an SVG <code><feDisplacementMap></code> filter. The filter chain is built in <code>filter.ts</code>.</p>
+<h4 id="filter-structure">Filter Structure</h4>
+<pre><code class="language-xml">&lt;filter id="glass-lens-filter"&gt;
+  &lt;!-- 1. Displacement (refraction) --&gt;
+  &lt;feDisplacementMap
+    in="SourceGraphic"
+    in2="displacement-map"
+    scale="50"
+    xChannelSelector="R"
+    yChannelSelector="G"
+  /&gt;
+  
+  &lt;!-- 2. Touch warp overlay (interactive mode) --&gt;
+  &lt;feDisplacementMap
+    in="displaced"
+    in2="touch-warp-map"
+    scale="30"
+    xChannelSelector="R"
+    yChannelSelector="G"
+  /&gt;
+  
+  &lt;!-- 3. Specular blend (glass shine) --&gt;
+  &lt;feBlend
+    mode="screen"
+    in="warped"
+    in2="specular-map"
+  /&gt;
+&lt;/filter&gt;</code></pre>
+<h4 id="filter-components">Filter Components</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Component</th><th>SVG Element</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Displacement</td><td><code>feDisplacementMap</code></td><td>Main refraction effect using the displacement map</td></tr>
+<tr><td>Touch warp</td><td><code>feDisplacementMap</code></td><td>Interactive press effect overlay</td></tr>
+<tr><td>Specular blend</td><td><code>feBlend</code></td><td>Blends specular highlights for glass shine</td></tr>
+</tbody>
+</table></div>
+<h4 id="glass-variants">Glass Variants</h4>
+<h4 id="regular-glass">Regular Glass</h4>
+<ul>
+<li>Frosted tint layer (semi-transparent background)</li>
+<li>Specular highlights (shine gradient)</li>
+<li>Subtle edge glow</li>
+<li>Backdrop blur via CSS <code>backdrop-filter: blur(60px)</code></li>
+<li>Tailwind glass color variables applied</li>
+</ul>
+<h4 id="clear-glass">Clear Glass</h4>
+<ul>
+<li>No tinting (transparent)</li>
+<li>Specular highlights only</li>
+<li>Used for special UI elements like the DragLens overlay</li>
+<li>CSS <code>backdrop-filter</code> is more subtle</li>
+</ul>
+<hr>
+<h3 id="stage-5-specular-map">Stage 5: Specular Map</h3>
+<p>The specular map (generated in <code>specular.ts</code>) creates realistic light reflections on the glass surface.</p>
+<h4 id="calculation">Calculation</h4>
+<pre><code class="language-typescript">function generateSpecularMap(
+  width: number,
+  height: number,
+  lightDirection: { x: number; y: number; z: number },
+  surfaceProfile: SurfaceProfile
+): HTMLCanvasElement</code></pre>
+<ol>
+<li>For each pixel, compute the surface normal from the profile derivative</li>
+<li>Calculate the reflection vector from the light direction and surface normal</li>
+<li>Compute specular intensity using the Blinn-Phong reflection model</li>
+<li>Map intensity to a gradient (white = strong reflection, transparent = no reflection)</li>
+</ol>
+<p>The light direction defaults to top-left (simulating natural overhead lighting), but can be customized per-lens.</p>
+<hr>
+<h3 id="spring-physics-system">Spring Physics System</h3>
+<p>The <code>spring.ts</code> module provides a simple physics spring system used by <code>FluidSlider</code> and <code>TactileSwitch</code>.</p>
+<pre><code class="language-typescript">interface SpringParams {
+  stiffness: number;     // Spring stiffness (default: 180)
+  damping: number;       // Damping factor (default: 15)
+  mass: number;          // Mass of the object (default: 1)
+}
+
+function createSpring(params: SpringParams): Spring;
+function tickSpring(spring: Spring, target: number): number;</code></pre>
+<h4 id="how-it-works">How It Works</h4>
+<p>The spring simulation uses a simple <strong>mass-spring-damper</strong> model:</p>
+<pre><code>Force = -stiffness × (position - target) - damping × velocity
+acceleration = Force / mass
+velocity += acceleration × dt
+position += velocity × dt</code></pre>
+<p>Despite its simplicity, this produces smooth, natural-feeling animations that respond to user input with realistic momentum.</p>
+<h4 id="spring-parameter-tuning-guide">Spring Parameter Tuning Guide</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Application</th><th>Stiffness</th><th>Damping</th><th>Mass</th><th>Behavior</th></tr></thead>
+<tbody>
+<tr><td>FluidSlider (idle)</td><td>180</td><td>15</td><td>1</td><td>Gentle settling</td></tr>
+<tr><td>FluidSlider (dragging)</td><td>300</td><td>20</td><td>1</td><td>Responsive tracking</td></tr>
+<tr><td>TactileSwitch</td><td>250</td><td>18</td><td>1</td><td>Satisfying snap</td></tr>
+<tr><td>Interactive lens warp</td><td>120</td><td>10</td><td>1</td><td>Fluid deformation</td></tr>
+</tbody>
+</table></div>
+<p>The stiffness/damping ratio determines the spring's behavior:</p>
+<ul>
+<li><strong>Underdamped</strong> (stiffness high relative to damping): Oscillates before settling (bouncy)</li>
+<li><strong>Critically damped</strong> (stiffness proportional to damping): Fastest settling without oscillation</li>
+<li><strong>Overdamped</strong> (damping high relative to stiffness): Slow settling, no oscillation</li>
+</ul>
+<p>Mosaic's springs are tuned to be slightly underdamped — fast enough to feel responsive, with just enough overshoot to feel natural.</p>
+<h4 id="usage-in-fluidslider">Usage in FluidSlider</h4>
+<pre><code class="language-typescript">// Idle state — gentle, natural feel
+const idleSpring = createSpring({ stiffness: 180, damping: 15 });
+
+// During drag — tight, responsive tracking
+const dragSpring = createSpring({ stiffness: 300, damping: 20 });
+
+// Rendering loop (simplified)
+function renderSlider() {
+  const currentValue = tickSpring(spring, targetValue);
+  const knobPosition = mapValueToPosition(currentValue);
+  
+  // Apply to DOM
+  knobElement.style.transform = `translateX(${knobPosition}px)`;
+  
+  if (Math.abs(currentValue - targetValue) &gt; 0.001) {
+    requestAnimationFrame(renderSlider);
+  }
+}</code></pre>
+<p>When the user starts dragging, the spring stiffness increases for more responsive tracking. When released, the lower stiffness creates a gentle settling motion with a slight overshoot (underdamped behavior).</p>
+<h4 id="usage-in-tactileswitch">Usage in TactileSwitch</h4>
+<p>Same spring system, used to animate the switch knob between the ON and OFF positions. The knob overshoots slightly and settles, mimicking a physical toggle switch.</p>
+<hr>
+<h3 id="lens-resource-lifecycle">Lens Resource Lifecycle</h3>
+<p>The <code>renderer.ts</code> module manages the lifecycle of lens resources:</p>
+<pre><code>createLens(params)
+  ├── Generate displacement map
+  ├── Generate specular map
+  ├── Build SVG filter chain
+  ├── Insert filter into DOM (SVG defs)
+  └── Return lens handle
+
+updateLens(handle, params)
+  ├── Regenerate displacement map (if size/shape changed)
+  ├── Regenerate specular map
+  ├── Update filter chain
+  └── Return updated handle
+
+destroyLens(handle)
+  ├── Remove filter from DOM
+  ├── Release canvas resources
+  └── Clear cached data</code></pre>
+<p>Resources are reference-counted to prevent memory leaks when multiple lenses share the same configuration.</p>
+<hr>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Operation</th><th>Cost</th><th>Caching</th></tr></thead>
+<tbody>
+<tr><td>Displacement map generation</td><td>Medium (canvas pixel iteration)</td><td>Cached per unique size/profile</td></tr>
+<tr><td>Specular map generation</td><td>Medium</td><td>Cached per unique size/profile/light</td></tr>
+<tr><td>SVG filter application</td><td>Low (GPU-accelerated via browser)</td><td>Built into browser rendering</td></tr>
+<tr><td>Interactive warp calculation</td><td>Low (single pixel per pointer event)</td><td>No caching needed</td></tr>
+<tr><td>Spring physics tick</td><td>Negligible</td><td>No caching needed</td></tr>
+</tbody>
+</table></div>
+<h4 id="optimization-tips">Optimization Tips</h4>
+<ul>
+<li><strong>Use <code>lens={false}</code> on GlassCard</strong> when the full refraction effect isn't needed (standard CSS glass is much faster)</li>
+<li><strong>Avoid resizing lenses frequently</strong> — displacement map regeneration is the most expensive operation</li>
+<li><strong>Limit interactive lenses</strong> — each interactive lens adds pointer event overhead</li>
+<li><strong>The DragLens is intentionally small</strong> (120x120) to minimize the performance impact of real-time displacement</li>
+</ul>
+<hr>
+<h3 id="glass-ui-component-summary">Glass UI Component Summary</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Component</th><th>Glass Engine Features</th></tr></thead>
+<tbody>
+<tr><td><code>GlassCard</code></td><td>Standard CSS glass + optional Lens mode</td></tr>
+<tr><td><code>Lens</code></td><td>Full SVG displacement + specular pipeline</td></tr>
+<tr><td><code>DragLens</code></td><td>Interactive displacement + pointer tracking</td></tr>
+<tr><td><code>FluidSlider</code></td><td>Spring physics for knob animation</td></tr>
+<tr><td><code>TactileSwitch</code></td><td>Spring physics for toggle animation</td></tr>
+<tr><td><code>SegmentControl</code></td><td>Lens-based active segment highlight</td></tr>
+<tr><td><code>GlassEffectContainer</code></td><td>Shared backdrop context for grouped glass</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="api-reference.html#component-api-reference">Component API Reference</a> — Glass component props and usage</li>
+<li><a href="user-guide.html#keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</a> — UI elements documentation</li>
+<li><a href="#theme-system">Theme System</a> (inline in UI Reference) — Theme CSS custom properties</li>
+</ul>
+</section>
+<section id="code-sandbox-architecture"><h2 id="code-sandbox-architecture">Code Sandbox Architecture</h2>
+<p>Mosaic's code execution system runs <strong>JavaScript</strong> and <strong>Python</strong> in a secure, sandboxed environment. All code executes in a <strong>Web Worker</strong> with strict security restrictions, preventing access to network, filesystem, and browser APIs.</p>
+<hr>
+<h3 id="architecture-overview">Architecture Overview</h3>
+<pre><code>Main Thread                    Web Worker
+┌──────────────┐              ┌─────────────────────────┐
+│  codeRunner   │───postMessage──►│  codeWorker.ts          │
+│  (interface)  │              │                         │
+│              │◄──postMessage──│  JS: new Function()     │
+│  runCode()   │              │  Python: Pyodide WASM    │
+│  replExec()  │              │                         │
+│  replReset() │              │  Sandbox restrictions:   │
+└──────────────┘              │  - No fetch/XHR/WS      │
+                              │  - No localStorage/DOM  │
+                              │  - No import()          │
+                              │  - Allowlisted globals  │
+                              │  - 30s timeout          │
+                              └─────────────────────────┘</code></pre>
+<h4 id="why-a-web-worker">Why a Web Worker?</h4>
+<ul>
+<li><strong>Isolation</strong>: The worker runs in a separate global scope — no access to the main thread's DOM, stores, or API keys</li>
+<li><strong>No blocking</strong>: Long-running code doesn't block the UI (the canvas remains interactive)</li>
+<li><strong>Abort support</strong>: The worker can be terminated or messages aborted without affecting the main app</li>
+<li><strong>Security boundary</strong>: Even if malicious code breaks out of the sandbox, it's still confined to the worker scope</li>
+</ul>
+<h4 id="worker-lifecycle">Worker Lifecycle</h4>
+<pre><code>App start
+  │
+  ├── Worker NOT created (lazy initialization)
+  │
+  ├── User clicks "Run" on code block
+  │     │
+  │     ├── Is worker alive? → No → CreateWorker()
+  │     │                              ├── Create Blob URL from worker source
+  │     │                              ├── new Worker(blobURL)
+  │     │                              ├── URL.revokeObjectURL(blobURL)
+  │     │                              └── Worker loads Pyodide (if Python)
+  │     │
+  │     ├── postMessage({ exec_id, lang, code })
+  │     ├── Wait for messages (timeout 30s)
+  │     ├── Return result or error
+  │     └── Worker stays alive (for next execution)
+  │
+  ├── User clicks "Run" again
+  │     └── Reuse existing worker (faster, no init)
+  │
+  ├── User closes Python REPL
+  │     └── replReset() — clears Python globals
+  │
+  └── App unmount
+        └── terminateWorker() — kills worker</code></pre>
+<p>The worker is created lazily — no resources are consumed until the user first runs code. Python's Pyodide runtime (~12 MB) is only loaded when the first Python execution is requested.</p>
+<h4 id="worker-memory-management">Worker Memory Management</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Resource</th><th>Approx Size</th><th>Loaded When</th></tr></thead>
+<tbody>
+<tr><td>Worker shell (JS)</td><td>~5 KB</td><td>First code execution</td></tr>
+<tr><td>Pyodide WASM runtime</td><td>~12 MB</td><td>First Python execution</td></tr>
+<tr><td>Python packages (numpy, etc.)</td><td>~8 MB each</td><td>On first import</td></tr>
+<tr><td>User code output</td><td>Variable</td><td>Per execution</td></tr>
+</tbody>
+</table></div>
+<p>For performance, Pyodide and imported packages remain cached in the worker's memory across executions. Only <code>replReset()</code> clears the Python state. The worker stays alive until the app closes, avoiding repeated Pyodide load times.</p>
+<hr>
+<h3 id="worker-communication-protocol">Worker Communication Protocol</h3>
+<p>Messages between the main thread and worker follow a strict protocol:</p>
+<h4 id="main-worker">Main → Worker</h4>
+<pre><code class="language-typescript">{
+  exec_id: string;      // Unique execution ID (UUID)
+  type: 'execute' | 'repl_exec' | 'repl_reset' | 'terminate';
+  lang: 'javascript' | 'python';
+  code: string;
+}</code></pre>
+<h4 id="worker-main">Worker → Main</h4>
+<pre><code class="language-typescript">{
+  exec_id: string;          // Matches the request's exec_id
+  type: 'stdout' | 'result' | 'error' | 'ready';
+  data: string;             // Output text
+}</code></pre>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Message Type</th><th>When Sent</th><th>Data</th></tr></thead>
+<tbody>
+<tr><td><code>stdout</code></td><td>During execution (console.log/print)</td><td>Captured output text</td></tr>
+<tr><td><code>result</code></td><td>Execution completed successfully</td><td>Return value or "undefined"</td></tr>
+<tr><td><code>error</code></td><td>Execution threw an error</td><td>Error message and stack trace</td></tr>
+<tr><td><code>ready</code></td><td>Worker initialized and Pyodide loaded</td><td>"ready"</td></tr>
+</tbody>
+</table></div>
+<h4 id="flow">Flow</h4>
+<pre><code>1. Main thread: postMessage({ exec_id: "abc123", lang: "javascript", code: "..." })
+2. Worker: Execute code
+3. Worker: postMessage({ exec_id: "abc123", type: "stdout", data: "Hello" })
+4. Worker: postMessage({ exec_id: "abc123", type: "result", data: "undefined" })
+5. Main thread: Resolve promise with collected output/result</code></pre>
+<hr>
+<h3 id="javascript-sandbox">JavaScript Sandbox</h3>
+<h4 id="execution-model">Execution Model</h4>
+<p>JavaScript code is executed using <code>new Function()</code>:</p>
+<pre><code class="language-javascript">const fn = new Function(...sandboxGlobals.keys(), code);
+return fn(...sandboxGlobals.values());</code></pre>
+<p>This creates a function with explicit parameters for each allowed global. Any reference to a non-param variable throws a ReferenceError.</p>
+<h4 id="allowlisted-globals-40">Allowlisted Globals (40+)</h4>
+<pre><code class="language-javascript">const SANDBOX_GLOBALS = [
+  // Primitives
+  'Array', 'Object', 'String', 'Number', 'Boolean',
+  'BigInt', 'Symbol', 'undefined', 'null', 'NaN', 'Infinity',
+  
+  // Collections
+  'Map', 'Set', 'WeakMap', 'WeakSet',
+  
+  // Typed arrays
+  'ArrayBuffer', 'Uint8Array', 'Int8Array', 'Uint16Array', 'Int16Array',
+  'Uint32Array', 'Int32Array', 'Float32Array', 'Float64Array',
+  
+  // Math &amp; time
+  'Math', 'Date', 'parseInt', 'parseFloat', 'isNaN', 'isFinite',
+  
+  // JSON
+  'JSON', 'structuredClone',
+  
+  // ReGExp
+  'RegExp', 'Error', 'TypeError', 'RangeError', 'SyntaxError',
+  
+  // Async
+  'Promise',
+  
+  // Utilities
+  'console', 'Reflect', 'Proxy',
+  
+  // Encoding
+  'decodeURI', 'encodeURI', 'decodeURIComponent', 'encodeURIComponent',
+  
+  // Timers (limited)
+  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',
+];</code></pre>
+<h4 id="blocked-apis">Blocked APIs</h4>
+<p>Any attempt to use these APIs throws a ReferenceError:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Category</th><th>Blocked APIs</th></tr></thead>
+<tbody>
+<tr><td><strong>Network</strong></td><td><code>fetch</code>, <code>XMLHttpRequest</code>, <code>WebSocket</code>, <code>EventSource</code></td></tr>
+<tr><td><strong>Workers</strong></td><td><code>Worker</code>, <code>SharedWorker</code>, <code>ServiceWorker</code></td></tr>
+<tr><td><strong>Storage</strong></td><td><code>localStorage</code>, <code>sessionStorage</code>, <code>indexedDB</code>, <code>caches</code>, <code>cookie</code></td></tr>
+<tr><td><strong>DOM</strong></td><td><code>document</code>, <code>window</code>, <code>self</code>, <code>globalThis</code>, <code>navigator</code>, <code>location</code>, <code>history</code></td></tr>
+<tr><td><strong>I/O</strong></td><td><code>open</code>, <code>close</code>, <code>print</code>, <code>prompt</code>, <code>alert</code>, <code>confirm</code></td></tr>
+<tr><td><strong>Messaging</strong></td><td><code>postMessage</code>, <code>BroadcastChannel</code>, <code>MessageChannel</code></td></tr>
+<tr><td><strong>Dynamic import</strong></td><td><code>import()</code>, <code>importScripts()</code></td></tr>
+<tr><td><strong>File system</strong></td><td><code>FileReader</code>, <code>FileWriter</code>, <code>showOpenFilePicker</code></td></tr>
+</tbody>
+</table></div>
+<h4 id="timer-limitations">Timer Limitations</h4>
+<ul>
+<li><code>setTimeout</code> and <code>setInterval</code> are allowed but limited to the worker's event loop</li>
+<li>They cannot access the main thread's DOM or stores</li>
+<li>Animation-related APIs (<code>requestAnimationFrame</code>) are not available in workers</li>
+</ul>
+<hr>
+<h3 id="python-sandbox-pyodide">Python Sandbox (Pyodide)</h3>
+<h4 id="execution-model">Execution Model</h4>
+<p>Python code runs via <strong>Pyodide v0.26.2</strong> — a build of CPython compiled to WebAssembly. Pyodide is loaded from the CDN on first use.</p>
+<h4 id="pyodide-initialization">Pyodide Initialization</h4>
+<pre><code class="language-typescript">async function initPyodide(): Promise&lt;void&gt; {
+  if (pyodideInstance) return; // Already initialized
+  
+  // Step 1: Load Pyodide WASM from CDN
+  // The script tag is injected with integrity checking
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js';
+  script.integrity = 'sha384-...';
+  document.head.appendChild(script);
+  
+  await new Promise((resolve) =&gt; (script.onload = resolve));
+  
+  // Step 2: Initialize Pyodide
+  pyodideInstance = await globalThis.loadPyodide({
+    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/',
+  });
+  
+  // Step 3: Apply security patches
+  await patchNetworkAccess();
+  await blockPlatformModules();
+  await setupPackageAllowlist();
+}</code></pre>
+<p>The initialization:</p>
+<ol>
+<li>Downloads the Pyodide JavaScript loader (~1 MB)</li>
+<li>Downloads the Python WASM binary (~12 MB)</li>
+<li>Initializes the CPython interpreter in WebAssembly</li>
+<li>Patches security-sensitive modules</li>
+<li>Sets up the package allowlist</li>
+</ol>
+<p>This takes 2-5 seconds on first load. Subsequent executions are instant.</p>
+<h4 id="how-python-execution-works-in-wasm">How Python Execution Works in WASM</h4>
+<pre><code>User Python Code
+      │
+      ▼
+Pyodide.pyodide.runPython(code)
+      │
+      ├── CPython bytecode compiler (WASM)
+      ├── CPython bytecode interpreter (WASM)
+      ├── stdout/stderr redirected to JS
+      └── Result converted to JS object</code></pre>
+<p>Pyodide bridges Python and JavaScript:</p>
+<ul>
+<li>Python objects can be accessed from JavaScript</li>
+<li>JavaScript objects can be passed to Python</li>
+<li>stdout/stderr is captured via Python's <code>sys.stdout</code> redirection</li>
+<li>Errors are caught and converted to Python tracebacks</li>
+</ul>
+<pre><code class="language-python"># This works:
+import numpy as np
+print(np.array([1,2,3]).mean())
+
+# This is blocked:
+import os  # Most os functions raise errors
+import socket  # Not available in WASM
+
+# This is restricted:
+import requests  # Only allowlisted hosts</code></pre>
+<h4 id="allowlisted-pip-packages">Allowlisted Pip Packages</h4>
+<p>Only these packages can be installed via <code>pip install</code>:</p>
+<pre><code>numpy
+pandas
+scipy
+matplotlib
+sympy
+requests
+beautifulsoup4
+lxml
+Pillow
+markdown
+jinja2
+pyyaml
+toml
+colorama
+tqdm</code></pre>
+<p>The allowlist is enforced by wrapping the Pyodide <code>loadPackage</code> and micropip <code>install</code> functions.</p>
+<h4 id="network-restrictions">Network Restrictions</h4>
+<p>Python's network access is patched to only allow specific CDN hosts:</p>
+<pre><code>cdn.jsdelivr.net
+pyodide-cdn2.iodide.io
+files.pythonhosted.org</code></pre>
+<p>How it works:</p>
+<ol>
+<li>The worker patches Python's <code>urllib</code> and <code>http.client</code> modules</li>
+<li>Any request to a non-allowlisted host is blocked with a SecurityError</li>
+<li><code>fetch</code> in JavaScript (for Pyodide module loading) is similarly restricted</li>
+</ol>
+<p>This ensures:</p>
+<ul>
+<li>Pyodide can load its runtime from CDN</li>
+<li>pip can install allowlisted packages from PyPI</li>
+<li>User code cannot make arbitrary network requests</li>
+</ul>
+<h4 id="blocked-platform-modules">Blocked Platform Modules</h4>
+<p>Platform-specific C extensions that could provide system access are blocked:</p>
+<pre><code>msvcrt    (Windows console I/O)
+termios   (Unix terminal I/O)
+fcntl     (Unix file control)
+mmap      (Memory mapping)
+ctypes    (C foreign function interface) — partially restricted</code></pre>
+<h4 id="stdout-stderr-capture">stdout/stderr Capture</h4>
+<p>Python's stdout and stderr are captured via Pyodide's built-in redirection:</p>
+<pre><code class="language-python">import sys
+from io import StringIO
+
+# Mosaic captures:
+print("This goes to stdout")
+sys.stderr.write("This goes to stderr")</code></pre>
+<p>Both streams are sent back to the main thread as <code>stdout</code> messages.</p>
+<hr>
+<h3 id="execution-lifecycle">Execution Lifecycle</h3>
+<h4 id="single-execution">Single Execution</h4>
+<pre><code>runCode(lang, code)
+  │
+  ├── Create execution ID
+  ├── Set timeout (30 seconds)
+  ├── postMessage to worker
+  ├── Wait for messages:
+  │   ├── stdout → collect in output buffer
+  │   ├── result → resolve promise with output
+  │   └── error → reject promise with error
+  ├── On timeout → abort &amp; reject
+  └── Return { output, error?, executionTime? }</code></pre>
+<h4 id="repl-execution">REPL Execution</h4>
+<pre><code>replExec(code)       replReset()
+  │                      │
+  ├── Same as runCode    ├── Clears Python globals
+  ├── But persists       └── Returns fresh environment
+  │   state in worker
+  │   (global variables,
+  │   imported modules)
+  │
+  └── State persists
+      across calls</code></pre>
+<h4 id="timeout-handling">Timeout Handling</h4>
+<pre><code class="language-javascript">const TIMEOUT_MS = 30000;
+
+const timeoutId = setTimeout(() =&gt; {
+  worker.terminate();         // Kill the worker
+  worker = createWorker();    // Create a new one
+  reject(new Error('Execution timed out'));
+}, TIMEOUT_MS);</code></pre>
+<p>If code exceeds 30 seconds:</p>
+<ol>
+<li>The worker is <strong>terminated</strong> (killed entirely)</li>
+<li>A <strong>new worker</strong> is created (clean state)</li>
+<li>The promise rejects with a timeout error</li>
+<li>The node shows an error state with retry option</li>
+</ol>
+<hr>
+<h3 id="security-analysis">Security Analysis</h3>
+<h4 id="threat-model">Threat Model</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Threat</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr><td>Code reads API keys from localStorage</td><td>Worker has no access to main thread's localStorage</td></tr>
+<tr><td>Code makes unauthorized API calls</td><td>CSP blocks connect-src; worker's fetch is patched</td></tr>
+<tr><td>Code accesses filesystem</td><td>Worker has no filesystem access</td></tr>
+<tr><td>Code consumes unlimited CPU</td><td>30-second timeout, worker can be terminated</td></tr>
+<tr><td>Code reads other canvas data</td><td>Worker has no access to stores or DOM</td></tr>
+<tr><td>Code breaks out of Function() sandbox</td><td>Still confined to Worker scope (no DOM access)</td></tr>
+</tbody>
+</table></div>
+<h4 id="defense-in-depth">Defense in Depth</h4>
+<p>Mosaic uses multiple layers of security:</p>
+<ol>
+<li><strong>Tauri CSP</strong> — Browser-level content security policy restricts network access</li>
+<li><strong>Web Worker isolation</strong> — Separate global scope, no DOM access</li>
+<li><strong>JavaScript Function sandbox</strong> — Explicit allowlist of globals</li>
+<li><strong>Python restrictions</strong> — Allowlisted packages, blocked modules</li>
+<li><strong>CDN allowlist</strong> — Network fetch restricted to trusted hosts</li>
+<li><strong>Pyodide integrity</strong> — Module loading includes integrity checks</li>
+<li><strong>Execution timeout</strong> — Prevents infinite loops from hanging the app</li>
+<li><strong>Confirmation dialog</strong> — User must confirm AI-generated code execution</li>
+</ol>
+<hr>
+<h3 id="coderunner-ts-api">codeRunner.ts API</h3>
+<pre><code class="language-typescript">interface CodeRunner {
+  runCode(lang: CodeLanguage, code: string): Promise&lt;CodeResult&gt;;
+  replExec(code: string): Promise&lt;CodeResult&gt;;
+  replReset(): Promise&lt;void&gt;;
+  terminateWorker(): void;
+}
+
+interface CodeResult {
+  output: string;           // All captured stdout
+  error?: string;           // Error message (if failed)
+  executionTime?: number;   // Duration in ms
+}
+
+type CodeLanguage = 'javascript' | 'python';</code></pre>
+<h4 id="usage-examples">Usage Examples</h4>
+<pre><code class="language-typescript">import { runCode, replExec, replReset } from '@/utils/codeRunner';
+
+// One-shot JavaScript
+const result = await runCode('javascript', `
+  const numbers = [1, 2, 3, 4, 5];
+  console.log('Sum:', numbers.reduce((a, b) =&gt; a + b));
+`);
+console.log(result.output); // "Sum: 15"
+
+// One-shot Python
+const pyResult = await runCode('python', `
+  import numpy as np
+  arr = np.array([1, 2, 3, 4, 5])
+  print(f"Mean: {arr.mean():.2f}")
+`);
+console.log(pyResult.output); // "Mean: 3.00"
+
+// Persistent REPL
+await replExec('x = 42');
+const replResult = await replExec('print(x * 2)');
+console.log(replResult.output); // "84"
+
+// Reset REPL
+await replReset();</code></pre>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="tutorials.html#tutorial-running-code-inline">Tutorial - Running Code Inline</a> — Step-by-step code execution walkthrough</li>
+<li><a href="security.html#security-model">Security Model</a> — Complete security overview (CSP, sandboxing, validation)</li>
+<li><a href="#pythonterminal">PythonTerminal</a> component in <a href="api-reference.html#component-api-reference">Component API Reference</a> — REPL widget details</li>
+</ul>
+</section>
+<section id="provider-protocol-and-streaming"><h2 id="provider-protocol-and-streaming">Provider Protocol and Streaming</h2>
+<p>This page details how Mosaic communicates with each LLM provider — the streaming protocols, authentication, error handling, and embedding integrations.</p>
+<hr>
+<h3 id="streaming-architecture">Streaming Architecture</h3>
+<p>All providers use <strong>Server-Sent Events (SSE)</strong> for streaming, though the event format varies by provider. Mosaic normalizes these into a uniform streaming interface.</p>
+<pre><code>Main Thread:
+  streamProvider(model, messages, config)
+       │
+       ├── GET/POST → Provider API endpoint
+       │     with Authorization header
+       │
+       ▼
+  ReadableStream (SSE)
+       │
+       ├── Parse SSE events (format varies by provider)
+       ├── Extract text delta from each event
+       ├── Call onChunk(delta) callback
+       └── On stream end → resolve promise</code></pre>
+<h4 id="shared-streaming-interface">Shared Streaming Interface</h4>
+<p>All provider streaming functions share a consistent <code>AsyncGenerator<string></code> signature:</p>
+<pre><code class="language-typescript">export async function* streamProvider(
+  messages: { role: string; content: string }[],
+  temperature: number,
+  signal: AbortSignal,
+  model: string
+): AsyncGenerator&lt;string&gt;</code></pre>
+<p>Each provider-specific function follows the same pattern. The hook consuming the stream iterates with <code>for await...of</code>:</p>
+<pre><code class="language-typescript">for await (const chunk of streamProvider(messages, temperature, signal, model)) {
+  // Append chunk to response node
+  updateNode(nodeId, { label: currentLabel + chunk });
+}</code></pre>
+<hr>
+<h3 id="provider-specific-protocols">Provider-Specific Protocols</h3>
+<h4 id="mistral-ai">Mistral AI</h4>
+<p><strong>Endpoint</strong>: <code>POST https://api.mistral.ai/v1/chat/completions</code></p>
+<p><strong>Headers</strong>:</p>
+<pre><code class="language-http">Authorization: Bearer {api_key}
+Content-Type: application/json</code></pre>
+<p><strong>Request Body</strong>:</p>
+<pre><code class="language-json">{
+  "model": "mistral-large-latest",
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello!"}
+  ],
+  "temperature": 0.7,
+  "stream": true
+}</code></pre>
+<p><strong>SSE Format</strong>:</p>
+<pre><code>data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant","content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" world"},"finish_reason":null}]}
+
+data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]</code></pre>
+<p><strong>Extraction</strong>: <code>JSON.parse(event).choices[0].delta.content || ''</code></p>
+<p><strong>Embeddings</strong>: <code>POST https://api.mistral.ai/v1/embeddings</code> with model <code>mistral-embed</code>.</p>
+<hr>
+<h4 id="openai">OpenAI</h4>
+<p><strong>Endpoint</strong>: <code>POST https://api.openai.com/v1/chat/completions</code></p>
+<p><strong>Headers</strong>:</p>
+<pre><code class="language-http">Authorization: Bearer {api_key}
+Content-Type: application/json</code></pre>
+<p><strong>Request Body</strong>:</p>
+<pre><code class="language-json">{
+  "model": "gpt-4o",
+  "messages": [
+    {"role": "system", "content": "..."},
+    {"role": "user", "content": "Hello!"}
+  ],
+  "temperature": 0.7,
+  "stream": true
+}</code></pre>
+<p><strong>SSE Format</strong>: Same structure as Mistral (OpenAI-compatible API).</p>
+<pre><code>data: {"choices":[{"delta":{"role":"assistant","content":"Hello"},"index":0}]}
+
+data: {"choices":[{"delta":{"content":" world"},"index":0}]}
+
+data: [DONE]</code></pre>
+<p><strong>Extraction</strong>: <code>JSON.parse(event).choices[0].delta.content || ''</code></p>
+<p><strong>Stream end</strong>: Detected by <code>data: [DONE]</code> line.</p>
+<p><strong>Embeddings</strong>: <code>POST https://api.openai.com/v1/embeddings</code> with model <code>text-embedding-3-small</code>.</p>
+<hr>
+<h4 id="anthropic">Anthropic</h4>
+<p><strong>Endpoint</strong>: <code>POST https://api.anthropic.com/v1/messages</code></p>
+<p><strong>Headers</strong>:</p>
+<pre><code class="language-http">x-api-key: {api_key}
+anthropic-version: 2023-06-01
+Content-Type: application/json</code></pre>
+<p>Note: Anthropic uses <code>x-api-key</code> header instead of <code>Authorization: Bearer</code>.</p>
+<p><strong>Request Body</strong>:</p>
+<pre><code class="language-json">{
+  "model": "claude-sonnet-4-20250514",
+  "messages": [
+    {"role": "user", "content": "Hello!"}
+  ],
+  "system": "You are a helpful assistant.",
+  "temperature": 0.7,
+  "stream": true
+}</code></pre>
+<p><strong>SSE Format</strong> (event-based — different from OpenAI/Mistral):</p>
+<pre><code>event: message_start
+data: {"type":"message_start","message":{"id":"msg_...","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-20250514","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":10,"output_tokens":1}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" world"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_stop
+data: {"type":"message_stop","message":{"id":"msg_...","type":"message","role":"assistant","content":[{"type":"text","text":"Hello world"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":10,"output_tokens":2}}}</code></pre>
+<p><strong>Extraction</strong>: Only <code>content<em>block</em>delta</code> events with <code>delta.type === 'text_delta'</code> contain text.</p>
+<pre><code class="language-typescript">if (event.type === 'content_block_delta' &amp;&amp; event.delta?.type === 'text_delta') {
+  chunk = event.delta.text;
+}</code></pre>
+<p><strong>Stream end</strong>: Detected by <code>message_stop</code> event.</p>
+<p><strong>Embeddings</strong>: Not supported by Anthropic API.</p>
+<hr>
+<h4 id="gemini">Gemini</h4>
+<p><strong>Endpoint</strong>: <code>POST https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={api_key}</code></p>
+<p>Note: The API key is passed as a <strong>URL query parameter</strong>, not a header.</p>
+<p><strong>Headers</strong>:</p>
+<pre><code class="language-http">Content-Type: application/json</code></pre>
+<p><strong>Request Body</strong>:</p>
+<pre><code class="language-json">{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [{"text": "Hello!"}]
+    }
+  ],
+  "systemInstruction": {
+    "parts": [{"text": "You are a helpful assistant."}]
+  },
+  "generationConfig": {
+    "temperature": 0.7
+  }
+}</code></pre>
+<p><strong>SSE Format</strong>:</p>
+<pre><code>data: {"candidates":[{"index":0,"content":{"role":"model","parts":[{"text":"Hello"}]},"finishReason":"STOP"}],"usageMetadata":{...}}
+
+data: {"candidates":[{"index":0,"content":{"role":"model","parts":[{"text":" world"}]},"finishReason":"STOP"}],"usageMetadata":{...}}</code></pre>
+<p><strong>Extraction</strong>: <code>candidates[0].content.parts[0].text</code></p>
+<p><strong>Stream end</strong>: Detected when the last chunk has no further parts.</p>
+<p><strong>Embeddings</strong>: <code>POST https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={api_key}</code></p>
+<hr>
+<h4 id="ollama">Ollama</h4>
+<p><strong>Endpoint</strong>: <code>POST {ollama_url}/api/chat</code></p>
+<p><strong>Headers</strong>: None (no authentication)</p>
+<p><strong>Request Body</strong>:</p>
+<pre><code class="language-json">{
+  "model": "llama3.2",
+  "messages": [
+    {"role": "system", "content": "..."},
+    {"role": "user", "content": "Hello!"}
+  ],
+  "stream": true
+}</code></pre>
+<p><strong>Streaming Format</strong> (JSON lines — not standard SSE):</p>
+<pre><code class="language-json">{"model":"llama3.2","created_at":"...","message":{"role":"assistant","content":"Hello"},"done":false}
+{"model":"llama3.2","created_at":"...","message":{"role":"assistant","content":" world"},"done":false}
+{"model":"llama3.2","created_at":"...","message":{"role":"assistant","content":""},"done":true,"total_duration":...}</code></pre>
+<p><strong>Extraction</strong>: <code>JSON.parse(line).message?.content || ''</code></p>
+<p><strong>Stream end</strong>: Detected by <code>done: true</code> field.</p>
+<p><strong>Embeddings</strong>: <code>POST {ollama_url}/api/embeddings</code> with model <code>nomic-embed-text</code>.</p>
+<hr>
+<h3 id="error-handling">Error Handling</h3>
+<h4 id="common-error-scenarios">Common Error Scenarios</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Scenario</th><th>Detection</th><th>User-Facing Message</th></tr></thead>
+<tbody>
+<tr><td>Invalid API key</td><td>HTTP 401</td><td>"Invalid API key. Check your settings."</td></tr>
+<tr><td>Rate limited</td><td>HTTP 429</td><td>"Rate limited. Please wait a moment."</td></tr>
+<tr><td>Model unavailable</td><td>HTTP 404</td><td>"Model not available."</td></tr>
+<tr><td>Network error</td><td>fetch throws</td><td>"Network error. Check your connection."</td></tr>
+<tr><td>Timeout</td><td>AbortController</td><td>"Request timed out."</td></tr>
+<tr><td>Provider down</td><td>HTTP 5xx</td><td>"Provider error. Try again later."</td></tr>
+</tbody>
+</table></div>
+<h4 id="provider-error-responses">Provider Error Responses</h4>
+<p>Each provider returns errors in a different format. Mosaic normalizes these:</p>
+<p><strong>Mistral / OpenAI</strong> (standard HTTP errors):</p>
+<pre><code class="language-json">// HTTP 401
+{ "error": { "message": "Incorrect API key", "type": "authentication_error" } }
+
+// HTTP 429
+{ "error": { "message": "Rate limit exceeded", "type": "rate_limit_error" } }
+
+// HTTP 400
+{ "error": { "message": "Model 'gpt-5' does not exist", "type": "invalid_request_error" } }</code></pre>
+<p><strong>Anthropic</strong>:</p>
+<pre><code class="language-json">// HTTP 400
+{ "type": "error", "error": { "type": "invalid_request_error", "message": "messages: ..." } }
+
+// HTTP 529 (overloaded)
+{ "type": "error", "error": { "type": "overloaded_error", "message": "..." } }</code></pre>
+<p><strong>Gemini</strong> (error in response, not HTTP status):</p>
+<pre><code class="language-json">// HTTP 403 (auth via URL param)
+{ "error": { "code": 403, "message": "API key not valid.", "status": "PERMISSION_DENIED" } }</code></pre>
+<p><strong>Ollama</strong>:</p>
+<pre><code class="language-json">// Various errors
+{ "error": "model 'llama3' not found" }
+{ "error": "ollama server not running" }</code></pre>
+<h4 id="error-response-formats">Error Response Formats</h4>
+<p>Each provider returns errors in a different JSON format. Mosaic normalizes these into consistent error messages.</p>
+<h4 id="retry-logic">Retry Logic</h4>
+<p>Currently, Mosaic does <strong>not</strong> implement automatic retry. When a stream fails:</p>
+<ol>
+<li>The streaming flag on the node is cleared</li>
+<li>An error message is displayed on the response node</li>
+<li>The user can click a retry button to resend the message</li>
+<li>The retry sends the same message through the same streaming pipeline</li>
+</ol>
+<p>Future versions may add exponential backoff retry for transient failures (HTTP 429, 5xx).</p>
+<hr>
+<h3 id="abortcontroller-integration">AbortController Integration</h3>
+<p>Every streaming request is associated with an <code>AbortController</code>:</p>
+<pre><code class="language-typescript">const abortController = new AbortController();
+
+// Pass to provider
+const reader = await streamProvider(model, messages, {
+  ...config,
+  signal: abortController.signal,
+});
+
+// To stop mid-stream:
+abortController.abort();</code></pre>
+<p>When aborted:</p>
+<ol>
+<li>The fetch request is cancelled</li>
+<li>The ReadableStream is released</li>
+<li>The promise rejects with an <code>AbortError</code></li>
+<li>The hook catches this and does NOT show an error UI (it's intentional)</li>
+<li>The user can continue the conversation from the partial response</li>
+</ol>
+<hr>
+<h3 id="embedding-provider-priority">Embedding Provider Priority</h3>
+<p>The <code>embedTexts()</code> function (used by RAG) tries providers in order:</p>
+<pre><code class="language-typescript">export async function embedTexts(texts: string[]): Promise&lt;number[][] | null&gt; {
+  // Priority: Ollama → Mistral → OpenAI → Gemini
+  const attempts = [
+    { provider: "ollama", fn: embedOllama },
+    { provider: "mistral", fn: embedMistral },
+    { provider: "openai", fn: embedOpenAI },
+    { provider: "gemini", fn: embedGemini },
+  ];
+  
+  for (const { fn } of attempts) {
+    try {
+      const result = await fn(texts);
+      if (result &amp;&amp; result.length &gt; 0 &amp;&amp; result[0].length &gt; 0) {
+        return result;
+      }
+    } catch { /* try next */ }
+  }
+  
+  return null; // All providers failed — never throws
+}</code></pre>
+<p>If <code>embedTexts()</code> returns <code>null</code>, <code>ragStore.searchChunks()</code> falls back to TF-IDF cosine similarity, which requires no external API.</p>
+<hr>
+<h3 id="provider-comparison">Provider Comparison</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Feature</th><th>Mistral</th><th>OpenAI</th><th>Anthropic</th><th>Gemini</th><th>Ollama</th></tr></thead>
+<tbody>
+<tr><td>Auth</td><td>Bearer</td><td>Bearer</td><td>x-api-key</td><td>URL param</td><td>None</td></tr>
+<tr><td>Streaming</td><td>SSE</td><td>SSE</td><td>Event-based SSE</td><td>SSE</td><td>JSON lines</td></tr>
+<tr><td>Embeddings</td><td>✅ (<code>mistral-embed</code>)</td><td>✅ (<code>text-embedding-3-small</code>)</td><td>❌</td><td>✅ (<code>text-embedding-004</code>)</td><td>✅ (<code>nomic-embed-text</code>)</td></tr>
+<tr><td>Free tier</td><td>✅ Credits</td><td>❌</td><td>❌</td><td>✅</td><td>✅ (local)</td></tr>
+<tr><td>Speed</td><td>Fast</td><td>Fast</td><td>Medium</td><td>Fast</td><td>Variable</td></tr>
+<tr><td>Quality</td><td>High</td><td>High</td><td>Very High</td><td>High</td><td>Variable</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#llm-provider-integration">LLM Provider Integration</a> — Configuration and usage guide</li>
+<li><a href="user-guide.html#rag-system-guide">RAG System Guide</a> — How embeddings are used for document search</li>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — How streaming enables confidence scoring and tendrils</li>
+</ul>
+</section>
+<section id="state-management-and-persistence"><h2 id="state-management-and-persistence">State Management and Persistence</h2>
+<p>Mosaic uses <strong>Zustand v5</strong> for all state management, with localStorage-based persistence for most stores. This page documents the architecture, persistence strategy, data validation, and design decisions behind the state layer.</p>
+<hr>
+<h3 id="store-architecture">Store Architecture</h3>
+<h4 id="store-overview">Store Overview</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Store</th><th>File</th><th>Persistence</th><th>localStorage Key</th><th>Size Estimate</th></tr></thead>
+<tbody>
+<tr><td><code>canvasStore</code></td><td><code>store/canvasStore.ts</code></td><td>Debounced save to canvasManagerStore</td><td>(via canvasManagerStore)</td><td>Per-canvas</td></tr>
+<tr><td><code>canvasManagerStore</code></td><td><code>store/canvasManagerStore.ts</code></td><td>localStorage</td><td><code>mosaic-canvases</code>, <code>mosaic-canvas-data-*</code></td><td>Index: ~1KB; per-canvas: variable</td></tr>
+<tr><td><code>uiStore</code></td><td><code>store/uiStore.ts</code></td><td>localStorage</td><td><code>mosaic-ui</code></td><td>~2KB</td></tr>
+<tr><td><code>analyticsStore</code></td><td><code>store/analyticsStore.ts</code></td><td>localStorage</td><td><code>mosaic-analytics</code></td><td>~50KB (100 completions)</td></tr>
+<tr><td><code>ragStore</code></td><td><code>store/ragStore.ts</code></td><td>localStorage</td><td><code>mosaic-rag</code></td><td>Variable (document chunks)</td></tr>
+<tr><td><code>toastStore</code></td><td><code>store/toastStore.ts</code></td><td>In-memory</td><td>—</td><td>Negligible</td></tr>
+<tr><td><code>pruneStore</code></td><td><code>store/pruneStore.ts</code></td><td>In-memory</td><td>—</td><td>Negligible</td></tr>
+</tbody>
+</table></div>
+<h4 id="why-zustand">Why Zustand?</h4>
+<ul>
+<li><strong>Minimal API</strong>: No reducers, actions, or dispatch functions. State and actions are co-located in a single store definition.</li>
+<li><strong>Selective subscriptions</strong>: Components only re-render when their specific slice of state changes, preventing unnecessary re-renders.</li>
+<li><strong>TypeScript inference</strong>: Full type safety without additional type definitions for actions.</li>
+<li><strong>Persistence</strong>: The <code>persist</code> middleware (or manual localStorage integration) handles persistence without extra libraries.</li>
+<li><strong>Bundle size</strong>: ~2KB gzipped — negligible impact on app size.</li>
+</ul>
+<hr>
+<h3 id="canvasstore-deep-dive">canvasStore Deep Dive</h3>
+<p>The canvas store is the most complex store. It manages the current canvas's nodes, edges, viewport, and position history.</p>
+<h4 id="state-shape">State Shape</h4>
+<pre><code class="language-typescript">interface CanvasState {
+  nodes: Node[];
+  edges: Edge[];
+  activeNodeId: string | null;
+  viewport: { x: number; y: number; zoom: number };
+  positionHistory: { nodes: Node[]; edges: Edge[] }[];
+  bookmarkedIds: string[];
+  currentNodeIndex: number;
+}</code></pre>
+<h4 id="position-history-undo">Position History (Undo)</h4>
+<p>The undo system uses a <strong>ring buffer</strong> with a maximum of 50 entries:</p>
+<pre><code class="language-typescript">const MAX_HISTORY = 50;
+
+// Before each position update:
+function captureSnapshot(state: CanvasState) {
+  const snapshot = deepClone({ nodes: state.nodes, edges: state.edges });
+  state.positionHistory.push(snapshot);
+  if (state.positionHistory.length &gt; MAX_HISTORY) {
+    state.positionHistory.shift(); // Remove oldest
+  }
+}
+
+// On undo:
+function undo(state: CanvasState) {
+  const snapshot = state.positionHistory.pop();
+  if (snapshot) {
+    state.nodes = snapshot.nodes;
+    state.edges = snapshot.edges;
+  }
+}</code></pre>
+<p>The snapshots are created using <code>deepClone()</code> (from <code>src/utils/deepClone.ts</code>), which uses <code>structuredClone()</code> with a JSON-based fallback for environments that don't support it.</p>
+<h4 id="debounced-save">Debounced Save</h4>
+<p>The canvas state is saved to <code>canvasManagerStore</code> with a <strong>300ms debounce</strong>:</p>
+<pre><code class="language-typescript">const saveTimeoutRef = { current: null as number | null };
+
+function scheduleSave(state: CanvasState) {
+  if (saveTimeoutRef.current) {
+    clearTimeout(saveTimeoutRef.current);
+  }
+  saveTimeoutRef.current = setTimeout(() =&gt; {
+    flushSave();
+  }, 300);
+}
+
+function flushSave() {
+  const state = get();
+  canvasManagerStore.getState().saveCanvasData(activeCanvasId, {
+    nodes: state.nodes,
+    edges: state.edges,
+    viewport: state.viewport,
+    bookmarkedIds: state.bookmarkedIds,
+  });
+}</code></pre>
+<p>This prevents excessive writes during rapid operations (e.g., dragging a node triggers many position updates, but only the final position is saved).</p>
+<hr>
+<h3 id="canvasmanagerstore-deep-dive">canvasManagerStore Deep Dive</h3>
+<p>The canvas manager handles <strong>multi-canvas tabs</strong> — creating, deleting, renaming, switching, and duplicating canvases.</p>
+<h4 id="storage-layout">Storage Layout</h4>
+<pre><code>localStorage:
+  mosaic-canvases: [
+    { id: "canvas-1", name: "Research", createdAt: 1700000000000 },
+    { id: "canvas-2", name: "Code Review", createdAt: 1700000100000 }
+  ]
+  
+  mosaic-canvas-data-canvas-1: {
+    nodes: [...],
+    edges: [...],
+    viewport: {...},
+    bookmarkedIds: [...]
+  }
+  
+  mosaic-canvas-data-canvas-2: {
+    nodes: [...],
+    edges: [...],
+    viewport: {...},
+    bookmarkedIds: [...]
+  }</code></pre>
+<h4 id="switch-canvas-flow">Switch Canvas Flow</h4>
+<pre><code>1. User clicks tab "canvas-2"
+2. canvasManagerStore.switchCanvas("canvas-2")
+3.    ├── Save current canvas data (canvas-1) to localStorage
+4.    ├── Set activeCanvasId = "canvas-2"
+5.    └── canvasStore.loadCanvas("canvas-2")
+6.         └── Load data from localStorage mosaic-canvas-data-canvas-2
+7.         └── Validate with validateCanvasData()
+8.         └── Replace nodes, edges, viewport in canvasStore</code></pre>
+<h4 id="duplicate-canvas">Duplicate Canvas</h4>
+<pre><code>1. User clicks Duplicate
+2. canvasManagerStore.duplicateCanvas("canvas-1")
+3.    ├── Create new canvas ID "canvas-3"
+4.    ├── Load canvas-1 data from localStorage
+5.    ├── Save under canvas-3's key
+6.    ├── Add "canvas-3 (copy)" to canvas list
+7.    └── Switch to new canvas</code></pre>
+<hr>
+<h3 id="uistore-deep-dive">uiStore Deep Dive</h3>
+<p>The UI store manages application settings and UI state.</p>
+<h4 id="persistence-strategy">Persistence Strategy</h4>
+<pre><code class="language-typescript">// Subscribe to store changes and save to localStorage
+uiStore.subscribe((state) =&gt; {
+  const { settingsOpen, searchOpen, ...persistable } = state;
+  localStorage.setItem('mosaic-ui', JSON.stringify(persistable));
+});
+
+// On initialization:
+const stored = localStorage.getItem('mosaic-ui');
+if (stored) {
+  try {
+    const parsed = JSON.parse(stored);
+    if (validateUIState(parsed)) {
+      uiStore.setState(parsed);
+    }
+  } catch {
+    // Invalid data — use defaults
+  }
+}</code></pre>
+<p>Some state fields (like <code>settingsOpen</code>, <code>searchOpen</code>) are <strong>transient</strong> — they control UI visibility and shouldn't persist across sessions.</p>
+<h4 id="theme-application">Theme Application</h4>
+<pre><code class="language-typescript">// In uiStore.setTheme():
+setTheme: (theme) =&gt; {
+  // Remove all theme classes
+  document.documentElement.classList.remove('theme-void', 'theme-dusk',
+    'theme-sand', 'theme-snow', 'theme-sunrise');
+  // Add selected theme
+  document.documentElement.classList.add(`theme-${theme}`);
+  // Save to state
+  set({ theme });
+}</code></pre>
+<p>On initialization, the store respects the OS <code>prefers-color-scheme</code> setting:</p>
+<pre><code class="language-typescript">const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const initialTheme = prefersDark ? 'void' : 'sand';</code></pre>
+<h4 id="ollama-state">Ollama State</h4>
+<p>The uiStore manages three Ollama-related fields:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Field</th><th>Default</th><th>Setter</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>ollamaConnected</code></td><td><code>false</code></td><td><code>setOllamaConnected()</code></td><td>Whether Ollama is reachable</td></tr>
+<tr><td><code>ollamaModels</code></td><td><code>[]</code></td><td><code>setOllamaModels()</code></td><td>List of pulled model names</td></tr>
+<tr><td><code>ollamaUrl</code></td><td><code>http://localhost:11434</code></td><td><code>setOllamaUrl()</code></td><td>Configured server URL</td></tr>
+</tbody>
+</table></div>
+<p>The <code>useOllamaDetect</code> hook in <code>App.tsx</code> polls the Ollama API on mount and updates these fields automatically.</p>
+<hr>
+<h3 id="analyticsstore-deep-dive">analyticsStore Deep Dive</h3>
+<h4 id="token-estimation">Token Estimation</h4>
+<p>Token count is estimated using a simple heuristic:</p>
+<pre><code class="language-typescript">function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);  // ~4 characters per token
+}</code></pre>
+<p>This is an approximation. Actual token counts vary by model and tokenizer, but this provides a reasonable estimate for cost tracking.</p>
+<h4 id="cost-calculation">Cost Calculation</h4>
+<pre><code class="language-typescript">const PRICING: Record&lt;string, { input: number; output: number }&gt; = {
+  'mistral-large-latest': { input: 2.00, output: 6.00 },  // Per 1M tokens
+  'mistral-small-latest': { input: 0.20, output: 0.60 },
+};
+
+function calculateCost(model: string, inputTokens: number, outputTokens: number) {
+  const pricing = PRICING[model] || { input: 0.50, output: 1.50 }; // Default fallback
+  return (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
+}</code></pre>
+<h4 id="completion-history">Completion History</h4>
+<p>The last 100 completions are stored with timestamps:</p>
+<pre><code class="language-typescript">{
+  completions: [
+    {
+      model: 'mistral-large-latest',
+      tokens: 150,
+      cost: 0.0009,
+      timestamp: 1700000000000,
+    },
+    // ... up to 100 entries
+  ]
+}</code></pre>
+<p>When the array exceeds 100 entries, the oldest are trimmed.</p>
+<hr>
+<h3 id="ragstore-deep-dive">ragStore Deep Dive</h3>
+<h4 id="document-limits">Document Limits</h4>
+<pre><code class="language-typescript">const MAX_DOCUMENTS = 50;
+const MAX_TOTAL_SIZE = 50 * 1024 * 1024;  // 50 MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;   // 10 MB
+
+function addDocument(doc: RagDocument): boolean {
+  const state = get();
+  
+  if (state.documents.length &gt;= MAX_DOCUMENTS) {
+    throw new Error(`Maximum ${MAX_DOCUMENTS} documents allowed`);
+  }
+  
+  const totalSize = state.documents.reduce((sum, d) =&gt; sum + d.size, 0);
+  if (totalSize + doc.size &gt; MAX_TOTAL_SIZE) {
+    throw new Error('Total document size exceeds 50 MB limit');
+  }
+  
+  set({ documents: [...state.documents, doc] });
+  return true;
+}</code></pre>
+<h4 id="search-implementation">Search Implementation</h4>
+<h4 id="embedding-search-primary">Embedding Search (Primary)</h4>
+<pre><code class="language-typescript">async function searchChunks(query: string, topK = 3): Promise&lt;RagChunk[]&gt; {
+  const state = get();
+  if (!state.enabled || state.documents.length === 0) return [];
+  
+  const allChunks = state.documents.flatMap(d =&gt; d.chunks);
+  if (allChunks.length === 0) return [];
+  
+  try {
+    // Try embedding search
+    const queryEmbedding = await embedTexts([query]);
+    const scored = allChunks.map(chunk =&gt; ({
+      chunk,
+      score: cosineSimilarity(queryEmbedding[0], chunk.embedding),
+    }));
+    return scored.sort((a, b) =&gt; b.score - a.score)
+                 .slice(0, topK)
+                 .map(s =&gt; s.chunk);
+  } catch {
+    // Fallback to TF-IDF
+    return tfidfSearch(query, allChunks, topK);
+  }
+}</code></pre>
+<h4 id="tf-idf-fallback">TF-IDF Fallback</h4>
+<p>When embeddings are unavailable, TF-IDF cosine similarity is used:</p>
+<pre><code class="language-typescript">function tfidfSearch(query: string, chunks: RagChunk[], topK: number): RagChunk[] {
+  // 1. Build vocabulary from all chunks + query
+  const vocab = buildVocabulary([...chunks.map(c =&gt; c.text), query]);
+  
+  // 2. Compute TF-IDF vectors
+  const queryVector = computeTfidfVector(query, vocab, chunks.length);
+  const chunkVectors = chunks.map(c =&gt; computeTfidfVector(c.text, vocab, chunks.length));
+  
+  // 3. Compute cosine similarity
+  const scored = chunkVectors.map((vec, i) =&gt; ({
+    chunk: chunks[i],
+    score: cosineSimilarity(queryVector, vec),
+  }));
+  
+  // 4. Return top K
+  return scored.sort((a, b) =&gt; b.score - a.score)
+               .slice(0, topK)
+               .map(s =&gt; s.chunk);
+}</code></pre>
+<hr>
+<h3 id="data-validation">Data Validation</h3>
+<p>All persisted data is validated on load to prevent corrupted data from crashing the app.</p>
+<h4 id="validation-functions">Validation Functions</h4>
+<pre><code class="language-typescript">// src/utils/validation.ts
+
+function validateCanvasData(data: unknown): data is CanvasData {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record&lt;string, unknown&gt;;
+  if (!Array.isArray(d.nodes)) return false;
+  if (!Array.isArray(d.edges)) return false;
+  // Validate each node has required fields
+  return d.nodes.every(n =&gt; validateNodeData(n.data));
+}
+
+function validateUIState(data: unknown): data is Partial&lt;UIState&gt; {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record&lt;string, unknown&gt;;
+  return (
+    typeof d.theme === 'string' &amp;&amp;
+    typeof d.temperature === 'number' &amp;&amp;
+    // ... other field checks
+  );
+}
+
+function validateRagDocs(data: unknown): data is RagDocument[] {
+  if (!Array.isArray(data)) return false;
+  return data.every(doc =&gt;
+    typeof doc.id === 'string' &amp;&amp;
+    typeof doc.filename === 'string' &amp;&amp;
+    Array.isArray(doc.chunks)
+  );
+}</code></pre>
+<h4 id="error-recovery">Error Recovery</h4>
+<p>When validation fails, the store <strong>resets to defaults</strong>:</p>
+<pre><code class="language-typescript">// In store initialization:
+const stored = localStorage.getItem('mosaic-ui');
+if (stored) {
+  try {
+    const parsed = JSON.parse(stored);
+    if (validateUIState(parsed)) {
+      set(parsed);
+    } else {
+      console.warn('Invalid UI state in localStorage, using defaults');
+      localStorage.removeItem('mosaic-ui');
+    }
+  } catch {
+    localStorage.removeItem('mosaic-ui');
+  }
+}</code></pre>
+<hr>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<h4 id="debounced-saves">Debounced Saves</h4>
+<ul>
+<li>Canvas saves are debounced at 300ms</li>
+<li>This prevents multiple saves during rapid edits (e.g., typing in a node)</li>
+<li><code>flushSave()</code> provides an immediate save when needed (e.g., before switching canvases)</li>
+</ul>
+<h4 id="selective-subscriptions">Selective Subscriptions</h4>
+<p>Zustand allows components to subscribe to specific slices of state:</p>
+<pre><code class="language-typescript">// Good: Only re-renders when theme changes
+const theme = useUIStore(s =&gt; s.theme);
+
+// Bad: Re-renders on ANY uiStore change
+const state = useUIStore();</code></pre>
+<p>Mosaic's components use selective subscriptions throughout for optimal performance.</p>
+<h4 id="avoiding-common-zustand-pitfalls">Avoiding Common Zustand Pitfalls</h4>
+<p><strong>Pitfall 1: Creating new objects in selectors</strong></p>
+<pre><code class="language-typescript">// Bad — creates new object every render, causing infinite re-renders
+const { theme, temperature } = useUIStore(s =&gt; ({ theme: s.theme, temperature: s.temperature }));
+
+// Good — select primitives individually
+const theme = useUIStore(s =&gt; s.theme);
+const temperature = useUIStore(s =&gt; s.temperature);</code></pre>
+<p><strong>Pitfall 2: Mutating state directly</strong></p>
+<pre><code class="language-typescript">// Bad — Zustand uses shallow comparison; mutations don't trigger updates
+state.nodes.push(newNode);
+
+// Good — always create new references
+set(state =&gt; ({ nodes: [...state.nodes, newNode] }));</code></pre>
+<p><strong>Pitfall 3: Over-subscribing</strong></p>
+<pre><code class="language-typescript">// Bad — component re-renders on ANY state change
+const store = useCanvasStore();
+
+// Good — only re-render when specific values change
+const nodes = useCanvasStore(s =&gt; s.nodes);
+const activeNodeId = useCanvasStore(s =&gt; s.activeNodeId);</code></pre>
+<h4 id="localstorage-limits">localStorage Limits</h4>
+<p>localStorage typically has a 5-10 MB limit per origin. Mosaic's data fits comfortably within this:</p>
+<ul>
+<li>Canvas data: ~10-100 KB per canvas (varies with conversation size)</li>
+<li>Analytics: ~50 KB</li>
+<li>UI state: ~2 KB</li>
+<li>RAG documents: Variable (up to 50 MB on disk, but typically much less)</li>
+</ul>
+<p>For very large canvases with extensive RAG documents, users may approach localStorage limits. Future versions may implement a Tauri command for file-based storage.</p>
+<h4 id="data-migration-strategy">Data Migration Strategy</h4>
+<p>When upgrading Mosaic to a newer version, stored data may need migration:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Version Change</th><th>Migration Needed</th><th>Automatic?</th></tr></thead>
+<tbody>
+<tr><td>0.1.0 → 0.2.0</td><td>Yes (new store fields)</td><td>Yes (defaults for new fields)</td></tr>
+<tr><td>Future patches</td><td>No (backward compatible)</td><td>Always</td></tr>
+<tr><td>Future minors</td><td>Maybe</td><td>Validation + defaults</td></tr>
+</tbody>
+</table></div>
+<p>The validation layer (<code>validateCanvasData</code>, <code>validateUIState</code>, <code>validateRagDocs</code>) handles migration gracefully:</p>
+<ol>
+<li>Load stored data</li>
+<li>Validate against current schema</li>
+<li>If valid, use as-is (extra fields are preserved)</li>
+<li>If invalid, reset to defaults (with console warning)</li>
+<li>Missing fields get defaults from the store's initial state</li>
+</ol>
+<p>This means canvases created in v0.1.0 will still open in v0.2.0 — missing fields like <code>bookmarkedIds</code> will simply default to an empty array.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="api-reference.html#store-api-reference">Store API Reference</a>— Complete store API documentation</li>
+<li><a href="architecture.html#overall-architecture-and-data-flow">Overall Architecture and Data Flow</a> — How stores fit into the application</li>
+<li><a href="security.html#security-model">Security Model</a> — Data protection and validation</li>
+</ul>
+</section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking (category pages)
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+<script>
+// Node background
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
+</html>

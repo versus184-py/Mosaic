@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic documentation — Tutorials — Documentation">
+<meta property="og:title" content="Mosaic — Tutorials — Documentation">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — Tutorials — Documentation</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="wiki.html">Docs</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="wiki.html">Docs</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<section class="tech-hero">
+  <h1>Tutorials</h1>
+  <p>Step-by-step walkthroughs for branching, RAG, code execution, customization, and advanced workflows.</p>
+</section>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">Tutorials</div>
+      <a href="#tutorial-branching-and-parallel-exploration">Tutorial: Branching and Parallel Exploration</a>
+<a href="#tutorial-using-rag-with-documents">Tutorial: Using RAG with Documents</a>
+<a href="#tutorial-advanced-features-in-practice">Tutorial: Advanced Features in Practice</a>
+<a href="#tutorial-customizing-mosaic">Tutorial: Customizing Mosaic</a>
+<a href="#tutorial-running-code-inline">Tutorial: Running Code Inline</a>
+      <a href="wiki.html" style="margin-top:8px;color:var(--accent)">&larr; All docs</a>
+    </div>
+  </aside>
+  <main class="tech-content">
+    <section id="tutorial-branching-and-parallel-exploration"><h2 id="tutorial-branching-and-parallel-exploration">Tutorial: Branching and Parallel Exploration</h2>
+<p>This tutorial explores Mosaic's core feature — <strong>conversation branching</strong> — in depth. You'll learn strategies for effective branching, how to compare parallel paths, and how to manage complex conversation trees.</p>
+<p><strong>Estimated time</strong>: 20 minutes</p>
+<hr>
+<h3 id="why-branch">Why Branch?</h3>
+<p>Traditional AI chats are linear: you ask, the AI answers, you ask again. This works for sequential tasks but fails when you want to:</p>
+<ul>
+<li><strong>Compare approaches</strong>: "Write this function in Python vs JavaScript"</li>
+<li><strong>Explore tangents</strong>: "What about this alternative interpretation?"</li>
+<li><strong>Iterate on details</strong>: "Refine this specific part while keeping the rest"</li>
+<li><strong>Backtrack</strong>: "Go back to that earlier point and try a different direction"</li>
+</ul>
+<p>Mosaic's canvas solves all of these. Every node is a potential fork.</p>
+<hr>
+<h3 id="step-1-set-up-a-base-conversation">Step 1: Set Up a Base Conversation</h3>
+<p>Start with a question that has multiple valid approaches:</p>
+<ol>
+<li>Click the root node</li>
+<li>Type: <code>What are different approaches to handling errors in API design?</code></li>
+<li>Press Enter and wait for the AI's response</li>
+</ol>
+<p>The AI will likely discuss several approaches (HTTP status codes, retry strategies, circuit breakers, etc.).</p>
+<hr>
+<h3 id="step-2-branch-from-a-specific-point">Step 2: Branch from a Specific Point</h3>
+<p>Now, instead of continuing linearly, branch from the AI's response:</p>
+<ol>
+<li>Click on the AI's response node</li>
+<li>Type: <code>Explain the circuit breaker pattern in detail with a code example</code></li>
+<li>Press Enter</li>
+</ol>
+<p>This creates a new branch exploring one specific topic from the response.</p>
+<hr>
+<h3 id="step-3-create-a-second-branch">Step 3: Create a Second Branch</h3>
+<p>Go back to the original response and create a different branch:</p>
+<ol>
+<li>Again click the <strong>same</strong> AI response node (the original one)</li>
+<li>Type: <code>Compare REST and GraphQL error handling approaches</code></li>
+<li>Press Enter</li>
+</ol>
+<p>Now you have:</p>
+<pre><code>[root] → [You: API design approaches] → [AI: response]
+                                              ├── [You: circuit breaker] → [AI: response]
+                                              └── [You: REST vs GraphQL] → [AI: response]</code></pre>
+<p>You can now <strong>drag the nodes</strong> to arrange them side by side for comparison.</p>
+<hr>
+<h3 id="step-4-compare-responses">Step 4: Compare Responses</h3>
+<p>With two parallel branches, you can:</p>
+<ol>
+<li><strong>Drag nodes</strong>: Move the two branch responses so they sit next to each other</li>
+<li><strong>Review side-by-side</strong>: Read both responses to compare their approaches</li>
+<li><strong>Continue each branch</strong>: Click into either response and continue the conversation independently</li>
+</ol>
+<p>This is impossible in a linear chat — you'd have to choose one direction and lose the other.</p>
+<hr>
+<h3 id="step-5-deep-branching">Step 5: Deep Branching</h3>
+<p>Branches can themselves be branched. Let's go deeper:</p>
+<ol>
+<li>Click the <strong>circuit breaker</strong> response node</li>
+<li>Ask: <code>Show me a Python implementation of circuit breaker with asyncio</code></li>
+<li>Then click the <strong>REST vs GraphQL</strong> response node</li>
+<li>Ask: <code>What tools help implement GraphQL error handling?</code></li>
+</ol>
+<p>Your tree now has depth:</p>
+<pre><code>[root]
+  └── [AI: API design]
+        ├── [You: circuit breaker] → [AI: response]
+        │                               └── [You: Python asyncio] → [AI: response]
+        └── [You: REST vs GraphQL] → [AI: response]
+                                        └── [You: tools] → [AI: response]</code></pre>
+<hr>
+<h3 id="step-6-use-collapse-to-manage-clutter">Step 6: Use Collapse to Manage Clutter</h3>
+<p>As the tree grows, you can collapse branches you don't need to see:</p>
+<ol>
+<li>Right-click the <strong>circuit breaker</strong> response node</li>
+<li>Select <strong>Collapse</strong></li>
+<li>The entire circuit breaker subtree collapses into a badge: <code>+2</code></li>
+</ol>
+<pre><code>[root]
+  └── [AI: API design]
+        ├── [AI: circuit breaker (+2)]
+        └── [You: REST vs GraphQL] → [AI: response]
+                                        └── [You: tools] → [AI: response]</code></pre>
+<p>To expand: click the badge or right-click → <strong>Expand</strong>.</p>
+<hr>
+<h3 id="step-7-bookmark-important-findings">Step 7: Bookmark Important Findings</h3>
+<p>As you explore, bookmark the most valuable responses:</p>
+<ol>
+<li>Right-click a particularly insightful response</li>
+<li>Select <strong>Bookmark</strong> (star icon appears)</li>
+<li>Later, click the <strong>Bookmarks</strong> button (★) in the TopBar to see only bookmarked nodes</li>
+<li>This is great for distilling key takeaways from a large canvas</li>
+</ol>
+<hr>
+<h3 id="step-8-prune-irrelevant-branches">Step 8: Prune Irrelevant Branches</h3>
+<p>If some branches turned out to be less useful:</p>
+<ol>
+<li>Click the <strong>Prune</strong> button (🧹) in the TopBar</li>
+<li>Enter a goal, for example: <code>I want to learn about practical API error handling patterns</code></li>
+<li>Mosaic scores each branch against this goal</li>
+<li>Low-scoring branches are dimmed</li>
+</ol>
+<p>You can restore pruned branches anytime via the Prune Banner.</p>
+<hr>
+<h3 id="step-9-distill-insights">Step 9: Distill Insights</h3>
+<p>When you've finished exploring, distill everything into a summary:</p>
+<ol>
+<li>Click the <strong>Distill</strong> button (🌿) in the TopBar</li>
+<li>Mosaic collects all leaf nodes and sends them to the AI</li>
+<li>A new <strong>distillation node</strong> appears at the bottom of the canvas</li>
+<li>It summarizes all branches into a coherent synthesis</li>
+<li>Gold dashed edges connect the distillation to its source leaves</li>
+</ol>
+<hr>
+<h3 id="step-10-use-parallel-debate-for-multi-model-comparison">Step 10: Use Parallel Debate for Multi-Model Comparison</h3>
+<p>For critical decisions, compare how different models handle the same input:</p>
+<ol>
+<li>Open Settings → <strong>Debate Models</strong></li>
+<li>Select 2-3 models (e.g., Mistral Large, GPT-4o, Claude Sonnet)</li>
+<li>Click a node and type your question</li>
+<li>Press <strong>Shift+Enter</strong> instead of Enter</li>
+<li>Multiple response nodes fan out, one per model</li>
+</ol>
+<pre><code>                           ┌── [Mistral Large response]
+[You: complex question] ───┼── [GPT-4o response]
+                           └── [Claude Sonnet response]</code></pre>
+<p>You can then branch from any of these responses, mix insights across models, or distill the debate into a synthesis.</p>
+<hr>
+<h3 id="branching-strategies">Branching Strategies</h3>
+<h4 id="strategy-1-the-star">Strategy 1: The Star</h4>
+<p>Create several branches from a single response to explore different angles:</p>
+<pre><code>[root] → [broad question]
+              ├── [angle A]
+              ├── [angle B]
+              ├── [angle C]
+              └── [angle D]</code></pre>
+<p>Best for: Exploring a complex topic from multiple perspectives.</p>
+<h4 id="strategy-2-the-chain">Strategy 2: The Chain</h4>
+<p>A single deep branch that goes deeper on a specific topic:</p>
+<pre><code>[root] → [question] → [follow-up] → [deep dive] → [implementation]</code></pre>
+<p>Best for: Sequential problem-solving, debugging, tutorials.</p>
+<h4 id="strategy-3-the-tree">Strategy 3: The Tree</h4>
+<p>Full branching with multiple levels, combining Star and Chain:</p>
+<pre><code>[root]
+  ├── [angle A] → [deeper] → [even deeper]
+  ├── [angle B] → [deeper]
+  └── [angle C]</code></pre>
+<p>Best for: Complex research where you need breadth and depth.</p>
+<h4 id="strategy-4-the-debate">Strategy 4: The Debate</h4>
+<p>Use multiple models on the same input via parallel debate:</p>
+<pre><code>[question] → Mistral, GPT-4o, Claude (simultaneous)</code></pre>
+<p>Best for: Fact-checking, comparing reasoning styles, cost/quality analysis.</p>
+<hr>
+<h4 id="strategy-5-the-synthesis">Strategy 5: The Synthesis</h4>
+<p>Explore several branches, then distill into a summary:</p>
+<pre><code>[root] → [broad question]
+              ├── [angle A] → [deep dive A]
+              ├── [angle B] → [deep dive B]
+              └── [angle C] → [deep dive C]
+                                      │
+                                      └── [Distillation: synthesis of A, B, C]</code></pre>
+<p>Best for: Research where you need to explore multiple angles and then synthesize findings.</p>
+<h4 id="strategy-6-the-debate">Strategy 6: The Debate</h4>
+<p>Use parallel debate to get multiple perspectives:</p>
+<pre><code>[question] → Mistral, GPT-4o, Claude (simultaneous)
+                  │
+                  ├── [AI response from Model A]
+                  ├── [AI response from Model B]
+                  └── [AI response from Model C]</code></pre>
+<p>Best for: Fact-checking, comparing reasoning styles, cost/quality analysis.</p>
+<h4 id="strategy-7-the-garden">Strategy 7: The Garden</h4>
+<p>Allow the conversation to grow organically with tendrils:</p>
+<pre><code>[root] → [question] → [AI response]
+                        ├── [tendril: follow-up 1] → materialize → branch
+                        ├── [tendril: follow-up 2] → (auto-dismissed)
+                        └── [tendril: follow-up 3] → materialize → branch → deep dive</code></pre>
+<p>Best for: Exploratory conversations where you don't know the direction in advance.</p>
+<hr>
+<h3 id="real-world-branching-scenarios">Real-World Branching Scenarios</h3>
+<h4 id="scenario-code-debugging">Scenario: Code Debugging</h4>
+<pre><code>[root: "Help me debug this Python error"]
+  └── [AI: suggests 3 possible causes]
+        ├── [Branch: "Check database connection pooling"]
+        │     └── [AI: deep dive into connection pool settings]
+        ├── [Branch: "Check async/await patterns"]
+        │     └── [AI: reviews code for async issues]
+        └── [Branch: "Check environment variables"]
+              └── [AI: walks through env config]</code></pre>
+<h4 id="scenario-essay-writing">Scenario: Essay Writing</h4>
+<pre><code>[root: "Outline an essay on AI ethics"]
+  └── [AI: provides outline with 5 sections]
+        ├── [Branch: "Expand privacy section"]
+        │     └── [AI: detailed privacy analysis]
+        ├── [Branch: "Expand bias section"]
+        │     └── [AI: detailed bias analysis]
+        └── [Branch: "Write introduction"]
+              └── [AI: draft introduction]
+                    └── [Branch: "Make it more engaging"]
+                          └── [AI: revised introduction]</code></pre>
+<h4 id="scenario-meeting-preparation">Scenario: Meeting Preparation</h4>
+<pre><code>[root: "Prepare for Q3 board meeting"]
+  └── [AI: suggests preparation areas]
+        ├── [Branch: "Financial highlights"]
+        │     └── [AI: revenue, costs, projections]
+        ├── [Branch: "Product roadmap"]
+        │     └── [AI: feature launch timeline]
+        └── [Branch: "Competitive landscape"]
+              └── [AI: competitor analysis]
+                    └── [Distillation: executive summary]</code></pre>
+<hr>
+<h3 id="tips-for-effective-branching">Tips for Effective Branching</h3>
+<ol>
+<li><strong>Name your branches mentally</strong> — know what each branch is exploring</li>
+<li><strong>Collapse early</strong> — reduce visual noise for branches you're done with</li>
+<li><strong>Bookmark key insights</strong> — mark responses that contain critical information</li>
+<li><strong>Distill before archiving</strong> — synthesize branches before moving on</li>
+<li><strong>Use auto-layout</strong> — press F to fit all nodes when the tree gets messy</li>
+<li><strong>Rearrange spatially</strong> — drag nodes to group related branches together</li>
+<li><strong>Prune ruthlessly</strong> — dim branches that don't serve your goal</li>
+<li><strong>Leverage tendrils</strong> — let the AI suggest follow-ups to save typing time</li>
+<li><strong>Combine strategies</strong> — start with a Star, follow a Chain on one branch, then Distill</li>
+<li><strong>Export regularly</strong> — save important canvases before major restructuring</li>
+</ol>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="tutorials.html#tutorial-advanced-features-in-practice">Tutorial - Advanced Features in Practice</a> — Combine all features in one workflow</li>
+<li><a href="tutorials.html#tutorial-using-rag-with-documents">Tutorial - Using RAG with Documents</a> — Add document context to your branches</li>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — Deep dive into each advanced feature</li>
+</ul>
+</section>
+<section id="tutorial-using-rag-with-documents"><h2 id="tutorial-using-rag-with-documents">Tutorial: Using RAG with Documents</h2>
+<p>This tutorial walks you through Mosaic's <strong>Retrieval-Augmented Generation (RAG)</strong> system — uploading documents, enabling context-aware queries, and getting the most out of your data.</p>
+<p><strong>Estimated time</strong>: 15 minutes</p>
+<hr>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before starting, ensure:</p>
+<ul>
+<li>Mosaic is installed and running</li>
+<li>At least one LLM provider is configured (API key entered in Settings)</li>
+<li>You have a text file, markdown file, or code file ready to upload</li>
+</ul>
+<hr>
+<h3 id="step-1-open-the-documentpanel">Step 1: Open the DocumentPanel</h3>
+<ol>
+<li>Click the <strong>Documents</strong> icon (📄) in the TopBar</li>
+<li>The DocumentPanel slides in from the right side</li>
+<li>You'll see an empty document list with an Upload button</li>
+</ol>
+<hr>
+<h3 id="step-2-upload-a-document">Step 2: Upload a Document</h3>
+<ol>
+<li>Click <strong>Upload</strong></li>
+<li>Select a file from your computer (supports .txt, .md, .json, .csv, .py, .js, .ts, .rs, .go, .java, .c, .cpp, .css, .html, .xml, .yaml, .yml)</li>
+<li>The file is processed automatically — you'll see it appear in the list</li>
+</ol>
+<h4 id="what-happens-during-upload">What Happens During Upload</h4>
+<ol>
+<li>The file is read as text</li>
+<li>The text is split into <strong>chunks</strong> of 800 characters with 100 characters of overlap</li>
+<li>Each chunk is stored with metadata (source filename, chunk index)</li>
+<li>The document appears in the panel with:</li>
+</ol>
+<p>   - Filename</p>
+<p>   - File size</p>
+<p>   - Number of chunks created</p>
+<h4 id="example">Example</h4>
+<p>Upload a file called <code>my-notes.txt</code> (3,200 characters). It will be split into approximately 5 chunks (800 × 4 = 3,200 + overlap).</p>
+<hr>
+<h3 id="step-3-enable-rag">Step 3: Enable RAG</h3>
+<p>Toggle the <strong>RAG Enable</strong> switch in the DocumentPanel:</p>
+<ul>
+<li><strong>ON</strong>: The top 3 most relevant chunks from your documents are automatically included with every AI query</li>
+<li><strong>OFF</strong>: Documents are stored but not searched</li>
+</ul>
+<p>Make sure it's toggled <strong>ON</strong>.</p>
+<hr>
+<h3 id="step-4-ask-questions-about-your-document">Step 4: Ask Questions About Your Document</h3>
+<p>Now ask the AI questions about your uploaded content:</p>
+<ol>
+<li>Click the root node (or any existing node)</li>
+<li>Type a question related to your document, for example:</li>
+</ol>
+<pre><code>What are the key points about error handling mentioned in my notes?</code></pre>
+<ol>
+<li>Press Enter</li>
+</ol>
+<p>The AI's response should reference content from your document. Unlike a normal query (where the AI relies only on its training data), the RAG system has injected relevant context from your uploaded file.</p>
+<hr>
+<h3 id="step-5-compare-rag-vs-non-rag-responses">Step 5: Compare RAG vs Non-RAG Responses</h3>
+<p>To see the difference RAG makes:</p>
+<ol>
+<li>Toggle RAG <strong>OFF</strong> in the DocumentPanel</li>
+<li>Ask the same question again (branch from an earlier node)</li>
+</ol>
+<pre><code>What are the key points about error handling mentioned in my notes?</code></pre>
+<ol>
+<li>Note the difference: without RAG, the AI has no access to your document and may respond generically (or state it doesn't have access to your notes).</li>
+</ol>
+<ol>
+<li>Toggle RAG back <strong>ON</strong> for continued context-aware queries.</li>
+</ol>
+<hr>
+<h3 id="step-6-upload-multiple-documents">Step 6: Upload Multiple Documents</h3>
+<p>For richer context, upload several related documents:</p>
+<ol>
+<li>Upload a code file (e.g., <code>api-handler.py</code>)</li>
+<li>Upload a documentation file (e.g., <code>api-docs.md</code>)</li>
+<li>Upload a notes file (e.g., <code>meeting-notes.txt</code>)</li>
+</ol>
+<p>Now when you ask questions, the RAG system searches across <strong>all</strong> documents and returns the 3 most relevant chunks regardless of source.</p>
+<h4 id="example-cross-document-query">Example Cross-Document Query</h4>
+<pre><code>What's the relationship between the error handling strategy in api-handler.py
+and the requirements in the meeting notes?</code></pre>
+<p>The AI can synthesize information across all your documents.</p>
+<hr>
+<h3 id="step-7-use-rag-with-branching">Step 7: Use RAG with Branching</h3>
+<p>RAG works seamlessly with branching:</p>
+<ol>
+<li>Branch from a RAG-informed response</li>
+<li>Ask a follow-up that drills deeper into the document content</li>
+<li>Each branch query independently searches for relevant chunks</li>
+</ol>
+<p>This means each branch gets context tailored to its specific question, even when exploring different aspects of the same document.</p>
+<hr>
+<h3 id="step-8-rag-code-execution">Step 8: RAG + Code Execution</h3>
+<p>Combine RAG with code execution for powerful workflows:</p>
+<ol>
+<li>Upload a data file (e.g., <code>sales-data.csv</code>)</li>
+<li>Ask: <code>Analyze the sales trends in my data</code></li>
+<li>The AI sees the data context and can generate analysis code</li>
+<li>Run the generated Python code inline to see actual analysis</li>
+</ol>
+<p>Example:</p>
+<pre><code>Based on the sales data in the CSV I uploaded, write a Python script
+using pandas to calculate monthly totals and identify the best-performing month.</code></pre>
+<p>The AI will: (1) reference your document context, (2) write appropriate code, and (3) you can run it to see results.</p>
+<hr>
+<h3 id="managing-the-document-library">Managing the Document Library</h3>
+<h4 id="viewing-document-details">Viewing Document Details</h4>
+<p>Click the expand arrow on any document entry to see:</p>
+<ul>
+<li>Number of chunks</li>
+<li>Individual chunk previews</li>
+</ul>
+<h4 id="removing-documents">Removing Documents</h4>
+<p>Click the delete icon (trash) next to a document to remove it. Its chunks are immediately removed from the search index.</p>
+<h4 id="clearing-all-documents">Clearing All Documents</h4>
+<p>Click <strong>Clear All</strong> to remove all documents. A confirmation dialog appears.</p>
+<h4 id="storage-limits">Storage Limits</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Limit</th><th>Value</th><th>What Happens When Exceeded</th></tr></thead>
+<tbody>
+<tr><td>Max documents</td><td>50</td><td>Upload is rejected with a message</td></tr>
+<tr><td>Max total size</td><td>50 MB</td><td>Upload is rejected</td></tr>
+<tr><td>Max per file</td><td>10 MB</td><td>File is rejected</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<h4 id="the-ai-doesn-t-seem-to-know-about-my-document">"The AI doesn't seem to know about my document"</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Possible Cause</th><th>Solution</th></tr></thead>
+<tbody>
+<tr><td>RAG is toggled OFF</td><td>Check the toggle in DocumentPanel</td></tr>
+<tr><td>Query doesn't match document content</td><td>Try rephrasing with keywords from the document</td></tr>
+<tr><td>Embedding API is down</td><td>Mosaic falls back to TF-IDF, which is less semantically accurate</td></tr>
+<tr><td>Document is too large</td><td>Check that it's under 10 MB</td></tr>
+<tr><td>Document format not supported</td><td>Check the supported formats list</td></tr>
+</tbody>
+</table></div>
+<h4 id="only-some-documents-are-being-searched">"Only some documents are being searched"</h4>
+<p>The RAG system returns the <strong>top 3 chunks</strong> across all documents. If you have many documents, some may not be represented in the top results. Try more specific queries.</p>
+<h4 id="chunks-seem-too-small">"Chunks seem too small"</h4>
+<p>The default chunk size of 800 characters works well for most use cases. If you need larger context, consider:</p>
+<ul>
+<li>Breaking your document into smaller files focused on specific topics</li>
+<li>Using more specific queries that match fewer, more relevant chunks</li>
+</ul>
+<hr>
+<h3 id="advanced-understanding-the-rag-pipeline">Advanced: Understanding the RAG Pipeline</h3>
+<pre><code>Query: "What is the error handling strategy?"
+
+1. Query → Embedding API → Query Vector
+   (or TF-IDF vector if embeddings unavailable)
+
+2. For each chunk:
+   similarity = cosine(vector_query, vector_chunk)
+
+3. Top 3 chunks selected
+
+4. Context injected into system prompt:
+   [RELEVANT CONTEXT]
+   Source: api-docs.md
+   The error handling strategy uses circuit breakers...
+
+5. AI generates response with context</code></pre>
+<h3 id="chunking-strategy-explained">Chunking Strategy Explained</h3>
+<p>Mosaic uses fixed-size chunking with overlap:</p>
+<pre><code>Document text:
+[--- 800 chars ---][--- overlap 100 ---][--- 800 chars ---]
+[                                    ][--- overlap 100 ---][--- 800 chars ---]</code></pre>
+<p><strong>Why 800 characters?</strong></p>
+<ul>
+<li>Long enough to contain meaningful context (several paragraphs)</li>
+<li>Short enough to fit within most LLM context windows</li>
+<li>Multiple chunks can be included (top 3 = ~2,400 characters of context)</li>
+<li>Embedding models typically work best with 256-512 tokens (~200-800 words)</li>
+</ul>
+<p><strong>Why 100-character overlap?</strong></p>
+<ul>
+<li>Prevents information loss at chunk boundaries</li>
+<li>If a sentence spans two chunks, it appears in both</li>
+<li>Ensures context isn't cut mid-paragraph</li>
+<li>Increases recall for queries about boundary-spanning content</li>
+</ul>
+<h4 id="chunking-example">Chunking Example</h4>
+<p>For a 2,000-character document:</p>
+<pre><code>Chunk 1:  [characters 0-800]
+Chunk 2:  [characters 700-1500]  (overlaps 100 chars with chunk 1)
+Chunk 3:  [characters 1400-2000]  (overlaps 100 chars with chunk 2)</code></pre>
+<p>Total: 3 chunks covering the full document with overlap buffer at each boundary.</p>
+<p>See the <a href="user-guide.html#rag-system-guide">RAG System Guide</a> for a complete technical explanation.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#rag-system-guide">RAG System Guide</a> — Technical deep dive into the RAG system</li>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — Combine RAG with distillation, pruning, and debate</li>
+<li><a href="tutorials.html#tutorial-advanced-features-in-practice">Tutorial - Advanced Features in Practice</a> — Full workflow combining all features</li>
+</ul>
+</section>
+<section id="tutorial-advanced-features-in-practice"><h2 id="tutorial-advanced-features-in-practice">Tutorial: Advanced Features in Practice</h2>
+<p>This tutorial demonstrates how to combine all of Mosaic's advanced features into a single, powerful workflow. You'll start with a complex question, explore it through multiple models and branches, prune irrelevant paths, and distill the results into a synthesis.</p>
+<p><strong>Estimated time</strong>: 25 minutes</p>
+<hr>
+<h3 id="scenario">Scenario</h3>
+<p>You're evaluating <strong>database technologies</strong> for a new application. You want to compare PostgreSQL, MongoDB, and SQLite across several dimensions. This is a perfect use case for Mosaic's advanced features.</p>
+<hr>
+<h3 id="step-1-set-up-rag-context">Step 1: Set Up RAG Context</h3>
+<p>First, upload any relevant documents you have:</p>
+<ol>
+<li>Open the DocumentPanel (📄)</li>
+<li>Upload any notes, requirements documents, or comparison articles you have</li>
+<li>Enable RAG (toggle ON)</li>
+</ol>
+<p>Even without documents, the RAG system is useful — this step shows how to combine RAG with the other features.</p>
+<hr>
+<h3 id="step-2-start-with-parallel-debate">Step 2: Start with Parallel Debate</h3>
+<p>Let's see how different models approach the comparison:</p>
+<ol>
+<li>Open Settings → <strong>Debate Models</strong></li>
+<li>Select 2-3 models (e.g., Mistral Large, GPT-4o, Claude Sonnet 4)</li>
+<li>Click the root node</li>
+<li>Press <strong>Shift+Enter</strong> (not just Enter)</li>
+<li>Type:</li>
+</ol>
+<pre><code>Compare PostgreSQL, MongoDB, and SQLite for a new web application.
+Consider: performance, scalability, data modeling flexibility, ecosystem, and use cases.</code></pre>
+<ol>
+<li>Press Shift+Enter again (the text is already in the input)</li>
+</ol>
+<p>You'll see multiple response nodes fan out, one for each model:</p>
+<pre><code>                    ┌── [Mistral Large: comprehensive comparison]
+[You: comparison] ──┼── [GPT-4o: structured comparison with tables]
+                    └── [Claude: nuanced analysis with tradeoffs]</code></pre>
+<hr>
+<h3 id="step-3-review-confidence-scores">Step 3: Review Confidence Scores</h3>
+<p>After each response completes, look for the <strong>confidence badge</strong> (a number in the corner of each response node):</p>
+<ul>
+<li>Mistral Large: 92</li>
+<li>GPT-4o: 88</li>
+<li>Claude Sonnet: 95</li>
+</ul>
+<p>Claude's response has the highest confidence. This might be the one to explore first, but let's branch from all of them.</p>
+<hr>
+<h3 id="step-4-branch-from-each-model">Step 4: Branch from Each Model</h3>
+<p>Explore each model's response by branching:</p>
+<ol>
+<li>Click Mistral Large's response and ask about <strong>scalability</strong>:</li>
+</ol>
+<pre><code>Can you elaborate on PostgreSQL's horizontal scaling options?</code></pre>
+<ol>
+<li>Click GPT-4o's response and ask about <strong>schema flexibility</strong>:</li>
+</ol>
+<pre><code>How does MongoDB's schema-less design help in rapid prototyping?</code></pre>
+<ol>
+<li>Click Claude's response and ask about <strong>performance</strong>:</li>
+</ol>
+<pre><code>Under what conditions does SQLite outperform the other two?</code></pre>
+<p>Your canvas now has three branches:</p>
+<pre><code>[root → comparison]
+  ├── [Mistral: comparison] → [You: scalability] → [AI: response]
+  ├── [GPT-4o: comparison] → [You: schema] → [AI: response]
+  └── [Claude: comparison] → [You: performance] → [AI: response]</code></pre>
+<hr>
+<h3 id="step-5-use-tendril-suggestions">Step 5: Use Tendril Suggestions</h3>
+<p>As each branch response completes, look for <strong>suggestion nodes</strong> (dimmer nodes connected with dotted lines). These are AI-generated follow-up questions.</p>
+<ul>
+<li>From the scalability branch, a suggestion might be: "How does read replication work in PostgreSQL?"</li>
+<li>From the schema branch: "What are the trade-offs of MongoDB's document model?"</li>
+<li>From the performance branch: "When should you avoid SQLite?"</li>
+</ul>
+<p>Click a suggestion to materialize it into a real branch. This saves you from typing follow-up questions — the AI predicts what you might want to ask next.</p>
+<hr>
+<h3 id="step-6-add-a-deep-dive">Step 6: Add a Deep Dive</h3>
+<p>Let's go deeper on one branch:</p>
+<ol>
+<li>Click the latest node in the scalability branch</li>
+<li>Ask:</li>
+</ol>
+<pre><code>Show me a real-world architecture that uses PostgreSQL with horizontal scaling</code></pre>
+<ol>
+<li>After the response, ask:</li>
+</ol>
+<pre><code>Write a Python script that demonstrates connection pooling with PostgreSQL
+using asyncpg or psycopg2</code></pre>
+<ol>
+<li><strong>Run the code</strong> using the inline code execution button (▶️)</li>
+</ol>
+<p>Your scalability branch now has practical code you can test immediately.</p>
+<hr>
+<h3 id="step-7-prune-irrelevant-branches">Step 7: Prune Irrelevant Branches</h3>
+<p>By now, your canvas might have 8-10 nodes. Some branches may be less relevant to your goal. Let's prune:</p>
+<ol>
+<li>Click the <strong>Prune</strong> button (🧹) in the TopBar</li>
+<li>When asked for a goal, enter:</li>
+</ol>
+<pre><code>I'm trying to decide which database to use for a high-traffic web application
+with flexible data requirements</code></pre>
+<ol>
+<li>Mosaic scores each leaf branch against this goal</li>
+<li>Branches scoring below 40 are dimmed</li>
+</ol>
+<p>For example, if the "when to avoid SQLite" branch scored 72 (relevant), but a "JSONB in PostgreSQL" tangent scored 15 (less relevant), the tangent would be dimmed.</p>
+<p>The Prune Banner appears at the bottom. You can <strong>Restore All</strong> if you disagree with the pruning.</p>
+<hr>
+<h3 id="step-8-distill-the-canvas">Step 8: Distill the Canvas</h3>
+<p>Now distill all valuable branches into a synthesis:</p>
+<ol>
+<li>Click the <strong>Distill</strong> button (🌿) in the TopBar</li>
+<li>Mosaic collects all leaf nodes and sends them to the AI</li>
+<li>A new <strong>distillation node</strong> appears with a gold border</li>
+<li>Gold dashed edges connect it to all source leaves</li>
+</ol>
+<p>The distillation might produce:</p>
+<pre><code>## Database Comparison Synthesis
+
+### Winner by Use Case
+- **PostgreSQL**: Best for high-traffic web apps with complex queries
+  (supported by Mistral scalability deep-dive and Claude performance analysis)
+  
+- **MongoDB**: Best for rapid prototyping with evolving schemas
+  (supported by GPT-4o schema flexibility analysis)
+  
+- **SQLite**: Best for embedded/single-user scenarios
+  (performance branch confirms limitations at scale)
+
+### Recommendation
+For your high-traffic web application with flexible data requirements,
+PostgreSQL is the strongest candidate...</code></pre>
+<hr>
+<h3 id="step-9-export-the-result">Step 9: Export the Result</h3>
+<p>Your work is now complete. Export the entire canvas:</p>
+<ol>
+<li>Open Settings (⚙️)</li>
+<li>Click <strong>Export</strong></li>
+<li>A JSON file downloads: <code>mosaic-database-comparison.json</code></li>
+</ol>
+<p>This file contains all nodes, edges, positions, bookmarks, and analytics. Share it with colleagues or archive it for later reference.</p>
+<hr>
+<h3 id="step-10-import-and-continue-later">Step 10: Import and Continue Later</h3>
+<p>To revisit this analysis:</p>
+<ol>
+<li>Open Settings (⚙️)</li>
+<li>Click <strong>Import</strong></li>
+<li>Select your exported JSON file</li>
+<li>The entire canvas restores with all nodes, branches, and positions intact</li>
+</ol>
+<hr>
+<h3 id="pro-tips-for-power-users">Pro Tips for Power Users</h3>
+<h4 id="tip-1-combine-rag-with-distillation">Tip 1: Combine RAG with Distillation</h4>
+<p>Before distilling, upload relevant documents and enable RAG. The distillation will include context from your documents, making the synthesis more informed than one based purely on the AI's training data.</p>
+<h4 id="tip-2-use-pruning-before-distillation">Tip 2: Use Pruning Before Distillation</h4>
+<p>Pruning removes low-value branches before distillation, which means:</p>
+<ul>
+<li>Less context for the AI to process (lower token cost)</li>
+<li>Higher quality synthesis (only relevant content included)</li>
+<li>Faster distillation (fewer leaves to summarize)</li>
+</ul>
+<h4 id="tip-3-parallel-debate-then-compare-then-distill">Tip 3: Parallel Debate Then Compare Then Distill</h4>
+<p>The most powerful workflow:</p>
+<ol>
+<li>Run parallel debate (3-4 models)</li>
+<li>Branch from each model's response to explore specific aspects</li>
+<li>Compare confidence scores to identify the most reliable answers</li>
+<li>Prune branches that don't align with your goal</li>
+<li>Distill the remaining branches into a final synthesis</li>
+</ol>
+<h4 id="tip-4-save-intermediate-states">Tip 4: Save Intermediate States</h4>
+<p>Before major operations like pruning or clearing, export your canvas:</p>
+<ul>
+<li>Settings → Export → <code>mosaic-before-pruning.json</code></li>
+<li>This gives you a safety net to restore if pruning is too aggressive</li>
+</ul>
+<h4 id="tip-5-use-bookmarks-as-milestones">Tip 5: Use Bookmarks as Milestones</h4>
+<p>Bookmark nodes that represent key insights or decisions. Later:</p>
+<ul>
+<li>Filter to bookmarks-only to see the "table of contents" of your canvas</li>
+<li>Distill only bookmarked branches for a curated synthesis</li>
+<li>Share exported canvas with bookmarks as a summary document</li>
+</ul>
+<hr>
+<h3 id="complete-workflow-summary">Complete Workflow Summary</h3>
+<pre><code>1. Upload RAG documents (optional)
+2. Parallel debate with multiple models
+3. Review confidence scores
+4. Branch from each model's response
+5. Follow suggestion tendrils
+6. Deep dive with code execution
+7. Prune irrelevant branches
+8. Distill into synthesis
+9. Export for sharing/archiving</code></pre>
+<p>This workflow took ~25 minutes and produced:</p>
+<ul>
+<li>Multi-model analysis</li>
+<li>3+ conversation branches</li>
+<li>Practical code examples</li>
+<li>AI-generated synthesis</li>
+<li>Exportable archive</li>
+</ul>
+<p>In a linear chat interface, this would require multiple separate conversations, manual copy-pasting, and significant context-switching. Mosaic's canvas handles it all in one spatial view.</p>
+<hr>
+<h3 id="time-saving-shortcuts-for-this-workflow">Time-Saving Shortcuts for This Workflow</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Goal</th><th>Shortcut / Action</th></tr></thead>
+<tbody>
+<tr><td>Start parallel debate</td><td><code>Shift+Enter</code> (instead of Enter)</td></tr>
+<tr><td>Open Settings</td><td>Click gear icon (⚙️)</td></tr>
+<tr><td>Fit all nodes</td><td>Press <code>F</code></td></tr>
+<tr><td>Delete a node</td><td>Select it → <code>Delete</code></td></tr>
+<tr><td>Undo a mistake</td><td><code>Ctrl+Z</code></td></tr>
+<tr><td>Bookmark important node</td><td>Right-click → Bookmark</td></tr>
+<tr><td>Open search</td><td><code>Ctrl+F</code></td></tr>
+<tr><td>New canvas</td><td><code>Ctrl+N</code></td></tr>
+<tr><td>Collapse a branch</td><td>Right-click → Collapse</td></tr>
+<tr><td>Export canvas</td><td>Settings → Export</td></tr>
+</tbody>
+</table></div>
+<p>Practice this workflow a few times. The combination of parallel debate → branching → pruning → distillation is where Mosaic's spatial canvas truly shines compared to traditional linear chat interfaces.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="tutorials.html#tutorial-customizing-mosaic">Tutorial - Customizing Mosaic</a> — Fine-tune system prompts, temperature, and theme</li>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — Deep dive into each feature's technical details</li>
+<li><a href="architecture.html#overall-architecture-and-data-flow">Overall Architecture and Data Flow</a> — How features interact under the hood</li>
+</ul>
+</section>
+<section id="tutorial-customizing-mosaic"><h2 id="tutorial-customizing-mosaic">Tutorial: Customizing Mosaic</h2>
+<p>This tutorial shows you how to tailor Mosaic to your specific needs — from writing effective system prompts and tuning temperature to choosing themes and optimizing your provider setup.</p>
+<p><strong>Estimated time</strong>: 15 minutes</p>
+<hr>
+<h3 id="step-1-write-an-effective-system-prompt">Step 1: Write an Effective System Prompt</h3>
+<p>The <strong>system prompt</strong> sets the AI's behavior, tone, and constraints. It's the single most powerful customization.</p>
+<h4 id="accessing-the-system-prompt">Accessing the System Prompt</h4>
+<ol>
+<li>Open Settings (⚙️)</li>
+<li>Find the <strong>System Prompt</strong> textarea</li>
+</ol>
+<h4 id="example-system-prompts">Example System Prompts</h4>
+<p><strong>For technical documentation</strong>:</p>
+<pre><code>You are a senior technical writer. Write clear, concise documentation
+with code examples. Use active voice. Include a "Prerequisites" section
+for any setup steps. Always explain WHY before HOW.</code></pre>
+<p><strong>For creative brainstorming</strong>:</p>
+<pre><code>You are a creative brainstorming partner. Generate diverse, unconventional
+ideas. Don't self-censor. Structure responses as: (1) The core idea,
+(2) Why it might work, (3) Potential challenges, (4) How to get started.</code></pre>
+<p><strong>For code review</strong>:</p>
+<pre><code>You are a senior software engineer conducting a code review. Analyze code for:
+- Correctness: does it work?
+- Performance: can it be optimized?
+- Maintainability: is it readable and well-structured?
+- Security: are there vulnerabilities?
+Be constructive and specific in your feedback.</code></pre>
+<h4 id="tips-for-good-system-prompts">Tips for Good System Prompts</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Do</th><th>Don't</th></tr></thead>
+<tbody>
+<tr><td>Be specific about tone and format</td><td>Use vague instructions like "be helpful"</td></tr>
+<tr><td>Include constraints (length, format)</td><td>Assume the AI knows your context</td></tr>
+<tr><td>Set clear role expectations</td><td>Overwhelm with contradictory instructions</td></tr>
+<tr><td>Keep it under 500 characters</td><td>Write a novel — concise prompts work better</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="step-2-tune-temperature">Step 2: Tune Temperature</h3>
+<p><strong>Temperature</strong> controls randomness in the AI's responses:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Range</th><th>Effect</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td>0.0 - 0.2</td><td>Low</td><td>Deterministic, focused, repetitive</td><td>Code generation, factual Q&A, data extraction</td></tr>
+<tr><td>0.3 - 0.7</td><td>Medium</td><td>Balanced creativity and precision</td><td>General conversation, analysis, explanations</td></tr>
+<tr><td>0.8 - 1.2</td><td>High</td><td>Creative, diverse, unpredictable</td><td>Brainstorming, creative writing, ideation</td></tr>
+<tr><td>1.3 - 2.0</td><td>Very High</td><td>Highly random, may be incoherent</td><td>Experimental, poetry, surreal content</td></tr>
+</tbody>
+</table></div>
+<h4 id="setting-temperature">Setting Temperature</h4>
+<ol>
+<li>Open Settings (⚙️)</li>
+<li>Adjust the <strong>Temperature</strong> slider (0.0 to 2.0)</li>
+</ol>
+<h4 id="practical-tips">Practical Tips</h4>
+<ul>
+<li><strong>Code generation</strong>: Use 0.1-0.2 for deterministic, correct code</li>
+<li><strong>Debugging/analysis</strong>: Use 0.3-0.5 for clear, logical analysis</li>
+<li><strong>Explanations</strong>: Use 0.5-0.7 for natural, readable explanations</li>
+<li><strong>Brainstorming</strong>: Use 0.8-1.0 for diverse ideas</li>
+<li><strong>Switch mid-conversation</strong>: You can change temperature between branches for different perspectives on the same topic</li>
+</ul>
+<hr>
+<h3 id="step-3-choose-a-theme">Step 3: Choose a Theme</h3>
+<p>Mosaic has 5 visual themes. The right theme reduces eye strain and improves focus.</p>
+<h4 id="theme-gallery">Theme Gallery</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Theme</th><th>Type</th><th>Background</th><th>Accent</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td><strong>Void</strong></td><td>Dark</td><td>Deep black/blue</td><td>Cool blue</td><td>Long coding sessions, low-light environments</td></tr>
+<tr><td><strong>Dusk</strong></td><td>Dark</td><td>Cosmic purple</td><td>Rich purple</td><td>Creative work, evening use</td></tr>
+<tr><td><strong>Sand</strong></td><td>Light</td><td>Warm beige</td><td>Earth tones</td><td>Daytime use, bright rooms</td></tr>
+<tr><td><strong>Snow</strong></td><td>Light</td><td>Clean cool gray</td><td>Blue-gray</td><td>Professional settings, readability</td></tr>
+<tr><td><strong>Sunrise</strong></td><td>Light</td><td>Golden warm</td><td>Gold tones</td><td>Morning use, warm environments</td></tr>
+</tbody>
+</table></div>
+<h4 id="switching-themes">Switching Themes</h4>
+<ol>
+<li>Open Settings (⚙️)</li>
+<li>Click a theme in the <strong>Theme</strong> grid</li>
+<li>The theme applies immediately</li>
+</ol>
+<h4 id="theme-auto-detection">Theme Auto-Detection</h4>
+<p>On first launch, Mosaic auto-detects your OS theme preference (dark/light) and selects the appropriate theme. You can override this manually.</p>
+<h4 id="accessibility">Accessibility</h4>
+<p>Mosaic respects your OS accessibility settings:</p>
+<ul>
+<li><code>prefers-reduced-motion</code>: Disables animations</li>
+<li><code>prefers-reduced-transparency</code>: Reduces glass effects</li>
+</ul>
+<hr>
+<h3 id="step-4-optimize-provider-configuration">Step 4: Optimize Provider Configuration</h3>
+<h4 id="provider-selection-strategy">Provider Selection Strategy</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Goal</th><th>Recommended Provider</th><th>Model</th></tr></thead>
+<tbody>
+<tr><td>Maximum quality</td><td>Anthropic</td><td>Claude Sonnet 4</td></tr>
+<tr><td>Best value</td><td>Mistral</td><td>Mistral Large</td></tr>
+<tr><td>Speed/simplicity</td><td>Mistral</td><td>Mistral Small</td></tr>
+<tr><td>Creative tasks</td><td>OpenAI</td><td>GPT-4o</td></tr>
+<tr><td>Local/offline</td><td>Ollama</td><td>Any local model</td></tr>
+<tr><td>Cost-sensitive</td><td>Ollama or Mistral Small</td><td>Local or Small</td></tr>
+</tbody>
+</table></div>
+<h4 id="multiple-provider-setup">Multiple Provider Setup</h4>
+<p>Configure all providers for maximum flexibility:</p>
+<ol>
+<li><strong>Mistral</strong>: Primary — fast, reliable, good value</li>
+<li><strong>OpenAI</strong>: Secondary — good for creative tasks</li>
+<li><strong>Anthropic</strong>: For complex reasoning tasks</li>
+<li><strong>Gemini</strong>: Alternative for specific tasks</li>
+<li><strong>Ollama</strong>: Offline/local when internet is unavailable</li>
+</ol>
+<h4 id="debate-model-configuration">Debate Model Configuration</h4>
+<p>For parallel debate, choose models with complementary strengths:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Combination</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td>Mistral Large + GPT-4o</td><td>General comparison</td></tr>
+<tr><td>Claude Sonnet + Mistral Large</td><td>High-quality reasoning</td></tr>
+<tr><td>Mistral Small + GPT-4o-mini</td><td>Cost-effective comparison</td></tr>
+<tr><td>All 4 providers</td><td>Comprehensive analysis</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="step-5-configure-canvas-preferences">Step 5: Configure Canvas Preferences</h3>
+<h4 id="minimap">Minimap</h4>
+<p>Toggle in Settings → Canvas → Minimap:</p>
+<ul>
+<li><strong>On</strong> (default): Shows an overview of all nodes in the bottom-right corner</li>
+<li><strong>Off</strong>: More canvas space, less visual distraction</li>
+</ul>
+<h4 id="confidence-scoring">Confidence Scoring</h4>
+<p>Toggle in Settings → Canvas → Confidence:</p>
+<ul>
+<li><strong>On</strong> (default): Each response shows a confidence badge</li>
+<li><strong>Off</strong>: Cleaner node appearance, saves one API call per response</li>
+</ul>
+<h4 id="suggestion-tendrils">Suggestion Tendrils</h4>
+<p>Toggle in Settings → Canvas → Tendrils:</p>
+<ul>
+<li><strong>On</strong> (default): Auto-generated follow-up suggestions after each response</li>
+<li><strong>Off</strong>: No suggestion nodes, less visual activity</li>
+</ul>
+<hr>
+<h3 id="step-6-master-auto-layout">Step 6: Master Auto-Layout</h3>
+<p>Auto-layout arranges nodes in a radial tree pattern. Useful when:</p>
+<ul>
+<li><strong>The canvas is messy</strong> after extensive branching</li>
+<li>You've <strong>dragged nodes around</strong> and want a clean arrangement</li>
+<li>After <strong>importing</strong> a canvas from another session</li>
+</ul>
+<p><strong>Trigger auto-layout</strong>:</p>
+<ol>
+<li>Settings → <strong>Auto-arrange</strong> (arranges entire canvas)</li>
+<li>Right-click a node → <strong>Auto-arrange</strong> (arranges from that node downward)</li>
+</ol>
+<hr>
+<h3 id="step-7-export-import-for-portability">Step 7: Export/Import for Portability</h3>
+<h4 id="export-workflow">Export Workflow</h4>
+<ol>
+<li>Complete your analysis</li>
+<li>Settings → <strong>Export</strong></li>
+<li>File downloads as <code>mosaic-{canvas-name}.json</code></li>
+<li>Share with team members or archive</li>
+</ol>
+<h4 id="import-workflow">Import Workflow</h4>
+<ol>
+<li>Settings → <strong>Import</strong></li>
+<li>Select a <code>.json</code> file</li>
+<li>Canvas is validated and loaded</li>
+<li>All nodes, edges, bookmarks, and analytics are restored</li>
+</ol>
+<h4 id="backup-strategy">Backup Strategy</h4>
+<ul>
+<li><strong>Daily</strong>: Export critical canvases at the end of each session</li>
+<li><strong>Before major changes</strong>: Export before trying experimental features</li>
+<li><strong>Sharing</strong>: Export a clean canvas without sensitive data</li>
+</ul>
+<hr>
+<h3 id="step-8-customize-with-ollama-local-models">Step 8: Customize with Ollama Local Models</h3>
+<p>For full control, run local models via Ollama:</p>
+<ol>
+<li>Install <a href="https://ollama.com/">Ollama</a></li>
+<li>Pull models: <code>ollama pull llama3.2</code> <code>ollama pull mistral</code></li>
+<li>Point Mosaic to <code>http://localhost:11434</code></li>
+<li>Click <strong>Detect</strong></li>
+</ol>
+<p><strong>Benefits of local models</strong>:</p>
+<ul>
+<li><strong>No API costs</strong> — runs entirely on your machine</li>
+<li><strong>Offline</strong> — works without internet</li>
+<li><strong>Privacy</strong> — data never leaves your computer</li>
+<li><strong>Custom models</strong> — use any model Ollama supports</li>
+</ul>
+<p><strong>Tradeoffs</strong>:</p>
+<ul>
+<li>Slower than cloud APIs (especially on CPU)</li>
+<li>Lower quality for most local models vs. cloud</li>
+<li>Requires significant RAM/VRAM</li>
+</ul>
+<hr>
+<h3 id="step-9-create-workflow-templates">Step 9: Create Workflow Templates</h3>
+<p>Once you've configured Mosaic perfectly, save your setup:</p>
+<ol>
+<li>Create a <strong>blank canvas</strong> with your ideal system prompt</li>
+<li>Configure your preferred theme, temperature, and provider</li>
+<li>Export this canvas as <code>template-default.json</code></li>
+<li>When starting a new project, <strong>Import</strong> this template</li>
+</ol>
+<p>You can create multiple templates for different use cases:</p>
+<ul>
+<li><code>template-code-review.json</code>: Low temperature, Mistral Large, system prompt for code</li>
+<li><code>template-brainstorm.json</code>: High temperature, GPT-4o, creative system prompt</li>
+<li><code>template-research.json</code>: Medium temperature, RAG enabled, analytical system prompt</li>
+</ul>
+<hr>
+<h3 id="quick-reference-settings-summary">Quick Reference: Settings Summary</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Setting</th><th>Location</th><th>Range/Options</th><th>Default</th></tr></thead>
+<tbody>
+<tr><td>API Keys</td><td>Settings → API Keys</td><td>Mistral, OpenAI, Anthropic, Gemini</td><td>Empty</td></tr>
+<tr><td>Ollama URL</td><td>Settings → Ollama</td><td>URL</td><td><code>http://localhost:11434</code></td></tr>
+<tr><td>System Prompt</td><td>Settings → System Prompt</td><td>Free text</td><td>Empty</td></tr>
+<tr><td>Temperature</td><td>Settings → Temperature</td><td>0.0 - 2.0</td><td>0.7</td></tr>
+<tr><td>Theme</td><td>Settings → Theme</td><td>Void, Dusk, Sand, Snow, Sunrise</td><td>Auto-detected</td></tr>
+<tr><td>Minimap</td><td>Settings → Canvas</td><td>On/Off</td><td>On</td></tr>
+<tr><td>Confidence</td><td>Settings → Canvas</td><td>On/Off</td><td>On</td></tr>
+<tr><td>Tendrils</td><td>Settings → Canvas</td><td>On/Off</td><td>On</td></tr>
+<tr><td>Debate Models</td><td>Settings → Debate Models</td><td>Multi-select</td><td>None</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — Deep dive into each advanced feature</li>
+<li><a href="community.html#contributing-guide">Contributing Guide</a> — Help improve Mosaic</li>
+<li><a href="user-guide.html#keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</a> — Complete UI documentation</li>
+</ul>
+</section>
+<section id="tutorial-running-code-inline"><h2 id="tutorial-running-code-inline">Tutorial: Running Code Inline</h2>
+<p>Mosaic lets you run <strong>JavaScript</strong> and <strong>Python</strong> code directly inside chat nodes. Code runs in a sandboxed environment — safe, isolated, and without network access (except for specific CDN hosts used by Pyodide).</p>
+<p><strong>Estimated time</strong>: 15 minutes</p>
+<hr>
+<h3 id="how-code-execution-works">How Code Execution Works</h3>
+<p>When an AI response contains a code block, Mosaic renders it with a <strong>Run</strong> button. You can also write your own code in the input. Code execution happens in:</p>
+<ul>
+<li><strong>JavaScript</strong>: A sandboxed Web Worker with strict globals — no <code>fetch</code>, <code>XMLHttpRequest</code>, <code>WebSocket</code>, or DOM access</li>
+<li><strong>Python</strong>: Pyodide (Python compiled to WebAssembly) running in the browser — sandboxed with allowlisted packages and blocked system APIs</li>
+</ul>
+<hr>
+<h3 id="step-1-run-javascript-from-an-ai-response">Step 1: Run JavaScript from an AI Response</h3>
+<ol>
+<li>Ask the AI a question that involves code:</li>
+</ol>
+<pre><code>Write a JavaScript function that checks if a string is a palindrome</code></pre>
+<ol>
+<li>The AI responds with a code block that includes a <strong>Run</strong> button</li>
+<li>Click <strong>Run</strong> ▶️ to execute the code</li>
+<li>The output appears below the code block</li>
+</ol>
+<p>Example output:</p>
+<pre><code>✅ "racecar" is a palindrome: true
+✅ "hello" is a palindrome: false</code></pre>
+<h4 id="what-you-ll-see">What You'll See</h4>
+<p>Each code block shows:</p>
+<ul>
+<li><strong>Language badge</strong> (e.g., <code>JavaScript</code> or <code>Python</code>)</li>
+<li><strong>Run button</strong> — click to execute</li>
+<li><strong>Collapse/Expand</strong> toggle for long code</li>
+<li><strong>Output pane</strong> — shows stdout, results, or errors</li>
+<li><strong>Dismiss</strong> button to clear output</li>
+</ul>
+<hr>
+<h3 id="step-2-run-python-from-an-ai-response">Step 2: Run Python from an AI Response</h3>
+<ol>
+<li>Ask for Python code:</li>
+</ol>
+<pre><code>Write a Python script using numpy to calculate the mean and median of a list</code></pre>
+<ol>
+<li>The AI responds with a Python code block</li>
+<li>Click <strong>Run</strong> ▶️</li>
+</ol>
+<blockquote><p><strong>Note</strong>: The first Python execution may take a few seconds while Pyodide loads (it downloads the Python WASM runtime from the CDN). Subsequent runs are instant.</p></blockquote>
+<hr>
+<h3 id="step-3-write-and-run-your-own-code">Step 3: Write and Run Your Own Code</h3>
+<p>You can execute custom code from the input field:</p>
+<ol>
+<li>Click any node and type code directly</li>
+<li>The AI will interpret it as a question. To ensure code execution, you can prefix with instructions:</li>
+</ol>
+<pre><code>Run this JavaScript:
+console.log("Hello from Mosaic!");
+console.log("2 + 2 =", 2 + 2);</code></pre>
+<ol>
+<li>Or for Python:</li>
+</ol>
+<pre><code>Run this Python:
+import numpy as np
+print(np.array([1,2,3,4,5]).mean())</code></pre>
+<p>The AI will reformat the code into a proper code block with a Run button.</p>
+<blockquote><p><strong>Tip</strong>: You don't actually need the AI to reformat. Just include the code block with the language specified: ```<code> </code>`<code>python </code>```</p></blockquote>
+<hr>
+<h3 id="step-4-use-the-python-repl-terminal">Step 4: Use the Python REPL Terminal</h3>
+<p>Mosaic includes a persistent <strong>Python REPL</strong> terminal for interactive coding:</p>
+<ol>
+<li>Click the <strong>terminal icon</strong> in the top bar (or use the floating terminal widget)</li>
+<li>A terminal window opens (520x320 pixels, draggable)</li>
+<li>Type Python commands directly:</li>
+</ol>
+<pre><code class="language-python">&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; np.random.randn(5)
+array([ 0.42, -1.23,  0.87,  2.01, -0.55])</code></pre>
+<h4 id="repl-features">REPL Features</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Feature</th><th>How</th></tr></thead>
+<tbody>
+<tr><td><strong>Persistent state</strong></td><td>Variables persist between commands</td></tr>
+<tr><td><strong>Command history</strong></td><td>Press ArrowUp/ArrowDown to cycle through history</td></tr>
+<tr><td><strong>Clear screen</strong></td><td>Type <code>clear()</code> or <code>!clear</code></td></tr>
+<tr><td><strong>Reset state</strong></td><td>Type <code>reset()</code> or <code>!reset</code></td></tr>
+<tr><td><strong>Multi-line</strong></td><td>Python handles multi-line input (functions, loops)</td></tr>
+</tbody>
+</table></div>
+<h4 id="repl-special-commands">REPL Special Commands</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Command</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>reset()</code> / <code>!reset</code></td><td>Reset Python environment (clear all variables)</td></tr>
+<tr><td><code>clear()</code> / <code>!clear</code></td><td>Clear terminal display</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="step-5-understanding-sandbox-limits">Step 5: Understanding Sandbox Limits</h3>
+<h4 id="javascript-restrictions">JavaScript Restrictions</h4>
+<p>The JavaScript sandbox blocks the following APIs for security:</p>
+<pre><code class="language-javascript">// These will throw errors:
+fetch('https://example.com');
+new XMLHttpRequest();
+new WebSocket('ws://example.com');
+new Worker('worker.js');
+localStorage.setItem('key', 'value');
+open('https://example.com');
+import('some-module');</code></pre>
+<p><strong>Allowlisted globals</strong> include: <code>Math</code>, <code>Date</code>, <code>JSON</code>, <code>Array</code>, <code>Object</code>, <code>String</code>, <code>Number</code>, <code>Boolean</code>, <code>Map</code>, <code>Set</code>, <code>Promise</code>, <code>RegExp</code>, <code>Error</code>, <code>console</code>, <code>setTimeout</code>, <code>clearTimeout</code>, <code>setInterval</code>, <code>clearInterval</code>, <code>parseInt</code>, <code>parseFloat</code>, <code>isNaN</code>, <code>isFinite</code>, <code>decodeURI</code>, <code>encodeURI</code>, <code>decodeURIComponent</code>, <code>encodeURIComponent</code>, <code>ArrayBuffer</code>, <code>Uint8Array</code>, <code>Int8Array</code>, <code>Uint16Array</code>, <code>Int16Array</code>, <code>Uint32Array</code>, <code>Int32Array</code>, <code>Float32Array</code>, <code>Float64Array</code>, <code>BigInt</code>, <code>Symbol</code>, <code>Reflect</code>, <code>Proxy</code>, <code>Math</code>, <code>Date</code>, <code>structuredClone</code>, <code>WeakMap</code>, <code>WeakSet</code>.</p>
+<h4 id="python-restrictions">Python Restrictions</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Restriction</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td><strong>Allowlisted packages</strong></td><td><code>numpy</code>, <code>scipy</code>, <code>pandas</code>, <code>matplotlib</code>, <code>sympy</code>, <code>requests</code>, <code>beautifulsoup4</code>, <code>lxml</code>, <code>Pillow</code>, <code>markdown</code>, <code>jinja2</code>, <code>pyyaml</code>, <code>toml</code>, <code>colorama</code>, <code>tqdm</code></td></tr>
+<tr><td><strong>Network fetch</strong></td><td>Only allowed to: <code>cdn.jsdelivr.net</code>, <code>pyodide-cdn2.iodide.io</code>, <code>files.pythonhosted.org</code></td></tr>
+<tr><td><strong>System modules blocked</strong></td><td><code>msvcrt</code>, <code>termios</code>, <code>fcntl</code>, and other platform-specific C extensions</td></tr>
+<tr><td><strong>Execution timeout</strong></td><td>30 seconds per execution</td></tr>
+</tbody>
+</table></div>
+<h4 id="why-these-restrictions">Why These Restrictions?</h4>
+<p>The sandbox ensures that:</p>
+<ol>
+<li><strong>AI-generated code cannot harm your system</strong> — no file system access, no network requests</li>
+<li><strong>Malicious code cannot exfiltrate data</strong> — API keys and local data are inaccessible</li>
+<li><strong>Code cannot make unauthorized API calls</strong> — only the Mistral API and Pyodide CDNs are reachable</li>
+</ol>
+<hr>
+<h3 id="step-6-confirm-before-running-ai-generated-code">Step 6: Confirm Before Running AI-Generated Code</h3>
+<p>For safety, the first time you run AI-generated code in a session, Mosaic shows a confirmation dialog:</p>
+<pre><code>⚠️ This code was generated by AI. Are you sure you want to run it?
+[Cancel] [Run Anyway]</code></pre>
+<p>This only appears once per session for AI-generated code blocks. Code you write yourself does not trigger this warning.</p>
+<hr>
+<h3 id="common-code-execution-scenarios">Common Code Execution Scenarios</h3>
+<h4 id="data-analysis-with-python">Data Analysis with Python</h4>
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+
+data = {'name': ['Alice', 'Bob', 'Charlie'],
+        'score': [85, 92, 78]}
+df = pd.DataFrame(data)
+print(df.describe())
+print(f"Mean score: {df['score'].mean()}")</code></pre>
+<h4 id="visualization-with-matplotlib">Visualization with matplotlib</h4>
+<pre><code class="language-python">import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 10, 100)
+y = np.sin(x)
+plt.plot(x, y)
+plt.title('Sine Wave')
+plt.show()</code></pre>
+<blockquote><p><strong>Note</strong>: matplotlib plots render inline in the output pane.</p></blockquote>
+<h4 id="algorithm-practice-in-javascript">Algorithm Practice in JavaScript</h4>
+<pre><code class="language-javascript">function fibonacci(n) {
+  if (n &lt;= 1) return n;
+  let a = 0, b = 1;
+  for (let i = 2; i &lt;= n; i++) {
+    [a, b] = [b, a + b];
+  }
+  return b;
+}
+
+for (let i = 0; i &lt; 10; i++) {
+  console.log(`fib(${i}) = ${fibonacci(i)}`);
+}</code></pre>
+<hr>
+<h3 id="what-happens-when-you-click-run">What Happens When You Click Run</h3>
+<p>Understanding the execution pipeline helps debug issues and set expectations:</p>
+<pre><code>1. User clicks "Run" on code block
+2. CodeBlock component extracts language and code text
+3. codeRunner.runCode(lang, code) called
+4.   → Creates Web Worker if not already running
+5.   → Generates unique execution ID (UUID)
+6.   → Sets 30-second timeout
+7.   → Posts message to Worker: { exec_id, lang, code }
+8. Worker receives message:
+9.   → JavaScript: new Function(...sandboxGlobals)(...globals)
+10.  → Python: pyodide.runPython(code) with output capture
+11. Worker sends messages back:
+12.  → stdout: captured console.log/print output
+13.  → result: return value
+14.  → error: error message + stack trace
+15. codeRunner collects output messages
+16. Promise resolves with CodeResult: { output, error?, executionTime? }
+17. CodeBlock component displays output/error in the output pane</code></pre>
+<p><strong>Total round trip</strong>: For simple JavaScript, typically 5-50ms. For Python (first run): 2-5 seconds (Pyodide loading). For Python (subsequent runs): 50-500ms.</p>
+<hr>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Problem</th><th>Cause</th><th>Solution</th></tr></thead>
+<tbody>
+<tr><td>"Pyodide failed to load"</td><td>Network issue or CDN unavailable</td><td>Check your internet connection; Pyodide is loaded from <code>cdn.jsdelivr.net</code></td></tr>
+<tr><td>"Execution timed out"</td><td>Code took longer than 30 seconds</td><td>Optimize your code or break it into smaller pieces</td></tr>
+<tr><td>"fetch is not defined"</td><td>JavaScript sandbox blocks fetch</td><td>Use Python with <code>requests</code> instead (allowlisted)</td></tr>
+<tr><td>"Module 'xyz' not found"</td><td>Package not in allowlist</td><td>Use an allowlisted package or implement without the dependency</td></tr>
+<tr><td>Python execution hangs</td><td>Large computation in WASM</td><td>WASM Python is slower than native; consider smaller datasets</td></tr>
+<tr><td>Output is empty</td><td>Code didn't produce output</td><td>Add <code>console.log()</code> or <code>print()</code> statements</td></tr>
+<tr><td>"ReferenceError: X is not defined"</td><td>X is not in the allowlist</td><td>Use only allowlisted globals or restructure code</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#canvas-and-node-system">Canvas and Node System</a> — Understand the full node system</li>
+<li><a href="tutorials.html#tutorial-advanced-features-in-practice">Tutorial - Advanced Features in Practice</a> — Combine code execution with other features</li>
+<li><a href="architecture.html#code-sandbox-architecture">Code Sandbox Architecture</a> — Deep dive into security and isolation</li>
+</ul>
+</section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking (category pages)
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+<script>
+// Node background
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
+</html>

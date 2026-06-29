@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic documentation — Security & Operations — Documentation">
+<meta property="og:title" content="Mosaic — Security & Operations — Documentation">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — Security & Operations — Documentation</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="wiki.html">Docs</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="wiki.html">Docs</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<section class="tech-hero">
+  <h1>Security & Operations</h1>
+  <p>Security model, troubleshooting guide, deployment pipeline, and distribution details.</p>
+</section>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">Security & Operations</div>
+      <a href="#security-model">Security Model</a>
+<a href="#troubleshooting-and-faq">Troubleshooting and FAQ</a>
+<a href="#deployment-and-distribution">Deployment and Distribution</a>
+      <a href="wiki.html" style="margin-top:8px;color:var(--accent)">&larr; All docs</a>
+    </div>
+  </aside>
+  <main class="tech-content">
+    <section id="security-model"><h2 id="security-model">Security Model</h2>
+<p>Mosaic takes security seriously. The application employs <strong>defense in depth</strong> — multiple independent security layers that protect users even if one layer is compromised.</p>
+<hr>
+<h3 id="security-layers">Security Layers</h3>
+<pre><code>Layer 1: Tauri CSP (Browser-level policy)
+Layer 2: Tauri Capabilities (System-level permissions)
+Layer 3: Web Worker Isolation (Code execution sandbox)
+Layer 4: JavaScript/Python Sandboxes (Language-level restrictions)
+Layer 5: Data Validation (Input sanitization)
+Layer 6: API Key Encryption (Storage protection)</code></pre>
+<hr>
+<h3 id="layer-1-content-security-policy-csp">Layer 1: Content Security Policy (CSP)</h3>
+<p>The CSP is enforced at the Tauri level in <code>tauri.conf.json</code> (the old CSP meta tag in <code>index.html</code> was removed in v0.3.0 to avoid duplication):</p>
+<pre><code class="language-json">{
+  "security": {
+    "csp": "default-src 'self';
+            script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net;
+            worker-src 'self' blob: https://cdn.jsdelivr.net;
+            connect-src 'self' https://api.mistral.ai
+                         https://api.openai.com
+                         https://api.anthropic.com
+                         https://generativelanguage.googleapis.com
+                         https://cdn.jsdelivr.net
+                         https://files.pythonhosted.org
+                         https://pyodide-cdn2.iodide.io
+                         http://localhost:11434;
+            img-src 'self' data: blob:;
+            style-src 'self' 'unsafe-inline';
+            font-src 'self' data:;
+            frame-src 'none';
+            object-src 'none';
+            base-uri 'self';"
+  }
+}</code></pre>
+<h4 id="directive-breakdown">Directive Breakdown</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Directive</th><th>Policy</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>default-src</code></td><td><code>'self'</code></td><td>Fallback for all resource types — only same-origin</td></tr>
+<tr><td><code>script-src</code></td><td><code>'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net</code></td><td>Allows Pyodide WASM loading from CDN; blocks inline scripts</td></tr>
+<tr><td><code>worker-src</code></td><td><code>'self' blob: https://cdn.jsdelivr.net</code></td><td>Allows Web Workers only from same origin or Pyodide CDN</td></tr>
+<tr><td><code>connect-src</code></td><td>Provider APIs + CDNs + localhost</td><td>Restricts network requests to known safe endpoints</td></tr>
+<tr><td><code>img-src</code></td><td><code>'self' data: blob:</code></td><td>Blocks external image loading (prevents tracking pixels)</td></tr>
+<tr><td><code>frame-src</code></td><td><code>'none'</code></td><td>No iframes allowed</td></tr>
+<tr><td><code>object-src</code></td><td><code>'none'</code></td><td>No plugins (Flash, Java)</td></tr>
+<tr><td><code>base-uri</code></td><td><code>'self'</code></td><td>Prevents base URI injection</td></tr>
+</tbody>
+</table></div>
+<h4 id="why-this-matters">Why This Matters</h4>
+<p>The CSP prevents:</p>
+<ul>
+<li><strong>XSS attacks</strong>: Inline scripts are blocked; only scripts from <code>'self'</code> and <code>cdn.jsdelivr.net</code> can execute</li>
+<li><strong>Data exfiltration</strong>: <code>connect-src</code> restricts what URLs the app can contact; even if XSS succeeds, data can only go to known endpoints</li>
+<li><strong>Clickjacking</strong>: No iframes allowed (<code>frame-src: 'none'</code>)</li>
+<li><strong>Drive-by downloads</strong>: <code>object-src: 'none'</code> blocks plugin-based attacks</li>
+</ul>
+<hr>
+<h3 id="layer-2-tauri-capabilities">Layer 2: Tauri Capabilities</h3>
+<p>Tauri v2 uses a <strong>capability-based permission model</strong>. Mosaic's capabilities are minimal:</p>
+<pre><code class="language-json">{
+  "identifier": "default",
+  "description": "Default capability set",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}</code></pre>
+<p>Only <code>"core:default"</code> is granted. This includes basic window management, but <strong>no</strong>:</p>
+<ul>
+<li>File system access</li>
+<li>Shell/process execution</li>
+<li>Clipboard access</li>
+<li>Global shortcuts</li>
+<li>HTTP requests (all networking is done from the webview, not the Rust backend)</li>
+</ul>
+<p>This is intentionally minimal. The Rust backend serves only as a webview container — all application logic runs in the sandboxed frontend.</p>
+<h4 id="capability-comparison">Capability Comparison</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>System Access</th><th>Mosaic</th><th>Typical Electron App</th><th>Typical Tauri App</th></tr></thead>
+<tbody>
+<tr><td>File system</td><td>❌ (blocked by capabilities)</td><td>✅ (Node.js fs)</td><td>✅ (via commands)</td></tr>
+<tr><td>Network (system level)</td><td>❌ (blocked by capabilities)</td><td>✅ (Node.js net)</td><td>✅ (via commands)</td></tr>
+<tr><td>Process spawning</td><td>❌</td><td>✅ (child_process)</td><td>✅ (via shell plugin)</td></tr>
+<tr><td>Clipboard</td><td>❌ (blocked by capabilities)</td><td>✅ (navigator.clipboard)</td><td>✅ (via clipboard plugin)</td></tr>
+<tr><td>Global shortcuts</td><td>❌</td><td>✅ (globalShortcut)</td><td>✅ (via plugin)</td></tr>
+<tr><td>Window management</td><td>✅ (core:default)</td><td>✅</td><td>✅</td></tr>
+<tr><td>HTTP requests (webview)</td><td>✅ (restricted by CSP)</td><td>✅</td><td>✅</td></tr>
+<tr><td>WebSocket (webview)</td><td>❌ (blocked by CSP)</td><td>✅</td><td>✅</td></tr>
+</tbody>
+</table></div>
+<p>By using the minimalist capability set, Mosaic significantly reduces the attack surface. Even if an attacker gains code execution in the webview, they cannot:</p>
+<ul>
+<li>Read or write files on the user's system</li>
+<li>Execute shell commands</li>
+<li>Access system-level APIs</li>
+<li>Register global shortcuts (which could be used for keylogging)</li>
+</ul>
+<hr>
+<h3 id="layer-3-web-worker-isolation">Layer 3: Web Worker Isolation</h3>
+<p>All user code (JavaScript and Python) executes in a <strong>Web Worker</strong>, which provides:</p>
+<h4 id="isolation-properties">Isolation Properties</h4>
+<ul>
+<li><strong>No DOM access</strong>: Workers cannot read or manipulate the DOM</li>
+<li><strong>No store access</strong>: Workers cannot access Zustand stores or localStorage</li>
+<li><strong>Separate global scope</strong>: Workers have their own global scope, separate from the main thread</li>
+<li><strong>Message-based communication</strong>: Workers communicate with the main thread only via <code>postMessage</code></li>
+<li><strong>Terminable</strong>: Workers can be terminated at any time, killing all running code</li>
+</ul>
+<h4 id="worker-security-boundaries">Worker Security Boundaries</h4>
+<pre><code>Main Thread (privileged)              Web Worker (sandboxed)
+┌──────────────────────────┐         ┌──────────────────────┐
+│  API keys (in memory)     │         │  Only receives:      │
+│  Canvas data (stores)     │         │  - exec_id           │
+│  localStorage (all data)  │         │  - lang              │
+│  DOM (full access)        │  msg   │  - code              │
+│  fetch (unrestricted)     │◄───────►│  - stdout/result     │
+│  Node.js file system      │         │  - No DOM/stores     │
+└──────────────────────────┘         └──────────────────────┘</code></pre>
+<p>Even if malicious code breaks out of the JavaScript/Python sandbox, it's still confined to the Worker scope and cannot access sensitive data on the main thread.</p>
+<hr>
+<h3 id="layer-4-code-sandboxes">Layer 4: Code Sandboxes</h3>
+<h4 id="javascript-sandbox">JavaScript Sandbox</h4>
+<p>JavaScript code is executed via <code>new Function()</code> with explicit parameter injection:</p>
+<pre><code class="language-javascript">// Safe: Every global must be explicitly passed
+const fn = new Function(
+  'Math', 'Date', 'JSON', 'console',
+  // ... 40+ allowlisted globals
+  code
+);
+return fn(Math, Date, JSON, console, /* ... */);</code></pre>
+<p>Any reference to a non-passed symbol (like <code>fetch</code>, <code>document</code>, <code>localStorage</code>, <code>process</code>) throws a <code>ReferenceError</code>. This is a <strong>strict allowlist approach</strong> — everything is blocked by default, only explicitly listed symbols are available.</p>
+<p><strong>Blocked APIs</strong>: fetch, XMLHttpRequest, WebSocket, Worker, SharedWorker, localStorage, sessionStorage, indexedDB, open, close, import(), Document, Window, Navigator, Location, History, Screen.</p>
+<h4 id="python-sandbox">Python Sandbox</h4>
+<p>Python code runs in Pyodite (CPython in WebAssembly) with additional restrictions:</p>
+<ul>
+<li><strong>Pip packages</strong>: Only 15 allowlisted packages can be installed</li>
+<li><strong>Network</strong>: Python's <code>urllib</code>/<code>requests</code>/<code>http.client</code> are patched to only allow CDN hosts</li>
+<li><strong>Platform modules</strong>: <code>msvcrt</code>, <code>termios</code>, <code>fcntl</code>, <code>mmap</code> are blocked or restricted</li>
+<li><strong>C extensions</strong>: Platform-specific C extensions are blocked (they don't work in WASM anyway)</li>
+<li><strong>Execution timeout</strong>: 30 seconds maximum</li>
+</ul>
+<hr>
+<h3 id="layer-5-data-validation">Layer 5: Data Validation</h3>
+<p>All data loaded from external sources is validated before use.</p>
+<h4 id="import-validation">Import Validation</h4>
+<p>When importing a canvas JSON file, <code>validateImportedCanvas()</code> checks:</p>
+<pre><code class="language-typescript">function validateImportedCanvas(data: unknown): data is CanvasData {
+  if (!data || typeof data !== 'object') return false;
+  
+  const d = data as Record&lt;string, unknown&gt;;
+  
+  // Must have nodes and edges arrays
+  if (!Array.isArray(d.nodes) || !Array.isArray(d.edges)) return false;
+  
+  // Each node must have valid structure
+  for (const node of d.nodes) {
+    if (!node.id || !node.type || !node.position || !node.data) return false;
+    if (typeof node.position.x !== 'number' || typeof node.position.y !== 'number') return false;
+    if (!validateNodeData(node.data)) return false;
+  }
+  
+  // Each edge must have valid structure
+  for (const edge of d.edges) {
+    if (!edge.id || !edge.source || !edge.target) return false;
+  }
+  
+  return true;
+}</code></pre>
+<h4 id="localstorage-validation">localStorage Validation</h4>
+<p>All persisted stores validate their data on load:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Store</th><th>Validator</th><th>Behavior on Invalid Data</th></tr></thead>
+<tbody>
+<tr><td>canvasManagerStore</td><td><code>validateCanvasData()</code></td><td>Reset to default (empty canvases)</td></tr>
+<tr><td>uiStore</td><td><code>validateUIState()</code></td><td>Reset to default settings</td></tr>
+<tr><td>ragStore</td><td><code>validateRagDocs()</code></td><td>Reset to empty document list</td></tr>
+<tr><td>analyticsStore</td><td>None (numeric data)</td><td>Keep as-is</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="layer-6-api-key-encryption">Layer 6: API Key Encryption</h3>
+<p>API keys are stored in localStorage using <strong>XOR encryption</strong> with a salt:</p>
+<pre><code class="language-typescript">const SALT = 'MosaicKeySalt';
+
+function encryptKey(plaintext: string): string {
+  let result = '';
+  for (let i = 0; i &lt; plaintext.length; i++) {
+    result += String.fromCharCode(
+      plaintext.charCodeAt(i) ^ SALT.charCodeAt(i % SALT.length)
+    );
+  }
+  return btoa(result);
+}
+
+function decryptKey(encoded: string): string {
+  const ciphertext = atob(encoded);
+  let result = '';
+  for (let i = 0; i &lt; ciphertext.length; i++) {
+    result += String.fromCharCode(
+      ciphertext.charCodeAt(i) ^ SALT.charCodeAt(i % SALT.length)
+    );
+  }
+  return result;
+}</code></pre>
+<p><strong>Important limitations</strong>:</p>
+<ul>
+<li>XOR encryption is <strong>not production-grade</strong> — it prevents casual exposure (e.g., someone looking at your localStorage)</li>
+<li>A determined attacker with access to the binary can extract the salt and decrypt keys</li>
+<li>For production use, consider OS-level credential storage (Keychain, Credential Manager, Secret Service)</li>
+</ul>
+<h4 id="per-provider-key-storage">Per-Provider Key Storage</h4>
+<p>In v0.3.0, API key storage was upgraded from a single shared key to per-provider keys:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Provider</th><th>localStorage Key</th></tr></thead>
+<tbody>
+<tr><td>Mistral</td><td><code>mosaic-api-key-mistral</code></td></tr>
+<tr><td>OpenAI</td><td><code>mosaic-api-key-openai</code></td></tr>
+<tr><td>Anthropic</td><td><code>mosaic-api-key-anthropic</code></td></tr>
+<tr><td>Gemini</td><td><code>mosaic-api-key-gemini</code></td></tr>
+</tbody>
+</table></div>
+<h4 id="key-caching">Key Caching</h4>
+<p>After decryption, API keys are cached in memory (a <code>Map<ProviderId, string></code>) to avoid repeated decryption:</p>
+<pre><code class="language-typescript">const keyCache = new Map&lt;string, string&gt;();
+
+function getApiKey(provider: string): string | null {
+  if (keyCache.has(provider)) return keyCache.get(provider)!;
+  
+  const stored = localStorage.getItem(`mosaic-api-key-${provider}`);
+  if (!stored) return null;
+  
+  const decrypted = decryptKey(stored);
+  keyCache.set(provider, decrypted);
+  return decrypted;
+}</code></pre>
+<hr>
+<h4 id="worker-creation-and-initialization-security">Worker Creation and Initialization Security</h4>
+<p>The Web Worker is created with strict controls:</p>
+<pre><code class="language-typescript">function createSandboxedWorker(): Worker {
+  // Create worker from a blob URL (inline worker)
+  const workerCode = `
+    // Worker code for sandboxed execution
+    self.onmessage = function(event) {
+      const { exec_id, lang, code } = event.data;
+      executeCode(exec_id, lang, code);
+    };
+  `;
+  
+  const blob = new Blob([workerCode], { type: 'application/javascript' });
+  const url = URL.createObjectURL(blob);
+  const worker = new Worker(url);
+  
+  // Clean up blob URL
+  URL.revokeObjectURL(url);
+  
+  // Set up message handler
+  worker.onmessage = handleWorkerMessage;
+  worker.onerror = handleWorkerError;
+  
+  return worker;
+}</code></pre>
+<p>Using a Blob URL instead of an external file prevents:</p>
+<ul>
+<li>Path traversal attacks (cannot load arbitrary worker files)</li>
+<li>Import/require in the worker (Blob workers have no URL to resolve imports from)</li>
+<li>Source mapping leaks (worker source is embedded, not served from filesystem)</li>
+</ul>
+<h4 id="worker-termination-strategy">Worker Termination Strategy</h4>
+<p>The worker can be terminated in three scenarios:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Scenario</th><th>Trigger</th><th>Behavior</th></tr></thead>
+<tbody>
+<tr><td>Execution timeout</td><td>30-second timer expires</td><td><code>worker.terminate()</code> → new worker created</td></tr>
+<tr><td>User abort</td><td>User clicks stop button</td><td>AbortController aborts fetch; worker continues</td></tr>
+<tr><td>App unmount</td><td>Component unmounts</td><td><code>worker.terminate()</code> for cleanup</td></tr>
+</tbody>
+</table></div>
+<p>When a worker is terminated due to timeout, a <strong>fresh worker</strong> is always created to replace it. This ensures that even if the worker's internal state was corrupted by malicious code, subsequent executions start clean.</p>
+<hr>
+<h3 id="layer-4-code-sandboxes">Layer 4: Code Sandboxes</h3>
+<h4 id="javascript-sandbox">JavaScript Sandbox</h4>
+<p>JavaScript code is executed via <code>new Function()</code> with explicit parameter injection:</p>
+<pre><code class="language-javascript">// Safe: Every global must be explicitly passed
+const fn = new Function(
+  'Math', 'Date', 'JSON', 'console',
+  // ... 40+ allowlisted globals
+  code
+);
+return fn(Math, Date, JSON, console, /* ... */);</code></pre>
+<p>Any reference to a non-passed symbol (like <code>fetch</code>, <code>document</code>, <code>localStorage</code>, <code>process</code>) throws a <code>ReferenceError</code>. This is a <strong>strict allowlist approach</strong> — everything is blocked by default, only explicitly listed symbols are available.</p>
+<p><strong>Blocked APIs</strong>: fetch, XMLHttpRequest, WebSocket, Worker, SharedWorker, localStorage, sessionStorage, indexedDB, open, close, import(), Document, Window, Navigator, Location, History, Screen.</p>
+<h4 id="python-sandbox">Python Sandbox</h4>
+<p>Python code runs in Pyodite (CPython in WebAssembly) with additional restrictions:</p>
+<ul>
+<li><strong>Pip packages</strong>: Only 15 allowlisted packages can be installed</li>
+<li><strong>Network</strong>: Python's <code>urllib</code>/<code>requests</code>/<code>http.client</code> are patched to only allow CDN hosts</li>
+<li><strong>Platform modules</strong>: <code>msvcrt</code>, <code>termios</code>, <code>fcntl</code>, <code>mmap</code> are blocked or restricted</li>
+<li><strong>C extensions</strong>: Platform-specific C extensions are blocked (they don't work in WASM anyway)</li>
+<li><strong>Execution timeout</strong>: 30 seconds maximum</li>
+</ul>
+<h4 id="why-a-function-sandbox-instead-of-iframe">Why a Function Sandbox Instead of iframe?</h4>
+<p>Mosaic considered using iframes for sandboxing but chose Web Workers for these reasons:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Aspect</th><th>Web Worker</th><th>iframe</th></tr></thead>
+<tbody>
+<tr><td>DOM access</td><td>None</td><td>Requires sandbox attribute</td></tr>
+<tr><td>Network access</td><td>None (unless code allows)</td><td>Blocked by CSP</td></tr>
+<tr><td>Thread isolation</td><td>Separate OS thread</td><td>Same thread (event loop)</td></tr>
+<tr><td>Message passing</td><td>postMessage</td><td>postMessage</td></tr>
+<tr><td>Termination</td><td><code>terminate()</code> available</td><td>Cannot be reliably killed</td></tr>
+<tr><td>Performance</td><td>Low overhead</td><td>Full browser context overhead</td></tr>
+<tr><td>Shared state</td><td>None</td><td>Can access parent via frameElement</td></tr>
+</tbody>
+</table></div>
+<p>Workers are strictly more isolated than iframes for code execution scenarios.</p>
+<hr>
+<h3 id="additional-security-measures">Additional Security Measures</h3>
+<h4 id="ai-generated-code-confirmation">AI-Generated Code Confirmation</h4>
+<p>Before executing AI-generated code, Mosaic shows a confirmation dialog:</p>
+<pre><code>⚠️ This code was generated by AI. Are you sure you want to run it?
+[Cancel] [Run Anyway]</code></pre>
+<p>This only appears once per session for AI-generated code blocks. User-written code does not trigger the warning.</p>
+<h4 id="pyodide-integrity-checks">Pyodide Integrity Checks</h4>
+<p>When loading Pyodide from the CDN, Mosaic verifies the module integrity using checksums to prevent tampering:</p>
+<pre><code class="language-typescript">const INTEGRITY_HASHES = {
+  'pyodide-0.26.2': 'sha384-...',
+};</code></pre>
+<p>Failed integrity checks prevent the module from loading and show an error to the user.</p>
+<h4 id="no-telemetry">No Telemetry</h4>
+<p>Mosaic does <strong>not</strong> collect or transmit any telemetry data:</p>
+<ul>
+<li>No analytics SDKs</li>
+<li>No error tracking services</li>
+<li>No usage statistics</li>
+<li>All analytics data is stored locally in localStorage</li>
+</ul>
+<hr>
+<h3 id="security-checklist">Security Checklist</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Concern</th><th>Mitigated By</th></tr></thead>
+<tbody>
+<tr><td>Cross-site scripting (XSS)</td><td>CSP, no inline scripts</td></tr>
+<tr><td>Data exfiltration</td><td>connect-src CSP, sandboxed workers</td></tr>
+<tr><td>Malicious code execution</td><td>Worker isolation, Function sandbox, pip allowlist</td></tr>
+<tr><td>API key theft</td><td>XOR encryption, in-memory only after decryption</td></tr>
+<tr><td>Corrupted data crashes</td><td>Schema validation on all imports</td></tr>
+<tr><td>Network attacks</td><td>CSP, CDN allowlist</td></tr>
+<tr><td>Memory access</td><td>Web Worker separation</td></tr>
+<tr><td>Extension exploits</td><td>Disabled plugins, no iframes</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="reporting-vulnerabilities">Reporting Vulnerabilities</h3>
+<p>If you discover a security vulnerability in Mosaic, please report it by opening a <a href="https://github.com/versus184-py/Mosaic/issues">GitHub issue</a> with the label <code>security</code>. Do not publicly disclose the vulnerability until it has been addressed.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="architecture.html#code-sandbox-architecture">Code Sandbox Architecture</a> — Deep dive into sandboxed execution</li>
+<li><a href="security.html#deployment-and-distribution">Deployment and Distribution</a> — How builds are secured</li>
+<li><a href="security.html#troubleshooting-and-faq">Troubleshooting and FAQ</a> — Common security-related questions</li>
+</ul>
+</section>
+<section id="troubleshooting-and-faq"><h2 id="troubleshooting-and-faq">Troubleshooting and FAQ</h2>
+<p>This page covers common issues, error messages, and frequently asked questions about Mosaic.</p>
+<hr>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<h4 id="installation-issues">Installation Issues</h4>
+<h4 id="rust-toolchain-not-found-during-build">"Rust toolchain not found" during build</h4>
+<p><strong>Error</strong>:</p>
+<pre><code>Error: failed to run custom build command for 'tauri'</code></pre>
+<p><strong>Cause</strong>: Rust is not installed or not in PATH.</p>
+<p><strong>Solution</strong>:</p>
+<pre><code class="language-bash"># Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Windows: download rustup-init.exe from https://rustup.rs/
+
+# Verify installation
+rustc --version
+cargo --version</code></pre>
+<h4 id="webkit2gtk-not-found-on-linux">"WebKit2GTK not found" on Linux</h4>
+<p><strong>Error</strong>:</p>
+<pre><code>Failed to run custom build command for 'webkit2gtk'</code></pre>
+<p><strong>Cause</strong>: Missing Linux system dependencies.</p>
+<p><strong>Solution</strong>:</p>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev \
+  libayatana-appindicator3-dev librsvg2-dev libsoup-3.0-dev
+
+# Fedora
+sudo dnf install webkit2gtk4.1-devel gtk3-devel \
+  libappindicator-gtk3-devel librsvg2-devel libsoup3-devel
+
+# Arch
+sudo pacman -S webkit2gtk-4.1 gtk3 libappindicator-gtk3 librsvg libsoup3</code></pre>
+<h4 id="npm-err-during-install">"npm ERR!" during install</h4>
+<p><strong>Cause</strong>: Network issues, npm cache corruption, or version mismatch.</p>
+<p><strong>Solution</strong>:</p>
+<pre><code class="language-bash">npm cache clean --force
+rm -rf node_modules
+npm install</code></pre>
+<hr>
+<h4 id="api-key-issues">API Key Issues</h4>
+<h4 id="invalid-api-key-error">"Invalid API key" error</h4>
+<p><strong>Cause</strong>: The API key is incorrect, expired, or belongs to a different provider.</p>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Verify the key in your provider's console</li>
+<li>Ensure you selected the correct provider in Settings</li>
+<li>Check that the key has the correct permissions (some providers require enabling API access)</li>
+<li>Regenerate the key and update it in Settings</li>
+</ul>
+<h4 id="cannot-connect-to-ollama">"Cannot connect to Ollama"</h4>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Ollama is not installed or not running</li>
+<li>Ollama URL is incorrect in Settings</li>
+<li>Ollama is running on a different port</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<pre><code class="language-bash"># Check if Ollama is running
+curl http://localhost:11434/api/tags
+
+# If not running, start it
+ollama serve
+
+# If running on a different host/port, update URL in Settings
+# Default: http://localhost:11434</code></pre>
+<h4 id="api-key-not-persisting-across-restarts">API key not persisting across restarts</h4>
+<p><strong>Cause</strong>: localStorage data may have been cleared or corrupted.</p>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li>Re-enter the API key in Settings</li>
+<li>Check that your browser isn't set to clear localStorage on exit</li>
+<li>If using a privacy-focused browser, add an exception for Mosaic</li>
+<li>Note: each provider has its own key field — ensure you've entered the key under the correct provider section</li>
+</ul>
+<h4 id="no-api-key-configured-for-this-provider">"No API key configured for this provider"</h4>
+<p><strong>Cause</strong>: You've selected a model from a provider that has no API key configured.</p>
+<p><strong>Solution</strong>:</p>
+<ul>
+<li>Open Settings and enter the API key for the provider you're using</li>
+<li>If using Ollama, no key is needed — ensure Ollama is running and connected</li>
+<li>Mistral is the default provider — if no keys are configured, configure at least Mistral or switch to Ollama</li>
+</ul>
+<hr>
+<h4 id="streaming-issues">Streaming Issues</h4>
+<h4 id="ai-response-stops-mid-stream">AI response stops mid-stream</h4>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Network interruption</li>
+<li>Provider API timeout</li>
+<li>AbortController triggered (user pressed stop)</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Click the <strong>retry</strong> button on the response node</li>
+<li>Check your internet connection</li>
+<li>The partial response is preserved in the node</li>
+</ul>
+<h4 id="streaming-is-slow">Streaming is slow</h4>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Large conversation history (many tokens sent as context)</li>
+<li>Provider-side latency</li>
+<li>Slow internet connection</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Start a new canvas for unrelated topics (reduces context size)</li>
+<li>Switch to a faster model (e.g., Mistral Small instead of Large)</li>
+<li>Check provider status page for outages</li>
+</ul>
+<h4 id="aborterror-in-console">"AbortError" in console</h4>
+<p><strong>Cause</strong>: A streaming request was intentionally cancelled (user pressed stop or navigated away). This is <strong>normal</strong> and not an error.</p>
+<hr>
+<h4 id="code-execution-issues">Code Execution Issues</h4>
+<h4 id="pyodide-failed-to-load">"Pyodide failed to load"</h4>
+<p><strong>Error</strong>:</p>
+<pre><code>Pyodide failed to load. Check your internet connection.</code></pre>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Internet connection is down</li>
+<li>CDN (cdn.jsdelivr.net) is blocked or unreachable</li>
+<li>CSP policy is blocking the CDN</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Check your internet connection</li>
+<li>If behind a corporate firewall, ensure <code>cdn.jsdelivr.net</code> is allowlisted</li>
+<li>Check that CSP in <code>tauri.conf.json</code> includes <code>https://cdn.jsdelivr.net</code></li>
+</ul>
+<h4 id="execution-timed-out">"Execution timed out"</h4>
+<p><strong>Cause</strong>: Code took longer than 30 seconds to execute.</p>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Optimize the code to run faster</li>
+<li>Break large computations into smaller pieces</li>
+<li>For very large computations, consider running them outside Mosaic</li>
+</ul>
+<h4 id="module-xyz-not-found">"Module 'xyz' not found"</h4>
+<p><strong>Cause</strong>: The Python package is not in the allowlist.</p>
+<p><strong>Solution</strong>: Use one of the allowlisted packages only:</p>
+<pre><code>numpy, pandas, scipy, matplotlib, sympy, requests,
+beautifulsoup4, lxml, Pillow, markdown, jinja2, pyyaml, toml, colorama, tqdm</code></pre>
+<h4 id="fetch-is-not-defined-in-javascript">"fetch is not defined" in JavaScript</h4>
+<p><strong>Cause</strong>: The JavaScript sandbox blocks network APIs.</p>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Use Python with <code>requests</code> if you need network access (still restricted to CDN hosts)</li>
+<li>Pre-compute data outside Mosaic and paste results in</li>
+<li>Use local data with array operations</li>
+</ul>
+<h4 id="python-execution-is-very-slow">Python execution is very slow</h4>
+<p><strong>Cause</strong>: Pyodide runs CPython in WebAssembly, which is slower than native Python.</p>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Use smaller datasets</li>
+<li>Avoid heavy loops; use numpy vectorized operations instead</li>
+<li>For computationally intensive tasks, run outside Mosaic</li>
+</ul>
+<hr>
+<h4 id="canvas-issues">Canvas Issues</h4>
+<h4 id="canvas-feels-laggy-with-many-nodes">Canvas feels laggy with many nodes</h4>
+<p><strong>Cause</strong>: React Flow performance degrades with hundreds of nodes.</p>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Collapse branches you're not actively working with</li>
+<li>Delete unnecessary nodes</li>
+<li>Start a new canvas for unrelated topics</li>
+<li>Ensure you're not running on battery saver mode (reduced rendering)</li>
+</ul>
+<h4 id="failed-to-import-canvas">"Failed to import canvas"</h4>
+<p><strong>Cause</strong>: The imported JSON file is corrupted or has an invalid structure.</p>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Ensure the file is valid JSON</li>
+<li>The file must contain <code>nodes</code> and <code>edges</code> arrays</li>
+<li>Each node needs <code>id</code>, <code>type</code>, <code>position</code>, and <code>data</code> fields</li>
+<li>Check that the file was exported from Mosaic (not modified externally)</li>
+</ul>
+<h4 id="nodes-overlap-after-zoom">Nodes overlap after zoom</h4>
+<p><strong>Cause</strong>: Auto-layout not triggered after manual node rearrangement.</p>
+<p><strong>Solution</strong>: Press <code>F</code> to fit all nodes, or use <strong>Auto-arrange</strong> in Settings or context menu.</p>
+<h4 id="undo-not-working-for-text-edits">Undo not working for text edits</h4>
+<p><strong>Cause</strong>: Undo history only captures <strong>position changes</strong>, not text edits.</p>
+<p><strong>Workaround</strong>: Undo is designed for spatial operations (node positions). Text edits are immediately saved.</p>
+<hr>
+<h4 id="rag-issues">RAG Issues</h4>
+<h4 id="the-ai-doesn-t-know-about-my-document">"The AI doesn't know about my document"</h4>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>RAG is not enabled (toggle in DocumentPanel)</li>
+<li>Query doesn't match document content</li>
+<li>Document was uploaded but not properly chunked</li>
+<li>Embedding API failed and TF-IDF search is less accurate</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Verify RAG is toggled ON in DocumentPanel</li>
+<li>Try using keywords from the document in your query</li>
+<li>Re-upload the document</li>
+<li>Check browser console for embedding API errors</li>
+</ul>
+<h4 id="file-too-large-error">"File too large" error</h4>
+<p><strong>Cause</strong>: File exceeds the 10 MB per-file limit or total storage exceeds 50 MB.</p>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Split large files into smaller ones</li>
+<li>Remove unused documents</li>
+<li>Reduce document count (max 50)</li>
+</ul>
+<hr>
+<h4 id="ui-issues">UI Issues</h4>
+<h4 id="theme-not-applying">Theme not applying</h4>
+<p><strong>Cause</strong>: Browser or OS-level reduced-transparency setting is active.</p>
+<p><strong>Solution</strong>: Mosaic respects <code>prefers-reduced-transparency</code>. If enabled, glass effects are reduced. Disable this OS setting for full glass effects.</p>
+<h4 id="keyboard-shortcuts-not-working">Keyboard shortcuts not working</h4>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>Input field is focused (some shortcuts are disabled while typing)</li>
+<li>Another application is intercepting the shortcut</li>
+<li>Tauri window doesn't have focus</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Click on empty canvas space to ensure the canvas has focus</li>
+<li>Check that Mosaic window is active</li>
+<li>Some shortcuts (like Ctrl+N for new chat) may conflict with browser shortcuts if running in dev mode</li>
+</ul>
+<hr>
+<h3 id="faq">FAQ</h3>
+<h4 id="general">General</h4>
+<p><strong>Q: Is Mosaic free?</strong></p>
+<p>A: Mosaic is open source (MIT license) and free to use. You only pay for API usage from your chosen LLM providers (Mistral, OpenAI, Anthropic, Gemini). Ollama (local models) is completely free.</p>
+<p><strong>Q: Can I use Mosaic offline?</strong></p>
+<p>A: Partially. You can browse existing canvases and use Ollama-connected local models offline. Cloud providers (Mistral, OpenAI, Anthropic, Gemini) require internet. Code execution (JavaScript/Python) works offline after Pyodide is loaded.</p>
+<p><strong>Q: Is my data sent to external servers?</strong></p>
+<p>A: Only your messages and API keys are sent to the LLM provider you select. Documents uploaded for RAG are stored locally and never leave your machine. Mosaic has no telemetry or analytics that send data externally.</p>
+<p><strong>Q: How are API keys stored?</strong></p>
+<p>A: Each provider's API key is stored separately under <code>mosaic-api-key-{provider}</code> in localStorage (e.g., <code>mosaic-api-key-mistral</code>, <code>mosaic-api-key-openai</code>). Keys are XOR-encrypted before storage and decrypted in memory for use. This is not production-grade encryption (see <a href="security.html#security-model">Security Model</a> for details).</p>
+<p><strong>Q: What happens to my uploaded documents?</strong></p>
+<p>A: Documents are stored in localStorage as text chunks. They are never sent to external servers except when Mosaic queries the embedding API (which sends the chunk text for vectorization). You can delete documents at any time.</p>
+<p><strong>Q: How do I report a bug?</strong></p>
+<p>A: Open a <a href="https://github.com/versus184-py/Mosaic/issues">GitHub issue</a> with a clear description, steps to reproduce, and relevant screenshots.</p>
+<h4 id="technical">Technical</h4>
+<p><strong>Q: Can I use custom LLM endpoints?</strong></p>
+<p>A: Not directly. Mosaic supports Mistral, OpenAI, Anthropic, Gemini (cloud), and Ollama (local). For custom endpoints, consider using Ollama as a proxy with a custom model, or open a feature request for custom provider support.</p>
+<p><strong>Q: How are tokens counted for cost estimation?</strong></p>
+<p>A: Mosaic uses a simple heuristic: <code>Math.ceil(text.length / 4)</code>. This estimates ~4 characters per token, which is a reasonable approximation for English text. Actual token counts may vary by provider and language. The estimation is used only for analytics display; providers charge based on their own tokenization.</p>
+<p><strong>Q: Can I delete the localStorage data to reset Mosaic?</strong></p>
+<p>A: Yes. To completely reset Mosaic:</p>
+<ol>
+<li>Close the app</li>
+<li>Open your browser's DevTools storage inspector (or use a localStorage manager extension)</li>
+<li>Delete all keys starting with <code>mosaic-</code>: <code>mosaic-canvases</code>, <code>mosaic-canvas-data-*</code>, <code>mosaic-ui</code>, <code>mosaic-analytics</code>, <code>mosaic-rag</code></li>
+<li>Alternatively, use the Settings drawer's "Clear Canvas" button (clears only the current canvas)</li>
+<li>Reopen Mosaic — it will initialize fresh</li>
+</ol>
+<p><strong>Q: Does Mosaic work with corporate proxies/VPNs?</strong></p>
+<p>A: It depends:</p>
+<ul>
+<li><strong>Ollama (local)</strong>: Works fine, no internet needed</li>
+<li><strong>Cloud providers</strong>: Must be able to reach the provider's API endpoint. Corporate proxies that block unknown HTTPS endpoints may interfere. Configure your proxy to allowlist:</li>
+</ul>
+<p>  - <code>api.mistral.ai</code></p>
+<p>  - <code>api.openai.com</code></p>
+<p>  - <code>api.anthropic.com</code></p>
+<p>  - <code>generativelanguage.googleapis.com</code></p>
+<p>  - <code>cdn.jsdelivr.net</code> (for Pyodide)</p>
+<p>  - <code>files.pythonhosted.org</code> (for pip packages)</p>
+<p>  - <code>pyodide-cdn2.iodide.io</code> (for Pyodide CDN)</p>
+<p><strong>Q: Is there a maximum canvas size?</strong></p>
+<p>A: The practical limit depends on your machine's memory. React Flow uses virtual rendering, so only visible nodes consume rendering resources. However:</p>
+<ul>
+<li>Each node's data is stored in memory and localStorage</li>
+<li>undo history stores up to 50 snapshots of the entire node/edge state</li>
+<li>RAG documents are stored as text chunks (limited to 50 MB total)</li>
+<li>Most users report good performance up to 200 nodes</li>
+</ul>
+<p><strong>Q: Can I run Mosaic in a browser (not as a desktop app)?</strong></p>
+<p>A: Mosaic is built with Tauri, which requires a native shell. However, you can run the frontend in a browser for development:</p>
+<pre><code class="language-bash">npm run dev
+# opens http://localhost:1420 in your browser</code></pre>
+<p>Note: Some features (CSP enforcement, window management) won't work in browser mode. API calls will still work, but localStorage persistence and desktop-specific features won't be available.</p>
+<hr>
+<p><strong>Q: What browsers/engines are supported?</strong></p>
+<p>A: Mosaic uses the Tauri webview, which on Windows is WebView2 (Edge Chromium), on macOS is WKWebView (Safari), and on Linux is WebKitGTK. All modern rendering engines are supported.</p>
+<p><strong>Q: Can I run code on my GPU?</strong></p>
+<p>A: No. Code executes in a Web Worker (CPU only). Python runs in WebAssembly, which doesn't support GPU compute. For GPU workloads, run code outside Mosaic.</p>
+<p><strong>Q: How many nodes can a canvas handle?</strong></p>
+<p>A: Performance depends on your machine. Most users report smooth performance with 50-100 nodes. Beyond 200 nodes, you may notice reduced responsiveness. The app handles this gracefully with React Flow's virtual rendering.</p>
+<p><strong>Q: Is there a mobile version?</strong></p>
+<p>A: Not currently. Mosaic is a desktop application built with Tauri. A mobile version is not on the roadmap, but the web version can be accessed in a mobile browser (limited functionality).</p>
+<p><strong>Q: Can I collaborate with others on a canvas?</strong></p>
+<p>A: Not yet. Collaborative canvases are on the roadmap (see <a href="community.html#changelog-and-roadmap">Changelog and Roadmap</a>).</p>
+<hr>
+<hr>
+<h3 id="diagnostic-tools">Diagnostic Tools</h3>
+<h4 id="accessing-developer-tools">Accessing Developer Tools</h4>
+<p>While running in development mode (<code>npm run tauri:dev</code>), you can access the browser DevTools:</p>
+<ul>
+<li><strong>Windows/Linux</strong>: Right-click → Inspect Element, or press F12</li>
+<li><strong>macOS</strong>: Right-click → Inspect Element, or press Cmd+Option+I</li>
+</ul>
+<p>In the DevTools console, you can:</p>
+<pre><code class="language-javascript">// Check store state
+console.log(window.__ZUSTAND_STORES__);  // If exposed
+
+// Manually trigger save
+localStorage.getItem('mosaic-canvases');
+
+// Check RAG data
+localStorage.getItem('mosaic-rag');
+
+// Check analytics
+localStorage.getItem('mosaic-analytics');
+
+// Inspect all localStorage keys
+for (let i = 0; i &lt; localStorage.length; i++) {
+  const key = localStorage.key(i);
+  if (key.startsWith('mosaic-')) {
+    console.log(key, JSON.parse(localStorage.getItem(key)));
+  }
+}</code></pre>
+<h4 id="checking-network-requests">Checking Network Requests</h4>
+<p>In the DevTools <strong>Network</strong> tab, you can monitor:</p>
+<ul>
+<li>API calls to LLM providers (verify streaming is working)</li>
+<li>CDN requests for Pyodide (verify loading)</li>
+<li>Any blocked requests (CSP violations)</li>
+</ul>
+<h4 id="log-file-locations">Log File Locations</h4>
+<p>Mosaic does not write log files to disk. All logging goes to:</p>
+<ul>
+<li><strong>Browser console</strong> (while running in dev mode)</li>
+<li><strong>Tauri logs</strong> (if Tauri processes emit errors)</li>
+</ul>
+<p>For production builds, run from the command line to see stdout:</p>
+<pre><code class="language-bash"># Windows (from the MSI install location)
+"C:\Program Files\Mosaic\Mosaic.exe" 2&gt;&amp;1
+
+# Or if built from source
+npm run tauri:dev</code></pre>
+<hr>
+<h3 id="still-having-issues">Still Having Issues?</h3>
+<ol>
+<li><strong>Search existing issues</strong>: Check <a href="https://github.com/versus184-py/Mosaic/issues">GitHub Issues</a> for similar problems</li>
+<li><strong>Open a new issue</strong>: If you can't find a solution, create a new issue with:</li>
+</ol>
+<p>   - Your operating system and Mosaic version</p>
+<p>   - Steps to reproduce the problem</p>
+<p>   - Expected vs actual behavior</p>
+<p>   - Any error messages from the console (F12 → Console tab)</p>
+<p>   - A minimized reproduction case if possible</p>
+<ol>
+<li><strong>Feature requests</strong>: Use the same <a href="https://github.com/versus184-py/Mosaic/issues">GitHub Issues</a> page with the <code>feature</code> label</li>
+</ol>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="security.html#security-model">Security Model</a> — Understand Mosaic's security architecture</li>
+<li><a href="security.html#deployment-and-distribution">Deployment and Distribution</a> — Build and release process</li>
+<li><a href="community.html#contributing-guide">Contributing Guide</a> — How to help fix issues</li>
+</ul>
+</section>
+<section id="deployment-and-distribution"><h2 id="deployment-and-distribution">Deployment and Distribution</h2>
+<p>This page documents how Mosaic is built, packaged, and distributed across platforms, including the CI/CD pipeline and release workflow.</p>
+<hr>
+<h3 id="release-workflow">Release Workflow</h3>
+<p>Mosaic uses <strong>GitHub Actions</strong> for automated builds and releases. The workflow is triggered by pushing a tag matching <code>v*</code>.</p>
+<pre><code>Developer pushes tag v0.3.0
+       │
+       ▼
+GitHub Actions: release.yml
+       │
+       ├── Matrix build (fail-fast: false):
+       │   ├── windows-latest
+       │   ├── macos-latest
+       │   └── ubuntu-latest
+       │
+       ├── Each platform:
+       │   ├── Checkout code
+       │   ├── Setup Node.js 20
+       │   ├── Setup Rust toolchain
+       │   ├── Install Linux deps (if ubuntu)
+       │   ├── npm ci
+       │   └── npm run tauri:build
+       │
+       └── GitHub Release (softprops/action-gh-release@v2):
+           ├── Windows: Mosaic_0.3.0_x64.msi + .exe (NSIS)
+           ├── macOS: Mosaic_0.3.0_x64.dmg
+           └── Linux: Mosaic_0.3.0_x86_64.AppImage</code></pre>
+<h4 id="release-workflow-file-github-workflows-release-yml">Release Workflow File (<code>.github/workflows/release.yml</code>)</h4>
+<pre><code class="language-yaml">name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    
+    runs-on: ${{ matrix.platform }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run tauri:build
+      
+      - name: Upload artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src-tauri/target/release/bundle/**/*</code></pre>
+<hr>
+<h3 id="build-output">Build Output</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Platform</th><th>Bundle Format</th><th>Output Path</th></tr></thead>
+<tbody>
+<tr><td>Windows</td><td><code>.msi</code> (Windows Installer) + <code>.exe</code> (NSIS)</td><td><code>src-tauri/target/release/bundle/msi/</code> + <code>nsis/</code></td></tr>
+<tr><td>macOS</td><td><code>.dmg</code> (Disk Image)</td><td><code>src-tauri/target/release/bundle/dmg/</code></td></tr>
+<tr><td>Linux</td><td><code>.AppImage</code> (Portable)</td><td><code>src-tauri/target/release/bundle/appimage/</code></td></tr>
+</tbody>
+</table></div>
+<h4 id="windows-packaging">Windows Packaging</h4>
+<p>The Windows build produces an <code>.msi</code> installer via the <strong>Tauri Windows Installer</strong> (tauri-utils):</p>
+<ul>
+<li>Creates Start Menu shortcut</li>
+<li>Associates <code>.msc</code> files (if configured)</li>
+<li>Sets up uninstaller via Windows Programs and Features</li>
+<li>Code signing can be configured via environment variables (<code>TAURI<em>SIGNING</em>PRIVATE<em>KEY</code>, <code>TAURI</em>SIGNING<em>PRIVATE</em>KEY_PASSWORD</code>)</li>
+</ul>
+<h4 id="macos-packaging">macOS Packaging</h4>
+<p>The macOS build produces a <code>.dmg</code> disk image:</p>
+<ul>
+<li>App is bundled as a <code>.app</code> bundle</li>
+<li>DMG provides drag-and-drop installation</li>
+<li>Notarization can be configured for macOS Gatekeeper</li>
+<li>Code signing requires an Apple Developer account</li>
+</ul>
+<h4 id="linux-packaging">Linux Packaging</h4>
+<p>The Linux build produces an <code>.AppImage</code>:</p>
+<ul>
+<li>Portable — no installation needed</li>
+<li>Works on most Linux distributions</li>
+<li>Can be packaged as <code>.deb</code> or <code>.rpm</code> with additional Tauri configuration</li>
+</ul>
+<hr>
+<h3 id="ci-pipeline">CI Pipeline</h3>
+<p>The CI workflow (<code>.github/workflows/ci.yml</code>) runs on every push and pull request to <code>main</code>:</p>
+<pre><code class="language-yaml">name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx tsc --noEmit         # TypeScript type checking
+      - run: npx vitest run --coverage # Unit tests
+      - run: npm run build             # Production build</code></pre>
+<h4 id="ci-steps">CI Steps</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Step</th><th>Command</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>TypeScript check</td><td><code>tsc --noEmit</code></td><td>Verifies type safety without emitting files</td></tr>
+<tr><td>Unit tests</td><td><code>vitest run</code></td><td>Runs 191 tests across 11 test files</td></tr>
+<tr><td>Production build</td><td><code>npm run build</code></td><td>Verifies the app builds successfully</td></tr>
+</tbody>
+</table></div>
+<p>The full test suite covers API config, provider routing, all stores (canvas, rag, ui), utility functions (validation, layout), components (SettingsDrawer, TopBar), and hooks (useDocumentParser).</p>
+<hr>
+<h3 id="tauri-configuration">Tauri Configuration</h3>
+<p>The build configuration is in <code>src-tauri/tauri.conf.json</code>:</p>
+<pre><code class="language-json">{
+  "productName": "Mosaic",
+  "version": "0.3.0",
+  "identifier": "com.mosaic.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Mosaic",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "wix": {
+        "language": "en-US"
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
+  }
+}</code></pre>
+<h4 id="key-configuration-fields">Key Configuration Fields</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Field</th><th>Purpose</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>identifier</code></td><td>App identifier (reverse domain)</td><td>Must be unique per app</td></tr>
+<tr><td><code>frontendDist</code></td><td>Vite production build output</td><td><code>../dist</code> from <code>src-tauri/</code></td></tr>
+<tr><td><code>devUrl</code></td><td>Vite dev server URL</td><td>Port 1420</td></tr>
+<tr><td><code>beforeDevCommand</code></td><td>Starts Vite dev server before Tauri</td><td><code>npm run dev</code></td></tr>
+<tr><td><code>beforeBuildCommand</code></td><td>Builds frontend before Tauri build</td><td><code>npm run build</code></td></tr>
+<tr><td><code>windows[].width/height</code></td><td>Default window size</td><td>1280x800</td></tr>
+<tr><td><code>windows[].minWidth/minHeight</code></td><td>Minimum window size</td><td>800x600</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="versioning">Versioning</h3>
+<p>Mosaic follows <strong>Semantic Versioning</strong> (SemVer):</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Version</th><th>Example</th><th>When</th></tr></thead>
+<tbody>
+<tr><td>Major</td><td><code>1.0.0</code></td><td>Breaking changes</td></tr>
+<tr><td>Minor</td><td><code>0.2.0</code> → <code>0.3.0</code></td><td>New features, non-breaking</td></tr>
+<tr><td>Patch</td><td><code>0.3.0</code> → <code>0.3.1</code></td><td>Bug fixes, non-breaking</td></tr>
+</tbody>
+</table></div>
+<p>Current version: <code>0.3.0</code> (beta — API may change)</p>
+<hr>
+<h3 id="development-build">Development Build</h3>
+<pre><code class="language-bash"># Development mode with hot reload
+npm run tauri:dev
+
+# This runs:
+# 1. Vite dev server (port 1420) with HMR
+# 2. Tauri window connected to dev server
+# 3. Rust compilation (cached, fast)</code></pre>
+<h4 id="development-features">Development Features</h4>
+<ul>
+<li><strong>Hot Module Replacement (HMR)</strong>: Frontend changes appear instantly</li>
+<li><strong>DevTools</strong>: Right-click → Inspect Element in the webview</li>
+<li><strong>Source maps</strong>: Full TypeScript debugging</li>
+<li><strong>Unminified code</strong>: Better error messages</li>
+</ul>
+<hr>
+<h3 id="production-build">Production Build</h3>
+<pre><code class="language-bash"># Production build
+npm run tauri:build
+
+# This runs:
+# 1. tsc --noEmit (TypeScript check)
+# 2. vite build (frontend bundling)
+# 3. cargo build (Rust compilation)
+# 4. tauri bundle (package into installer)</code></pre>
+<h4 id="production-optimizations">Production Optimizations</h4>
+<ul>
+<li><strong>Code splitting</strong>: <code>@xyflow/react</code> → <code>flow</code> chunk, <code>framer-motion</code> → <code>motion</code> chunk</li>
+<li><strong>Minification</strong>: Vite's built-in Terser/Rollup minification</li>
+<li><strong>Tree shaking</strong>: Unused code is removed</li>
+<li><strong>Asset hashing</strong>: Cache-busting filenames (e.g., <code>main.a1b2c3d4.js</code>)</li>
+</ul>
+<h4 id="vite-configuration-vite-config-ts">Vite Configuration (vite.config.ts)</h4>
+<pre><code class="language-typescript">import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 1420,
+    strictPort: true,
+  },
+  build: {
+    target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          flow: ['@xyflow/react'],
+          motion: ['framer-motion'],
+        },
+      },
+    },
+  },
+  // Prevent Vite from obscuring Rust errors
+  clearScreen: false,
+});</code></pre>
+<h4 id="release-checklist">Release Checklist</h4>
+<p>Before publishing a new release:</p>
+<ul>
+<li>[ ] Version bumped in <code>package.json</code> and <code>tauri.conf.json</code></li>
+<li>[ ] CHANGELOG updated with new version's changes</li>
+<li>[ ] CI passes on <code>main</code> (TypeScript check, tests, build)</li>
+<li>[ ] Test on all target platforms (Windows, macOS, Linux)</li>
+<li>[ ] Git tag created (<code>v0.x.x</code>)</li>
+<li>[ ] Release workflow triggered</li>
+<li>[ ] Release artifacts verified (download and install)</li>
+<li>[ ] Release notes written with highlights and upgrade instructions</li>
+</ul>
+<h4 id="manual-build-and-deployment-steps">Manual Build and Deployment Steps</h4>
+<p>For maintainers who need to build and release manually:</p>
+<pre><code class="language-bash"># 1. Update version
+# Edit package.json and tauri.conf.json with new version
+
+# 2. Commit and tag
+git add package.json src-tauri/tauri.conf.json
+git commit -m "chore: bump version to 0.x.x"
+git tag v0.x.x
+git push origin main --tags
+
+# 3. GitHub Actions will automatically run release.yml
+# Monitor progress at: https://github.com/versus184-py/Mosaic/actions
+
+# 4. After successful build, verify artifacts
+# Download from the Release page and test on each platform
+
+# 5. Write release notes
+# Include: highlights, breaking changes, upgrade instructions, contributors</code></pre>
+<h4 id="environment-variables-for-build">Environment Variables for Build</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Variable</th><th>Purpose</th><th>Required</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><code>TAURI<em>SIGNING</em>PRIVATE_KEY</code></td><td>Code signing private key path</td><td>For signed builds</td><td><code>./certs/key.pem</code></td></tr>
+<tr><td><code>TAURI<em>SIGNING</em>PRIVATE<em>KEY</em>PASSWORD</code></td><td>Code signing key password</td><td>For signed builds</td><td>(password)</td></tr>
+<tr><td><code>APPLE<em>DEVELOPER</em>ID</code></td><td>macOS signing identity</td><td>For macOS builds</td><td><code>Developer ID Application: ...</code></td></tr>
+<tr><td><code>APPLE<em>NOTARIZATION</em>USERNAME</code></td><td>Apple ID for notarization</td><td>For macOS builds</td><td><code>user@example.com</code></td></tr>
+<tr><td><code>APPLE<em>NOTARIZATION</em>PASSWORD</code></td><td>App-specific password for notarization</td><td>For macOS builds</td><td>(app-specific password)</td></tr>
+<tr><td><code>GITHUB_TOKEN</code></td><td>GitHub API token (auto-set by Actions)</td><td>For GitHub releases</td><td>(auto-set in CI)</td></tr>
+</tbody>
+</table></div>
+<h4 id="rollback-procedure">Rollback Procedure</h4>
+<p>If a release contains a critical bug:</p>
+<ol>
+<li><strong>Tag the previous working version</strong>:</li>
+</ol>
+<p>   ```bash</p>
+<p>   git tag v0.x.x-stable</p>
+<p>   git push origin v0.x.x-stable</p>
+<p>   ```</p>
+<ol>
+<li><strong>Patch the bug</strong> and create a new release (<code>v0.x.x+1</code>)</li>
+<li><strong>Update the release notes</strong> to warn users about the affected version</li>
+<li><strong>Mark the affected release</strong> as "Pre-release" on GitHub</li>
+</ol>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="community.html#contributing-guide">Contributing Guide</a> — How to contribute to development</li>
+<li><a href="security.html#security-model">Security Model</a> — Security in the build pipeline</li>
+<li><a href="community.html#changelog-and-roadmap">Changelog and Roadmap</a> — Release history and planned features</li>
+</ul>
+</section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking (category pages)
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+<script>
+// Node background
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
+</html>
