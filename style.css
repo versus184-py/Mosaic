@@ -612,6 +612,8 @@ details[open] .faq-answer{animation:faqFade 0.4s var(--ease-out)}
 .wiki-card:hover .wiki-card-arrow{opacity:1;transform:translateX(0);background:var(--accent);border-color:var(--accent)}
 .wiki-card-arrow svg{width:14px;height:14px;color:var(--text-muted);transition:color var(--transition-fast)}
 .wiki-card:hover .wiki-card-arrow svg{color:#fff}
+.wiki-card.visible{opacity:1!important;transform:translateY(0)!important}
+.wiki-quick-link.visible{opacity:1!important;transform:translateY(0)!important}
 .wiki-card-preview{
   display:flex;flex-wrap:wrap;gap:4px;margin-top:12px;padding-top:12px;
   border-top:1px solid var(--glass-border);opacity:0;max-height:0;
