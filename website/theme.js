@@ -29,9 +29,9 @@ function applyTheme(theme) {
 applyTheme(getThemePreference());
 
 // Listen for system color scheme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
   if (!localStorage.getItem('mosaic-theme')) {
-    applyTheme(new Date().getHours() >= 6 && new Date().getHours() < 18 ? 'sand' : 'dusk');
+    applyTheme(e.matches ? 'dusk' : 'sand');
   }
 });
 

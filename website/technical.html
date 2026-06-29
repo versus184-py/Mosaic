@@ -13,13 +13,16 @@
 </head>
 <body>
 
+<canvas id="node-bg"></canvas>
+
 <nav id="nav" role="navigation">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
     Mosaic
   </a>
   <div class="nav-links">
-    <a href="index.html">Home</a>
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
     <a href="technical.html" class="active">Technical</a>
     <a href="wiki.html">Docs</a>
     <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
@@ -29,7 +32,8 @@
 </nav>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html">Home</a>
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
   <a href="technical.html" class="active">Technical</a>
   <a href="wiki.html">Docs</a>
   <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
@@ -214,19 +218,16 @@ tests/              Integration tests</code></pre>
   <div class="footer-inner">
     <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
     <div class="footer-links">
-      <a href="index.html">Home</a>
       <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
       <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
     </div>
   </div>
 </footer>
 
 <div class="theme-picker" role="radiogroup" aria-label="Theme">
-  <span class="theme-picker-label">Theme</span>
-  <div class="theme-dots">
-    <button class="theme-dot-btn theme-dot-dusk active" data-theme="dusk" onclick="applyTheme('dusk')" aria-label="Dusk theme"><span class="tt">Dusk</span></button>
-    <button class="theme-dot-btn theme-dot-sand" data-theme="sand" onclick="applyTheme('sand')" aria-label="Sand theme"><span class="tt">Sand</span></button>
-  </div>
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
 </div>
 
 <script src="theme.js"></script>

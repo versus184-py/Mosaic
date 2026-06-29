@@ -52,7 +52,7 @@ body::after{
 .glass{
   position:relative;overflow:hidden;border-radius:var(--radius-lg);
   background:var(--glass);border:1px solid var(--glass-border);
-   box-shadow:0 16px 48px -8px var(--shadow);
+  box-shadow:0 16px 48px -8px var(--shadow);
   backdrop-filter:blur(24px) saturate(180%);
   -webkit-backdrop-filter:blur(24px) saturate(180%);
   transition:background var(--transition),border-color var(--transition),box-shadow var(--transition),transform 0.6s var(--ease-spring);
@@ -378,7 +378,7 @@ details[open] .faq-answer{animation:faqFade 0.4s var(--ease-out)}
   transform: translateY(-6px) scale(1.02);
   border-color: var(--accent-alpha);
   box-shadow: 0 16px 48px -8px var(--shadow), 0 0 20px var(--accent-glow);
-  background: var(--surface);
+  background: var(--glass-hover);
 }
 
 .section#download .download-card:hover::before {
@@ -403,6 +403,9 @@ details[open] .faq-answer{animation:faqFade 0.4s var(--ease-out)}
   50% { opacity: 1; transform: translateX(100%); }
   100% { opacity: 0.5; transform: translateX(-100%); }
 }
+
+.screenshot{display:block;width:100%;height:auto}
+.download-version{display:block;text-align:center;font-size:13px;color:var(--text-muted);margin-top:8px;grid-column:1/-1}
 
 /* ===== CTA ===== */
 .cta-banner{
@@ -473,7 +476,7 @@ details[open] .faq-answer{animation:faqFade 0.4s var(--ease-out)}
   .hero-card{padding:36px 24px}
   nav{max-width:calc(100% - 20px);top:10px;padding:5px 5px 5px 12px}
   .logo{font-size:14px}
-  .theme-toggle{bottom:16px;right:16px}
+  .theme-picker{bottom:16px;right:16px}
   .cta-banner{padding:48px 24px}
 }
 @media(max-width:640px){
