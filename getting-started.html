@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic documentation — Getting Started — Documentation">
+<meta property="og:title" content="Mosaic — Getting Started — Documentation">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — Getting Started — Documentation</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="wiki.html">Docs</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="wiki.html">Docs</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<section class="tech-hero">
+  <h1>Getting Started</h1>
+  <p>Install Mosaic, configure API providers, and send your first message on the branching canvas.</p>
+</section>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">Getting Started</div>
+      <a href="#mosaic">Mosaic</a>
+<a href="#installation-guide">Installation Guide</a>
+<a href="#tutorial-your-first-conversation">Tutorial: Your First Conversation</a>
+      <a href="wiki.html" style="margin-top:8px;color:var(--accent)">&larr; All docs</a>
+    </div>
+  </aside>
+  <main class="tech-content">
+    <section id="mosaic"><h2 id="mosaic">Mosaic</h2>
+<blockquote><p><strong>Beta</strong> — feedback welcome! Report issues or suggest features <a href="https://github.com/versus184-py/Mosaic/issues">here</a>.</p></blockquote>
+<p><strong>Mosaic turns linear AI chat into an interactive tree on an infinite canvas. Fork conversations from any message, explore multiple paths side-by-side, run code inline, and feed documents as RAG context.</strong></p>
+<p><a href="https://github.com/versus184-py/Mosaic/releases"><img src="https://img.shields.io/github/v/release/versus184-py/Mosaic?style=flat-square&label=Release" alt="Release" style="max-width:100%;border-radius:12px;margin:8px 0"></a></p>
+<p><a href="https://github.com/versus184-py/Mosaic/stargazers"><img src="https://img.shields.io/github/stars/versus184-py/Mosaic?style=flat-square&label=Stars" alt="Stars" style="max-width:100%;border-radius:12px;margin:8px 0"></a></p>
+<p><a href="https://github.com/versus184-py/Mosaic/issues"><img src="https://img.shields.io/github/issues/versus184-py/Mosaic?style=flat-square&label=Issues" alt="Issues" style="max-width:100%;border-radius:12px;margin:8px 0"></a></p>
+<p><img src="https://img.shields.io/badge/tests-191-passing-brightgreen?style=flat-square" alt="Tests" style="max-width:100%;border-radius:12px;margin:8px 0"></p>
+<p><img src="https://img.shields.io/badge/status-beta-yellow?style=flat-square" alt="Beta" style="max-width:100%;border-radius:12px;margin:8px 0"></p>
+<p><img src="https://img.shields.io/badge/Tauri-v2-purple?style=flat-square&logo=tauri" alt="Tauri v2" style="max-width:100%;border-radius:12px;margin:8px 0"></p>
+<p><img src="https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react" alt="React 19" style="max-width:100%;border-radius:12px;margin:8px 0"></p>
+<hr>
+<h3 id="what-is-mosaic">What is Mosaic?</h3>
+<p>Mosaic is a <strong>desktop application</strong> that reimagines the AI chat interface. Instead of a linear scroll of messages, Mosaic gives you an <strong>infinite spatial canvas</strong> where conversations grow as branching trees. Every AI response can be a starting point for a new direction — fork, explore, compare, and synthesize without losing context.</p>
+<p>Built with <strong>Tauri v2</strong> (Rust backend) and <strong>React 19</strong> (TypeScript frontend), Mosaic is fast, secure, and cross-platform. The application runs natively on Windows, macOS, and Linux via automated CI/CD builds. The Rust backend provides a lightweight, secure shell while the entire UI is rendered via a webview, giving you the performance of a native app with the flexibility of web technologies.</p>
+<h4 id="why-an-infinite-canvas">Why an Infinite Canvas?</h4>
+<p>Traditional AI chat interfaces are linear — a single thread of messages that grows downward. This works for simple Q&A but breaks down when you want to:</p>
+<ul>
+<li><strong>Explore alternatives</strong>: Ask the AI to approach a problem from different angles, then compare responses side-by-side.</li>
+<li><strong>Branch into subtopics</strong>: Follow an interesting tangent without losing the main conversation.</li>
+<li><strong>Iterate on ideas</strong>: Refine a response through multiple rounds while keeping earlier versions for reference.</li>
+<li><strong>Synthesize insights</strong>: Combine the best ideas from multiple conversation branches into a single coherent answer.</li>
+</ul>
+<p>Mosaic's spatial canvas solves all of these. Every message is a node on an infinite 2D plane. Click any AI response to fork a new branch. Drag nodes to arrange them spatially. Collapse branches you don't need. Search across all nodes. The canvas grows with your thinking.</p>
+<hr>
+<h3 id="feature-overview">Feature Overview</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Category</th><th>Feature</th><th>Details</th></tr></thead>
+<tbody>
+<tr><td><strong>Canvas</strong></td><td>Spatial canvas</td><td>Conversations branch like a tree, not a linear scroll. Drag, zoom, and arrange nodes freely on an infinite plane.</td></tr>
+<tr><td></td><td>Minimap</td><td>Navigate large canvases with an overview minimap showing all nodes and their positions.</td></tr>
+<tr><td></td><td>Multi-canvas tabs</td><td>Create, rename, duplicate, and switch between multiple conversation canvases simultaneously.</td></tr>
+<tr><td></td><td>Full-text search</td><td>Search across all node labels and message content with keyboard navigation.</td></tr>
+<tr><td></td><td>Bookmarks & collapsing</td><td>Bookmark important nodes for quick filtering; collapse entire branches to reduce visual clutter.</td></tr>
+<tr><td></td><td>Undo history</td><td>Position and structural undo with a 50-entry ring buffer for safe experimentation.</td></tr>
+<tr><td><strong>AI</strong></td><td>Multi-provider</td><td>Mistral AI (primary), OpenAI, Anthropic, Gemini, and Ollama (local models). Switch between providers per conversation.</td></tr>
+<tr><td></td><td>Streaming responses</td><td>Real-time token-by-token streaming with configurable temperature (0.0-2.0) and system prompts.</td></tr>
+<tr><td></td><td>Conversation branching</td><td>Click any message to fork the conversation. Explore alternatives in parallel without losing context.</td></tr>
+<tr><td></td><td>Confidence scoring</td><td>AI auto-scores responses from 0-100 after each completion, displayed as a badge on the response node.</td></tr>
+<tr><td></td><td>Suggestion tendrils</td><td>Auto-generated follow-up questions that appear after AI responses, auto-dismissing after 30 seconds.</td></tr>
+<tr><td></td><td>Branch distillation</td><td>Summarize entire conversation branches into a single synthesis node with a single click.</td></tr>
+<tr><td></td><td>Branch pruning</td><td>AI-driven relevance scoring against a user-provided goal; dims low-scoring branches to reduce noise.</td></tr>
+<tr><td></td><td>Parallel debate</td><td>Run the same prompt through multiple provider models simultaneously; results fan out for side-by-side comparison.</td></tr>
+<tr><td><strong>Code</strong></td><td>JavaScript execution</td><td>Sandboxed execution in a Web Worker with a strict allowlist of safe globals; network APIs are completely blocked.</td></tr>
+<tr><td></td><td>Python execution</td><td>In-browser Python via Pyodide (WebAssembly); supports numpy, pandas, scipy, matplotlib, and 9 other allowlisted packages.</td></tr>
+<tr><td></td><td>Python REPL</td><td>Floating persistent terminal with command history, reset/clear commands, and persistent global state across executions.</td></tr>
+<tr><td><strong>RAG</strong></td><td>Document ingestion</td><td>Upload PDFs, text files, and code files in 25+ formats. Automatic chunking at 800 characters with 100-character overlap.</td></tr>
+<tr><td></td><td>Semantic search</td><td>TF-IDF cosine similarity search with optional embedding-based search via any connected provider.</td></tr>
+<tr><td></td><td>Context injection</td><td>Top 3 most relevant chunks are automatically appended to the system prompt for each query.</td></tr>
+<tr><td></td><td>Document limits</td><td>Supports up to 50 documents with a total size limit of 50 MB (10 MB per file).</td></tr>
+<tr><td><strong>UI</strong></td><td>Glass UI system</td><td>Physics-based refractive glass components using SVG displacement maps, Snell's law simulation, and spring physics.</td></tr>
+<tr><td></td><td>5 themes</td><td>Void (deep black/blue, cold minimal), Dusk (cosmic purple, rich tones), Sand (warm desert beige), Snow (clean cool gray), Sunrise (golden warm tones).</td></tr>
+<tr><td></td><td>Accessibility</td><td>Respects <code>prefers-reduced-motion</code> and <code>prefers-reduced-transparency</code> OS preferences.</td></tr>
+<tr><td></td><td>Animations</td><td>Framer Motion-powered entrance animations, spring-based sliders and switches, particle welcome screen.</td></tr>
+<tr><td><strong>Security</strong></td><td>Sandboxed code execution</td><td>JavaScript executes with blocked network APIs; Python pip is limited to 14 allowlisted packages; fetches restricted to CDN hosts only.</td></tr>
+<tr><td></td><td>Strict CSP</td><td>Content Security Policy enforced at the Tauri level; restricts connect-src to all 5 provider API endpoints and CDNs.</td></tr>
+<tr><td></td><td>API key encryption</td><td>API keys are XOR-obfuscated in localStorage with a salt key to prevent casual exposure.</td></tr>
+<tr><td></td><td>Data validation</td><td>All imported canvas data, RAG documents, and stored UI state undergo schema validation before use.</td></tr>
+<tr><td><strong>Analytics</strong></td><td>Token tracking</td><td>Per-model token usage estimation and cost calculation using provider pricing tables.</td></tr>
+<tr><td></td><td>Canvas statistics</td><td>Node counts, message counts, maximum depth, branching points, and per-model breakdowns.</td></tr>
+<tr><td></td><td>Data locality</td><td>All analytics data is stored locally in localStorage; no external telemetry or data collection.</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="quick-links">Quick Links</h3>
+<ul>
+<li><a href="getting-started.html#installation-guide">Installation Guide</a> — Download or build from source</li>
+<li><a href="getting-started.html#tutorial-your-first-conversation">Tutorial - Your First Conversation</a> — Get started in 5 minutes</li>
+<li><a href="user-guide.html#llm-provider-integration">LLM Provider Integration</a> — Configure Mistral, OpenAI, Anthropic, Gemini, or Ollama</li>
+<li><a href="user-guide.html#canvas-and-node-system">Canvas and Node System</a> — Understand the spatial canvas and node types</li>
+<li><a href="user-guide.html#keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</a> — All shortcuts and interface documentation</li>
+<li><a href="community.html#contributing-guide">Contributing Guide</a> — How to help improve Mosaic</li>
+</ul>
+<hr>
+<h3 id="technology-stack">Technology Stack</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+<tbody>
+<tr><td>Desktop shell</td><td><a href="https://tauri.app/">Tauri</a></td><td>v2</td></tr>
+<tr><td>Frontend framework</td><td><a href="https://react.dev/">React</a></td><td>19</td></tr>
+<tr><td>Language</td><td><a href="https://www.typescriptlang.org/">TypeScript</a></td><td>5.8</td></tr>
+<tr><td>Canvas/graph</td><td><a href="https://xyflow.com/">React Flow</a> (@xyflow/react)</td><td>v12</td></tr>
+<tr><td>Animations</td><td><a href="https://www.framer.com/motion/">Framer Motion</a></td><td>v12</td></tr>
+<tr><td>Styling</td><td><a href="https://tailwindcss.com/">Tailwind CSS</a></td><td>v3</td></tr>
+<tr><td>State management</td><td><a href="https://github.com/pmndrs/zustand">Zustand</a></td><td>v5</td></tr>
+<tr><td>In-browser Python</td><td><a href="https://pyodide.org/">Pyodide</a></td><td>v0.26.2</td></tr>
+<tr><td>LLM providers</td><td>Mistral AI, OpenAI, Anthropic, Gemini, Ollama</td><td>—</td></tr>
+<tr><td>Bundler</td><td><a href="https://vitejs.dev/">Vite</a></td><td>v6</td></tr>
+<tr><td>Markdown</td><td><a href="https://github.com/remarkjs/react-markdown">react-markdown</a></td><td>v10</td></tr>
+<tr><td>Rust runtime</td><td><a href="https://www.rust-lang.org/">Rust</a></td><td>edition 2021</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="project-status">Project Status</h3>
+<p>Mosaic is currently in <strong>beta</strong> (v0.3.0). The core features are stable and functional, but you may encounter edge cases. Feedback is actively welcomed via <a href="https://github.com/versus184-py/Mosaic/issues">GitHub Issues</a>.</p>
+<h4 id="what-works-well">What works well</h4>
+<ul>
+<li>Spatial canvas with branching conversations</li>
+<li>Multi-provider LLM integration with streaming</li>
+<li>Inline code execution (JavaScript and Python)</li>
+<li>RAG document querying</li>
+<li>Multi-canvas tabs</li>
+<li>Export/import of canvases</li>
+</ul>
+<h4 id="what-s-coming">What's coming</h4>
+<ul>
+<li>Collaborative real-time canvases</li>
+<li>Node grouping and labels</li>
+<li>Visual branching indicators</li>
+<li>Improved RAG chunking (paragraph-aware)</li>
+<li>Plugin system</li>
+</ul>
+<hr>
+<h3 id="gallery">Gallery</h3>
+<blockquote><p>Screenshots coming soon! Want to help? Take a screenshot and drop it in a <a href="https://github.com/versus184-py/Mosaic/issues">GitHub issue</a>.</p></blockquote>
+<hr>
+<h3 id="use-cases">Use Cases</h3>
+<p>Mosaic is designed for a wide range of AI-powered workflows:</p>
+<h4 id="research-and-analysis">Research and Analysis</h4>
+<ul>
+<li>Explore a topic by branching into multiple subtopics simultaneously</li>
+<li>Upload research papers as RAG documents and query them with context</li>
+<li>Compare how different AI models approach the same research question</li>
+<li>Distill insights from multiple branches into a coherent synthesis</li>
+</ul>
+<h4 id="software-development">Software Development</h4>
+<ul>
+<li>Use the AI as a pair programmer — ask for code, review, and iterate</li>
+<li>Run generated code inline (JavaScript or Python) without leaving the app</li>
+<li>Branch to explore different implementation approaches</li>
+<li>Upload codebases as RAG documents for context-aware code review</li>
+</ul>
+<h4 id="creative-writing-and-brainstorming">Creative Writing and Brainstorming</h4>
+<ul>
+<li>Generate multiple outline variations by branching from a single idea</li>
+<li>Use parallel debate to get diverse creative perspectives</li>
+<li>Follow suggestion tendrils to explore unexpected directions</li>
+<li>Prune weak ideas and distill the best into a final draft</li>
+</ul>
+<h4 id="learning-and-education">Learning and Education</h4>
+<ul>
+<li>Ask follow-up questions that branch into deeper topics</li>
+<li>Upload lecture notes or textbooks as RAG documents</li>
+<li>Run code examples inline to see them work</li>
+<li>Bookmark key explanations for later review</li>
+</ul>
+<h4 id="meeting-and-project-preparation">Meeting and Project Preparation</h4>
+<ul>
+<li>Research multiple topics in parallel branches</li>
+<li>Synthesize findings into a single distillation node</li>
+<li>Export the complete canvas as a JSON archive</li>
+<li>Revisit and extend preparation canvases over time</li>
+</ul>
+<hr>
+<h3 id="quick-start">Quick Start</h3>
+<pre><code class="language-bash"># Prerequisites: Node.js 18+, Rust toolchain, a Mistral AI API key
+
+git clone https://github.com/versus184-py/Mosaic.git
+cd Mosaic
+npm install
+npm run tauri:dev    # Development mode with hot reload
+npm run tauri:build  # Production build</code></pre>
+<p>See the <a href="getting-started.html#installation-guide">Installation Guide</a> for detailed setup instructions, including how to obtain API keys and configure each provider.</p>
+</section>
+<section id="installation-guide"><h2 id="installation-guide">Installation Guide</h2>
+<p>This guide covers everything you need to install and configure Mosaic, from downloading a prebuilt binary to building from source and setting up your API keys.</p>
+<hr>
+<h3 id="download-a-prebuilt-installer">Download a Prebuilt Installer</h3>
+<p>The easiest way to get started is to download the latest release for your platform from the <a href="https://github.com/versus184-py/Mosaic/releases">Releases page</a>.</p>
+<h4 id="windows">Windows</h4>
+<ol>
+<li>Go to the <a href="https://github.com/versus184-py/Mosaic/releases">Releases page</a></li>
+<li>Download the latest <code>.msi</code> installer</li>
+<li>Run the installer and follow the on-screen instructions</li>
+<li>Launch Mosaic from the Start Menu or desktop shortcut</li>
+</ol>
+<h4 id="macos">macOS</h4>
+<ol>
+<li>Go to the <a href="https://github.com/versus184-py/Mosaic/releases">Releases page</a></li>
+<li>Download the latest <code>.dmg</code> disk image</li>
+<li>Open the DMG and drag Mosaic to your Applications folder</li>
+<li>Launch Mosaic from Applications</li>
+</ol>
+<h4 id="linux">Linux</h4>
+<ol>
+<li>Go to the <a href="https://github.com/versus184-py/Mosaic/releases">Releases page</a></li>
+<li>Download the latest <code>.AppImage</code> file</li>
+<li>Make it executable: <code>chmod +x Mosaic*.AppImage</code></li>
+<li>Run it: <code>./Mosaic*.AppImage</code></li>
+</ol>
+<hr>
+<h3 id="build-from-source">Build from Source</h3>
+<p>Building from source gives you the latest code and is useful for development and testing.</p>
+<h4 id="prerequisites">Prerequisites</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Requirement</th><th>Version</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><a href="https://nodejs.org/">Node.js</a></td><td>18+</td><td>Includes npm</td></tr>
+<tr><td><a href="https://rustup.rs/">Rust toolchain</a></td><td>Latest stable</td><td>Install via <code>rustup</code></td></tr>
+<tr><td><a href="https://console.mistral.ai/">Mistral AI API key</a></td><td>—</td><td>Required for AI features (free tier available)</td></tr>
+</tbody>
+</table></div>
+<h4 id="step-1-install-the-rust-toolchain">Step 1: Install the Rust Toolchain</h4>
+<p>If you don't already have Rust installed:</p>
+<pre><code class="language-bash"># Visit https://rustup.rs/ or run:
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Windows users: download and run rustup-init.exe from https://rustup.rs/</code></pre>
+<p>After installation, verify it works:</p>
+<pre><code class="language-bash">rustc --version
+cargo --version</code></pre>
+<h4 id="step-2-clone-the-repository">Step 2: Clone the Repository</h4>
+<pre><code class="language-bash">git clone https://github.com/versus184-py/Mosaic.git
+cd Mosaic</code></pre>
+<h4 id="step-3-install-javascript-dependencies">Step 3: Install JavaScript Dependencies</h4>
+<pre><code class="language-bash">npm install</code></pre>
+<p>This installs all frontend dependencies (React, React Flow, Zustand, Framer Motion, Tailwind CSS, etc.) and the Tauri CLI.</p>
+<h4 id="step-4-run-in-development-mode">Step 4: Run in Development Mode</h4>
+<pre><code class="language-bash">npm run tauri:dev</code></pre>
+<p>This launches the application in development mode with:</p>
+<ul>
+<li>Hot module reloading for the frontend (changes appear instantly)</li>
+<li>The Tauri webview window (1280x800 by default)</li>
+<li>DevTools available (right-click → Inspect Element, or F12)</li>
+<li>Source maps for debugging TypeScript directly</li>
+<li>Unminified code with descriptive variable names</li>
+</ul>
+<p><strong>What happens when you run <code>npm run tauri:dev</code>:</strong></p>
+<pre><code>1. Vite starts a dev server on http://localhost:1420
+2. Vite compiles TypeScript → JavaScript (esbuild, fast)
+3. Vite processes Tailwind CSS → compiled CSS
+4. Tauri CLI launches the native window
+5. The webview loads http://localhost:1420
+6. Vite injects HMR client into the page
+7. Any file change triggers HMR (sub-second refresh)</code></pre>
+<h4 id="step-5-build-for-production">Step 5: Build for Production</h4>
+<pre><code class="language-bash">npm run tauri:build</code></pre>
+<p>The build process:</p>
+<ol>
+<li><strong>TypeScript check</strong>: <code>tsc --noEmit</code> verifies type safety</li>
+<li><strong>Frontend bundling</strong>: Vite bundles with code splitting, tree shaking, minification</li>
+<li><strong>Rust compilation</strong>: Cargo builds the Tauri backend in release mode</li>
+<li><strong>App bundling</strong>: Tauri packages everything into platform-specific installers</li>
+</ol>
+<p>Build output goes to <code>src-tauri/target/release/bundle/</code>:</p>
+<ul>
+<li>Windows: <code>src-tauri/target/release/bundle/msi/Mosaic_*.msi</code></li>
+<li>macOS: <code>src-tauri/target/release/bundle/dmg/Mosaic_*.dmg</code></li>
+<li>Linux: <code>src-tauri/target/release/bundle/appimage/Mosaic_*.AppImage</code></li>
+</ul>
+<p><strong>Build time expectations:</strong></p>
+<ul>
+<li>First build: 2-5 minutes (Rust compilation + npm install)</li>
+<li>Subsequent builds: 30-60 seconds (incremental Rust compilation + cached Vite)</li>
+<li>The Rust backend is small (2 source files), so recompilation is fast</li>
+</ul>
+<h4 id="troubleshooting-build-issues">Troubleshooting Build Issues</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Problem</th><th>Likely Cause</th><th>Solution</th></tr></thead>
+<tbody>
+<tr><td><code>rustc not found</code></td><td>Rust not installed</td><td>Run <code>rustup-init</code> or install via your package manager</td></tr>
+<tr><td><code>Failed to run custom build command for 'tauri'</code></td><td>Missing system dependencies</td><td>See Tauri docs for your OS</td></tr>
+<tr><td>WebKit issues (Linux)</td><td>Missing WebKit2GTK</td><td><code>sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsoup-3.0-dev</code></td></tr>
+<tr><td><code>npm ERR!</code> during install</td><td>Network or version issues</td><td>Try <code>npm cache clean --force</code> then <code>npm install</code> again</td></tr>
+<tr><td>Build is very slow</td><td>First build compiles all Rust crates</td><td>Subsequent builds are much faster (incremental compilation)</td></tr>
+<tr><td><code>MSI</code> build fails (Windows)</td><td>Missing WiX Toolset</td><td>Install <a href="https://wixtoolset.org/">WiX Toolset v3</a></td></tr>
+<tr><td><code>dmg</code> build fails (macOS)</td><td>Missing create-dmg</td><td><code>brew install create-dmg</code></td></tr>
+<tr><td>Permission denied on AppImage (Linux)</td><td>AppImage not executable</td><td><code>chmod +x Mosaic*.AppImage</code></td></tr>
+<tr><td>Blank white window</td><td>Dev/build mismatch</td><td>Check that Vite dev server is running (dev mode) or frontend was built (production)</td></tr>
+</tbody>
+</table></div>
+<h4 id="verifying-the-build">Verifying the Build</h4>
+<p>After a successful build, verify the installation:</p>
+<pre><code class="language-bash"># Check that the binary exists and has the right permissions
+ls -la src-tauri/target/release/bundle/
+
+# Run directly (without installer)
+# Windows:
+./src-tauri/target/release/mosaic.exe
+# macOS/Linux:
+./src-tauri/target/release/mosaic
+
+# Check the version
+./src-tauri/target/release/mosaic --version  # if implemented</code></pre>
+<p>The app should launch and show the Mosaic welcome screen.</p>
+<h4 id="dev-mode-vs-production-mode">Dev Mode vs Production Mode</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Aspect</th><th>Development (<code>npm run tauri:dev</code>)</th><th>Production (<code>npm run tauri:build</code>)</th></tr></thead>
+<tbody>
+<tr><td>Performance</td><td>Slower (unminified code, HMR)</td><td>Optimized (minified, tree-shaken)</td></tr>
+<tr><td>Debugging</td><td>DevTools, React DevTools, source maps</td><td>Limited</td></tr>
+<tr><td>Hot reload</td><td>Yes (instant frontend updates)</td><td>No</td></tr>
+<tr><td>Console</td><td>Full logging</td><td>Minimal</td></tr>
+<tr><td>Rust</td><td>Debug compilation (faster build)</td><td>Release compilation (optimized binary)</td></tr>
+</tbody>
+</table></div>
+<p>For daily use, always use the production build. Use development mode for contributing and debugging.</p>
+<hr>
+<h3 id="configuration">Configuration</h3>
+<p>Once Mosaic is running, open the Settings drawer by clicking the gear icon (or <code>Ctrl+,</code>) in the top bar.</p>
+<h4 id="essential-settings">Essential Settings</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Setting</th><th>Description</th><th>Required</th></tr></thead>
+<tbody>
+<tr><td><strong>API Key</strong></td><td>Your Mistral AI API key</td><td>Yes (or another provider)</td></tr>
+<tr><td><strong>System prompt</strong></td><td>Custom instructions for the AI</td><td>Optional</td></tr>
+<tr><td><strong>Temperature</strong></td><td>0.0 (precise/deterministic) to 2.0 (creative/random)</td><td>Optional (default: 0.7)</td></tr>
+<tr><td><strong>Theme</strong></td><td>Void, Dusk, Sand, Snow, or Sunrise</td><td>Optional (default: auto-detected)</td></tr>
+<tr><td><strong>Minimap</strong></td><td>Toggle the canvas minimap on/off</td><td>Optional (default: on)</td></tr>
+</tbody>
+</table></div>
+<h4 id="obtaining-api-keys">Obtaining API Keys</h4>
+<p>Mosaic supports five LLM providers. You need at least one API key to use AI features.</p>
+<h4 id="mistral-ai-primary">Mistral AI (Primary)</h4>
+<ol>
+<li>Go to <a href="https://console.mistral.ai/">console.mistral.ai</a></li>
+<li>Sign up for a free account (generous free credits included)</li>
+<li>Navigate to <strong>API Keys</strong> and create a new key</li>
+<li>Copy the key and paste it into Mosaic's Settings drawer</li>
+<li>Available models: <code>mistral-large-latest</code>, <code>mistral-small-latest</code></li>
+</ol>
+<h4 id="openai">OpenAI</h4>
+<ol>
+<li>Go to <a href="https://platform.openai.com/api-keys">platform.openai.com/api-keys</a></li>
+<li>Sign up or log in</li>
+<li>Create a new API key</li>
+<li>Paste it into Mosaic's Settings drawer under OpenAI</li>
+<li>Available models: <code>gpt-4o</code>, <code>gpt-4o-mini</code></li>
+</ol>
+<h4 id="anthropic">Anthropic</h4>
+<ol>
+<li>Go to <a href="https://console.anthropic.com/">console.anthropic.com</a></li>
+<li>Sign up or log in</li>
+<li>Generate an API key</li>
+<li>Paste it under Anthropic in Mosaic's Settings</li>
+<li>Available models: <code>claude-sonnet-4-20250514</code>, <code>claude-haiku-3-5-20241022</code></li>
+</ol>
+<h4 id="gemini">Gemini</h4>
+<ol>
+<li>Go to <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a></li>
+<li>Sign up or log in</li>
+<li>Create an API key</li>
+<li>Paste it under Gemini in Mosaic's Settings</li>
+<li>Available models: <code>gemini-2.5-pro-exp-03-25</code>, <code>gemini-2.0-flash-exp</code></li>
+</ol>
+<h4 id="ollama-local">Ollama (Local)</h4>
+<ol>
+<li>Download and install <a href="https://ollama.com/">Ollama</a></li>
+<li>Run <code>ollama serve</code> to start the local server</li>
+<li>Pull a model: <code>ollama pull llama3.2</code> (or any model you prefer)</li>
+<li>In Mosaic's Settings, configure the Ollama URL (default: <code>http://localhost:11434</code>)</li>
+<li>Click <strong>Detect</strong> — Mosaic will list available models automatically</li>
+<li>No API key needed for local models</li>
+</ol>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<p>Now that Mosaic is installed and configured:</p>
+<ul>
+<li><a href="getting-started.html#tutorial-your-first-conversation">Tutorial - Your First Conversation</a> — Send your first message and explore the canvas</li>
+<li><a href="user-guide.html#llm-provider-integration">LLM Provider Integration</a> — Deep dive into provider configuration</li>
+<li><a href="user-guide.html#canvas-and-node-system">Canvas and Node System</a> — Understand the spatial canvas and node types</li>
+<li><a href="user-guide.html#keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</a> — Learn the shortcuts for efficient use</li>
+</ul>
+</section>
+<section id="tutorial-your-first-conversation"><h2 id="tutorial-your-first-conversation">Tutorial: Your First Conversation</h2>
+<p>This tutorial walks you through your first Mosaic session — from launching the app to having your first branched conversation.</p>
+<p><strong>Estimated time</strong>: 10 minutes</p>
+<hr>
+<h3 id="step-1-launch-mosaic">Step 1: Launch Mosaic</h3>
+<p>Open Mosaic from your Start Menu (Windows), Applications folder (macOS), or run <code>npm run tauri:dev</code> if developing.</p>
+<p>You'll see the <strong>Welcome Screen</strong> — a particle animation with floating dots against a dark background. Click anywhere to dismiss it and enter the main canvas.</p>
+<hr>
+<h3 id="step-2-meet-the-interface">Step 2: Meet the Interface</h3>
+<p>The main window has several key areas:</p>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│  [Mosaic]  [Model: Mistral Large ▼] [🔍][★][📄]  │  ← TopBar
+│  [📊][🌿][🧹][➕][⚙️]                           │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│                                                     │
+│           ┌──────────────────────┐                   │
+│           │ Welcome to Mosaic!   │                   │  ← Canvas area
+│           │                      │                   │     with nodes
+│           │ Click a node to      │                   │
+│           │ start a conversation │                   │
+│           └──────────────────────┘                   │
+│                                                     │
+│                                                     │
+│         [+][-] [Zoom: 100% ■━━━━━━━○]               │  ← Zoom controls
+└─────────────────────────────────────────────────────┘</code></pre>
+<h4 id="interface-elements">Interface Elements</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Element</th><th>Location</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>TopBar</strong></td><td>Top edge</td><td>Model selector, search, bookmarks, documents, analytics, settings</td></tr>
+<tr><td><strong>Canvas</strong></td><td>Center</td><td>Infinite scrollable/zoomable space for conversation nodes</td></tr>
+<tr><td><strong>Zoom controls</strong></td><td>Bottom center</td><td>Zoom slider and fit-to-view button</td></tr>
+<tr><td><strong>Minimap</strong></td><td>Bottom-right corner (if enabled)</td><td>Overview of entire canvas</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="step-3-configure-your-api-key">Step 3: Configure Your API Key</h3>
+<p>Before sending messages, you need an API key:</p>
+<ol>
+<li>Click the <strong>gear icon</strong> (⚙️) in the top-right corner</li>
+<li>The Settings drawer opens</li>
+<li>Paste your Mistral AI API key into the <strong>API Key</strong> field</li>
+<li>The key is stored securely (XOR-encrypted) in your browser's local storage</li>
+<li>Close the Settings drawer</li>
+</ol>
+<blockquote><p>Don't have an API key yet? Follow the <a href="getting-started.html#installation-guide">Installation Guide</a> for instructions on obtaining one.</p></blockquote>
+<hr>
+<h3 id="step-4-start-a-conversation">Step 4: Start a Conversation</h3>
+<ol>
+<li>Click on the <strong>root node</strong> (the welcome message in the center of the canvas)</li>
+<li>A text input appears at the bottom of the node</li>
+<li>Type a message, for example:</li>
+</ol>
+<pre><code>What are the best practices for writing clean Python code?</code></pre>
+<ol>
+<li>Press <code>Enter</code> (or click the send button) to send your message</li>
+</ol>
+<p>You'll see:</p>
+<ul>
+<li>Your message appears as a new <strong>branch node</strong> (user message)</li>
+<li>The AI begins streaming its response character by character in a <strong>response node</strong></li>
+<li>The response node has a <strong>typing indicator</strong> (animated dots) while streaming</li>
+<li>When complete, the full response is rendered as formatted Markdown</li>
+</ul>
+<hr>
+<h3 id="step-5-follow-up">Step 5: Follow Up</h3>
+<p>After the AI responds, you can continue the conversation:</p>
+<ol>
+<li>Click on the AI's response node</li>
+<li>Type a follow-up question, for example:</li>
+</ol>
+<pre><code>Can you show me an example of a Python decorator?</code></pre>
+<ol>
+<li>Press <code>Enter</code></li>
+</ol>
+<p>The new message appears connected to the previous response, forming a chain:</p>
+<pre><code>[root] → [You: best practices] → [AI: response] → [You: decorator example] → [AI: response]</code></pre>
+<hr>
+<h3 id="step-6-branch-the-conversation">Step 6: Branch the Conversation</h3>
+<p>Now for the feature that makes Mosaic unique — <strong>branching</strong>:</p>
+<ol>
+<li>Find an earlier AI response (not the most recent one)</li>
+<li>Click on it</li>
+<li>Instead of asking a follow-up, ask something different, for example:</li>
+</ol>
+<pre><code>What are the alternatives to decorators in Python?</code></pre>
+<ol>
+<li>Press <code>Enter</code></li>
+</ol>
+<p>Notice: a <strong>new branch</strong> starts from that node, parallel to your original conversation:</p>
+<pre><code>[root] → [You: best practices] → [AI: response] ─→ [You: decorator] → [AI: response]
+                                                   ─→ [You: alternatives] → [AI: response]</code></pre>
+<p>You now have two conversation paths side by side. You can:</p>
+<ul>
+<li><strong>Compare</strong> the AI's responses to different follow-ups</li>
+<li><strong>Explore</strong> both directions independently</li>
+<li><strong>Collapse</strong> a branch if it's not useful</li>
+</ul>
+<hr>
+<h3 id="step-7-navigate-the-canvas">Step 7: Navigate the Canvas</h3>
+<p>Try these navigation actions:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>How</th></tr></thead>
+<tbody>
+<tr><td><strong>Pan</strong></td><td>Click and drag on empty canvas space</td></tr>
+<tr><td><strong>Zoom in</strong></td><td>Scroll up, press <code>+</code>, or use the zoom slider</td></tr>
+<tr><td><strong>Zoom out</strong></td><td>Scroll down, press <code>-</code>, or use the zoom slider</td></tr>
+<tr><td><strong>Fit all</strong></td><td>Press <code>F</code> to zoom to fit all nodes</td></tr>
+<tr><td><strong>Select node</strong></td><td>Click a node</td></tr>
+<tr><td><strong>Deselect</strong></td><td>Press <code>Escape</code> or click empty space</td></tr>
+<tr><td><strong>Drag node</strong></td><td>Click and drag a node's title area</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="step-8-use-keyboard-shortcuts">Step 8: Use Keyboard Shortcuts</h3>
+<p>Speed up your workflow with these essential shortcuts:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>Ctrl+N</code></td><td>New chat (clears current canvas)</td></tr>
+<tr><td><code>Ctrl+F</code></td><td>Open search</td></tr>
+<tr><td><code>Ctrl+Z</code></td><td>Undo last node position change</td></tr>
+<tr><td><code>Enter</code></td><td>Send message</td></tr>
+<tr><td><code>Shift+Enter</code></td><td>Send with parallel debate (multiple models)</td></tr>
+<tr><td><code>Delete</code> / <code>Backspace</code></td><td>Delete selected node</td></tr>
+<tr><td><code>+</code></td><td>Zoom in</td></tr>
+<tr><td><code>-</code></td><td>Zoom out</td></tr>
+<tr><td><code>F</code></td><td>Fit canvas to view</td></tr>
+<tr><td><code>?</code></td><td>Show all keyboard shortcuts</td></tr>
+<tr><td><code>Escape</code></td><td>Deselect node / close overlays</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="step-9-bookmark-and-organize">Step 9: Bookmark and Organize</h3>
+<p>As your canvas grows, use bookmarks to keep track of important nodes:</p>
+<ol>
+<li><strong>Right-click</strong> a node → select <strong>Bookmark</strong></li>
+<li>The node gets a star icon (★)</li>
+<li>Click the <strong>Bookmarks</strong> button (★) in the TopBar to show only bookmarked nodes</li>
+<li>Click again to show all nodes</li>
+</ol>
+<hr>
+<h3 id="step-10-understand-streaming-responses">Step 10: Understand Streaming Responses</h3>
+<p>Watch how the AI responds in real time:</p>
+<ol>
+<li>Click a node and ask a question that requires a longer response</li>
+<li>Observe the <strong>typing indicator</strong> (three animated dots) appear on the response node</li>
+<li>Watch as the response appears character by character — no waiting for the full response</li>
+<li>Notice: you can click <strong>elsewhere</strong> on the canvas while streaming continues (non-blocking)</li>
+<li>Try pressing the <strong>stop</strong> button if you want to interrupt a response mid-stream</li>
+</ol>
+<p><strong>Why streaming matters</strong>: Unlike traditional chat UIs that show a loading spinner and then the full response, Mosaic's streaming lets you read the beginning of a response while the rest is still being generated. This feels faster and lets you decide early if the response is going in the right direction.</p>
+<hr>
+<h3 id="step-11-use-undo">Step 11: Use Undo</h3>
+<p>Mistyped a message or accidentally moved a node in the wrong place?</p>
+<ol>
+<li><strong>Move a node</strong> by dragging it to a new position</li>
+<li>Press <code>Ctrl+Z</code> — the node jumps back to its previous position</li>
+<li>Undo works for: node position changes, node additions, node deletions, and canvas clears</li>
+<li>Undo history stores the last 50 actions</li>
+</ol>
+<hr>
+<h3 id="step-12-start-a-new-canvas">Step 12: Start a New Canvas</h3>
+<p>Finished exploring and want to start fresh without losing your work?</p>
+<ol>
+<li>Press <code>Ctrl+N</code> or click the <strong>+</strong> button in the TopBar</li>
+<li>A new canvas tab appears with a fresh root node</li>
+<li>Your previous canvas is saved automatically</li>
+<li>Switch between canvases by clicking their tabs at the top</li>
+<li>Rename a canvas by double-clicking its tab label</li>
+</ol>
+<hr>
+<h3 id="complete-cheat-sheet-for-first-session">Complete Cheat Sheet for First Session</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Goal</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>Start chatting</td><td>Click root node → type message → Enter</td></tr>
+<tr><td>Continue conversation</td><td>Click any response → type → Enter</td></tr>
+<tr><td>Branch</td><td>Click an earlier response → type different follow-up</td></tr>
+<tr><td>Pan canvas</td><td>Drag empty space</td></tr>
+<tr><td>Zoom</td><td>Scroll or + / - keys</td></tr>
+<tr><td>Fit all</td><td>Press F</td></tr>
+<tr><td>Delete a node</td><td>Select it → press Delete</td></tr>
+<tr><td>Bookmark a node</td><td>Right-click → Bookmark</td></tr>
+<tr><td>Open search</td><td>Ctrl+F</td></tr>
+<tr><td>Undo</td><td>Ctrl+Z</td></tr>
+<tr><td>Settings</td><td>Click gear icon (⚙️)</td></tr>
+<tr><td>New canvas</td><td>Ctrl+N</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="what-s-next">What's Next?</h3>
+<p>You've completed your first conversation with Mosaic! Here's what to try next:</p>
+<ul>
+<li><a href="tutorials.html#tutorial-running-code-inline">Tutorial - Running Code Inline</a> — Run JavaScript and Python directly in chat</li>
+<li><a href="tutorials.html#tutorial-branching-and-parallel-exploration">Tutorial - Branching and Parallel Exploration</a> — Deep dive into canvas strategies</li>
+<li><a href="tutorials.html#tutorial-using-rag-with-documents">Tutorial - Using RAG with Documents</a> — Upload documents and query them with AI</li>
+<li><a href="user-guide.html#canvas-and-node-system">Canvas and Node System</a> — Understand all node types and operations</li>
+<li><a href="user-guide.html#llm-provider-integration">LLM Provider Integration</a> — Try different AI providers</li>
+</ul>
+</section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking (category pages)
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+<script>
+// Node background
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
+</html>

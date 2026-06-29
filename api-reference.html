@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic documentation — API Reference — Documentation">
+<meta property="og:title" content="Mosaic — API Reference — Documentation">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — API Reference — Documentation</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="wiki.html">Docs</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="wiki.html">Docs</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<section class="tech-hero">
+  <h1>API Reference</h1>
+  <p>Complete reference for Zustand stores, React hooks, UI components, utilities, and TypeScript types.</p>
+</section>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">API Reference</div>
+      <a href="#store-api-reference">Store API Reference</a>
+<a href="#hook-api-reference">Hook API Reference</a>
+<a href="#component-api-reference">Component API Reference</a>
+<a href="#utilities-and-types-reference">Utilities and Types Reference</a>
+      <a href="wiki.html" style="margin-top:8px;color:var(--accent)">&larr; All docs</a>
+    </div>
+  </aside>
+  <main class="tech-content">
+    <section id="store-api-reference"><h2 id="store-api-reference">Store API Reference</h2>
+<p>Mosaic uses <strong>Zustand v5</strong> for state management with seven stores. This page documents every store's state shape, actions, and persistence strategy.</p>
+<hr>
+<h3 id="zustand-patterns-used">Zustand Patterns Used</h3>
+<p>Mosaic uses several Zustand patterns to keep state management clean and predictable:</p>
+<h4 id="pattern-1-direct-store-creation">Pattern 1: Direct Store Creation</h4>
+<pre><code class="language-typescript">// No middleware, no persistence — simple and fast
+import { create } from 'zustand';
+
+interface SimpleStore {
+  count: number;
+  increment: () =&gt; void;
+}
+
+const useSimpleStore = create&lt;SimpleStore&gt;((set) =&gt; ({
+  count: 0,
+  increment: () =&gt; set((state) =&gt; ({ count: state.count + 1 })),
+}));</code></pre>
+<p>This pattern is used for <code>toastStore</code> and <code>pruneStore</code> (in-memory, no persistence).</p>
+<h4 id="pattern-2-manual-localstorage-persistence">Pattern 2: Manual localStorage Persistence</h4>
+<pre><code class="language-typescript">// Subscribe to changes and save manually
+const usePersistedStore = create&lt;PersistedStore&gt;((set, get) =&gt; ({
+  ...defaultState,
+  
+  // Load on initialization:
+  ...loadFromStorage(),
+}));
+
+// Save on changes:
+usePersistedStore.subscribe((state) =&gt; {
+  saveToStorage(state);
+});</code></pre>
+<p>This pattern is used for all persistent stores. The persistence is manual (not using Zustand's <code>persist</code> middleware) because:</p>
+<ol>
+<li>More control over what fields persist (some fields are transient)</li>
+<li>Custom validation on load</li>
+<li>Debouncing for canvas data</li>
+</ol>
+<h4 id="pattern-3-debounced-persistence">Pattern 3: Debounced Persistence</h4>
+<pre><code class="language-typescript">// canvasStore uses debounced saves
+let saveTimer: number | null = null;
+
+const useCanvasStore = create&lt;CanvasStore&gt;((set, get) =&gt; ({
+  // ... state and actions
+  updateNodePosition: (id, pos) =&gt; {
+    set((state) =&gt; ({
+      nodes: state.nodes.map((n) =&gt;
+        n.id === id ? { ...n, position: pos } : n
+      ),
+    }));
+    
+    // Debounce save (300ms)
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() =&gt; {
+      saveToManagerStore(get());
+    }, 300);
+  },
+}));</code></pre>
+<p>This prevents excessive localStorage writes during rapid operations (like dragging a node).</p>
+<h3 id="canvasstore">canvasStore</h3>
+<p><strong>File</strong>: <code>src/store/canvasStore.ts</code></p>
+<p><strong>Persistence</strong>: Debounced save (300ms) to <code>canvasManagerStore</code> per canvas</p>
+<h4 id="state">State</h4>
+<pre><code class="language-typescript">interface CanvasState {
+  nodes: Node[];                          // React Flow nodes
+  edges: Edge[];                          // React Flow edges
+  activeNodeId: string | null;            // Currently selected node
+  viewport: { x: number; y: number; zoom: number };  // Canvas viewport
+  positionHistory: CanvasSnapshot[];      // Undo history (max 50)
+  bookmarkedIds: string[];                // IDs of bookmarked nodes
+  currentNodeIndex: number;               // Auto-incrementing node ID counter
+}</code></pre>
+<h4 id="actions">Actions</h4>
+<h4 id="addnode-parentid-string-label-string-nodetype-nodedata-nodetype-string"><code>addNode(parentId: string, label: string, nodeType: NodeData['nodeType']): string</code></h4>
+<p>Creates a new node as a child of <code>parentId</code>. Automatically generates position based on existing children. Returns the new node's ID.</p>
+<pre><code class="language-typescript">const nodeId = canvasStore.getState().addNode('root-1', 'Hello world', 'branch');</code></pre>
+<h4 id="removecascade-nodeid-string"><code>removeCascade(nodeId: string)</code></h4>
+<p>Removes a node and <strong>all its descendants</strong>. Shows a confirmation dialog if the node has children. Root nodes cannot be deleted.</p>
+<pre><code class="language-typescript">canvasStore.getState().removeCascade('node-5');</code></pre>
+<h4 id="updatenode-nodeid-string-data-partial-nodedata"><code>updateNode(nodeId: string, data: Partial<NodeData>)</code></h4>
+<p>Updates a node's data fields (label, confidence, error state, etc.).</p>
+<pre><code class="language-typescript">canvasStore.getState().updateNode('node-5', { label: 'Updated message', confidence: 92 });</code></pre>
+<h4 id="updatenodeposition-nodeid-string-position-x-number-y-number"><code>updateNodePosition(nodeId: string, position: { x: number; y: number })</code></h4>
+<p>Updates a node's position and captures a snapshot in <code>positionHistory</code> for undo.</p>
+<pre><code class="language-typescript">canvasStore.getState().updateNodePosition('node-5', { x: 100, y: 200 });</code></pre>
+<h4 id="undo"><code>undo()</code></h4>
+<p>Pops the last position snapshot from <code>positionHistory</code> and restores nodes/edges.</p>
+<pre><code class="language-typescript">canvasStore.getState().undo();</code></pre>
+<h4 id="clearcanvas"><code>clearCanvas()</code></h4>
+<p>Removes all nodes and edges except the root node. Captures undo snapshot.</p>
+<h4 id="togglecollapse-nodeid-string"><code>toggleCollapse(nodeId: string)</code></h4>
+<p>Toggles the collapsed state of a node. When collapsed, descendant nodes are hidden.</p>
+<h4 id="togglebookmark-nodeid-string"><code>toggleBookmark(nodeId: string)</code></h4>
+<p>Toggles the bookmarked state of a node. Adds/removes from <code>bookmarkedIds</code>.</p>
+<h4 id="autolayout-startnodeid-string"><code>autoLayout(startNodeId?: string)</code></h4>
+<p>Runs BFS radial tree auto-layout. If <code>startNodeId</code> is provided, layouts from that node; otherwise from root.</p>
+<h4 id="getdescendantids-nodeid-string-string"><code>getDescendantIds(nodeId: string): string[]</code></h4>
+<p>Returns all descendant node IDs recursively. Used for cascade deletion.</p>
+<h4 id="getconversationpath-nodeid-string-string"><code>getConversationPath(nodeId: string): string[]</code></h4>
+<p>Walks up parent edges to return the complete conversation path from root to the given node. Used for streaming context.</p>
+<h4 id="importdata-data-nodes-node-edges-edge"><code>importData(data: { nodes: Node[]; edges: Edge[] })</code></h4>
+<p>Replaces all nodes and edges with imported data. Validates before importing.</p>
+<h4 id="loadcanvas-canvasid-string"><code>loadCanvas(canvasId: string)</code></h4>
+<p>Loads a canvas's data from <code>canvasManagerStore</code>. Called when switching tabs.</p>
+<h4 id="flushsave"><code>flushSave()</code></h4>
+<p>Immediately saves the current canvas state to <code>canvasManagerStore</code> (bypasses debounce).</p>
+<hr>
+<h3 id="canvasmanagerstore">canvasManagerStore</h3>
+<p><strong>File</strong>: <code>src/store/canvasManagerStore.ts</code></p>
+<p><strong>Persistence</strong>: localStorage (<code>mosaic-canvases</code>, <code>mosaic-canvas-data-*</code>)</p>
+<h4 id="state">State</h4>
+<pre><code class="language-typescript">interface CanvasManagerState {
+  canvases: CanvasMeta[];        // Array of { id, name, createdAt }
+  activeCanvasId: string | null; // Currently active canvas
+}</code></pre>
+<h4 id="actions">Actions</h4>
+<h4 id="createcanvas-name-string-string"><code>createCanvas(name?: string): string</code></h4>
+<p>Creates a new canvas with an optional name. Returns the new canvas ID.</p>
+<h4 id="deletecanvas-canvasid-string"><code>deleteCanvas(canvasId: string)</code></h4>
+<p>Deletes a canvas and its stored data. Auto-switches to another canvas if the active one is deleted.</p>
+<h4 id="renamecanvas-canvasid-string-name-string"><code>renameCanvas(canvasId: string, name: string)</code></h4>
+<p>Renames a canvas (double-click on tab to trigger).</p>
+<h4 id="switchcanvas-canvasid-string"><code>switchCanvas(canvasId: string)</code></h4>
+<p>Switches to a different canvas. Saves current canvas state before switching.</p>
+<h4 id="duplicatecanvas-canvasid-string-string"><code>duplicateCanvas(canvasId: string): string</code></h4>
+<p>Duplicates a canvas with all its data. Returns the new canvas ID.</p>
+<h4 id="savecanvasdata-canvasid-string-data-canvasdata"><code>saveCanvasData(canvasId: string, data: CanvasData)</code></h4>
+<p>Saves canvas data to localStorage. Key: <code>mosaic-canvas-data-{id}</code>.</p>
+<h4 id="loadcanvasdata-canvasid-string-canvasdata-null"><code>loadCanvasData(canvasId: string): CanvasData | null</code></h4>
+<p>Loads canvas data from localStorage. Validates with <code>validateCanvasData</code> before returning.</p>
+<hr>
+<h3 id="uistore">uiStore</h3>
+<p><strong>File</strong>: <code>src/store/uiStore.ts</code></p>
+<p><strong>Persistence</strong>: localStorage (<code>mosaic-ui</code>)</p>
+<h4 id="state">State</h4>
+<pre><code class="language-typescript">interface UIState {
+  theme: 'void' | 'dusk' | 'sand' | 'snow' | 'sunrise';
+  zoom: number;                          // Current zoom level
+  showMiniMap: boolean;
+  showWelcome: boolean;
+  settingsOpen: boolean;
+  systemPrompt: string;
+  temperature: number;                   // 0.0 - 2.0
+  model: string;                         // Selected model ID
+  searchQuery: string;
+  searchOpen: boolean;
+  showBookmarksOnly: boolean;
+  confidenceEnabled: boolean;
+  tendrilsEnabled: boolean;
+  debateModels: string[];               // Models for parallel debate
+  ollamaConnected: boolean;
+  ollamaModels: string[];
+  ollamaUrl: string;
+}</code></pre>
+<h4 id="actions">Actions</h4>
+<p>Each state field has a corresponding setter:</p>
+<pre><code class="language-typescript">setTheme(theme: string): void
+setZoom(zoom: number): void
+setShowMiniMap(show: boolean): void
+setSettingsOpen(open: boolean): void
+setSystemPrompt(prompt: string): void
+setTemperature(temp: number): void
+setModel(model: string): void
+setSearchQuery(query: string): void
+setSearchOpen(open: boolean): void
+setShowBookmarksOnly(show: boolean): void
+setConfidenceEnabled(enabled: boolean): void
+setTendrilsEnabled(enabled: boolean): void
+setDebateModels(models: string[]): void
+setOllamaConnected(connected: boolean): void
+setOllamaModels(models: string[]): void
+setOllamaUrl(url: string): void</code></pre>
+<h4 id="computed-getters">Computed (Getters)</h4>
+<h4 id="getselectedmodel-name-string-provider-string"><code>getSelectedModel(): { name: string; provider: string }</code></h4>
+<p>Returns the full model info for the currently selected model.</p>
+<h4 id="getavailablemodels-modeloption"><code>getAvailableModels(): ModelOption[]</code></h4>
+<p>Returns all available models across all configured providers, including auto-detected Ollama models. Groups by provider with color indicators (blue → Mistral, green → OpenAI, orange → Anthropic, yellow → Gemini, purple → Ollama).</p>
+<h4 id="getactiveprovider-providerid"><code>getActiveProvider(): ProviderId</code></h4>
+<p>Returns the provider ID for the currently selected model. Used by the UI to show/hide provider-specific controls.</p>
+<h4 id="hasapikeyforcurrent-boolean"><code>hasApiKeyForCurrent(): boolean</code></h4>
+<p>Returns whether the API key is configured for the currently selected provider. Always returns <code>true</code> for Ollama (no key needed).</p>
+<h4 id="ollama-state-management">Ollama State Management</h4>
+<p>Ollama connection state is managed through three fields and their setters:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>ollamaConnected</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether Ollama is reachable</td></tr>
+<tr><td><code>ollamaModels</code></td><td><code>string[]</code></td><td><code>[]</code></td><td>List of available Ollama model names</td></tr>
+<tr><td><code>ollamaUrl</code></td><td><code>string</code></td><td><code>http://localhost:11434</code></td><td>Configured Ollama server URL</td></tr>
+</tbody>
+</table></div>
+<p>The <code>useOllamaDetect</code> hook (called in <code>App.tsx</code> on mount) polls the Ollama API and updates these fields automatically.</p>
+<h4 id="theme-application">Theme Application</h4>
+<p>When <code>setTheme()</code> is called, the store sets <code>document.documentElement.classList</code> to <code>theme-{name}</code>. On initialization, it respects the OS <code>prefers-color-scheme</code> setting — dark mode defaults to <code>void</code>, light mode defaults to <code>sand</code>.</p>
+<hr>
+<h3 id="analyticsstore">analyticsStore</h3>
+<p><strong>File</strong>: <code>src/store/analyticsStore.ts</code></p>
+<p><strong>Persistence</strong>: localStorage (<code>mosaic-analytics</code>)</p>
+<h4 id="state">State</h4>
+<pre><code class="language-typescript">interface AnalyticsState {
+  stats: Record&lt;string, CanvasStats&gt;;  // Keyed by canvas ID
+}</code></pre>
+<h4 id="canvasstats">CanvasStats</h4>
+<pre><code class="language-typescript">interface CanvasStats {
+  totalTokens: number;
+  totalCost: number;
+  modelBreakdown: Record&lt;string, ModelStats&gt;;
+  completions: CompletionRecord[];     // Last 100
+}</code></pre>
+<pre><code class="language-typescript">interface ModelStats {
+  tokens: number;
+  cost: number;
+  count: number;
+}</code></pre>
+<pre><code class="language-typescript">interface CompletionRecord {
+  model: string;
+  tokens: number;
+  cost: number;
+  timestamp: number;
+}</code></pre>
+<h4 id="pricing-table-built-in">Pricing Table (built-in)</h4>
+<p>Only Mistral model pricing is built-in. Other providers use a default fallback of $0.50/M input and $1.50/M output tokens:</p>
+<pre><code class="language-typescript">const PRICING: Record&lt;string, { input: number; output: number }&gt; = {
+  'mistral-large-latest':      { input: 2.00, output: 6.00 },
+  'mistral-small-latest':      { input: 0.20, output: 0.60 },
+};</code></pre>
+<h4 id="actions">Actions</h4>
+<h4 id="recordcompletion-canvasid-string-model-string-text-string"><code>recordCompletion(canvasId: string, model: string, text: string)</code></h4>
+<p>Records a completion event. Estimates tokens as <code>Math.ceil(text.length / 4)</code>. Calculates cost from pricing table.</p>
+<pre><code class="language-typescript">analyticsStore.getState().recordCompletion('canvas-1', 'mistral-large-latest', 'Hello world');</code></pre>
+<h4 id="computenodestats-canvasid-string-nodes-node-edges-edge-nodestats"><code>computeNodeStats(canvasId: string, nodes: Node[], edges: Edge[]): NodeStats</code></h4>
+<p>Computes canvas statistics from the current node/edge data:</p>
+<pre><code class="language-typescript">interface NodeStats {
+  totalNodes: number;
+  branchNodes: number;
+  responseNodes: number;
+  rootNodes: number;
+  totalMessages: number;
+  depth: number;          // Maximum tree depth
+  branchCount: number;    // Number of branching points
+}</code></pre>
+<h4 id="resetcanvasstats-canvasid-string"><code>resetCanvasStats(canvasId: string)</code></h4>
+<p>Resets all analytics for a given canvas.</p>
+<hr>
+<h3 id="ragstore">ragStore</h3>
+<p><strong>File</strong>: <code>src/store/ragStore.ts</code></p>
+<p><strong>Persistence</strong>: localStorage (<code>mosaic-rag</code>)</p>
+<h4 id="state">State</h4>
+<pre><code class="language-typescript">interface RAGState {
+  documents: RagDocument[];
+  enabled: boolean;
+}</code></pre>
+<h4 id="ragdocument">RagDocument</h4>
+<pre><code class="language-typescript">interface RagDocument {
+  id: string;
+  filename: string;
+  size: number;
+  chunks: RagChunk[];
+}</code></pre>
+<pre><code class="language-typescript">interface RagChunk {
+  id: string;
+  text: string;
+  embedding?: number[];   // Optional embedding vector
+  metadata: {
+    documentId: string;
+    chunkIndex: number;
+  };
+}</code></pre>
+<h4 id="actions">Actions</h4>
+<h4 id="adddocument-doc-ragdocument"><code>addDocument(doc: RagDocument)</code></h4>
+<p>Adds a document. Enforces limits (50 docs, 50MB total, 10MB per file).</p>
+<h4 id="removedocument-documentid-string"><code>removeDocument(documentId: string)</code></h4>
+<p>Removes a document and all its chunks.</p>
+<h4 id="cleardocuments"><code>clearDocuments()</code></h4>
+<p>Removes all documents.</p>
+<h4 id="setenabled-enabled-boolean"><code>setEnabled(enabled: boolean)</code></h4>
+<p>Toggles RAG on/off.</p>
+<h4 id="searchchunks-query-string-topk-number-ragchunk"><code>searchChunks(query: string, topK?: number): RagChunk[]</code></h4>
+<p>Searches for the most relevant chunks. Uses embedding cosine similarity if available, otherwise TF-IDF cosine similarity. Returns <code>topK</code> chunks (default 3).</p>
+<hr>
+<h3 id="toaststore">toastStore</h3>
+<p><strong>File</strong>: <code>src/store/toastStore.ts</code></p>
+<p><strong>Persistence</strong>: In-memory only (not persisted)</p>
+<h4 id="state">State</h4>
+<pre><code class="language-typescript">interface ToastState {
+  toasts: Toast[];
+}</code></pre>
+<pre><code class="language-typescript">interface Toast {
+  id: string;
+  type: 'info' | 'success' | 'error';
+  message: string;
+}</code></pre>
+<h4 id="actions">Actions</h4>
+<h4 id="addtoast-type-toast-type-message-string"><code>addToast(type: Toast['type'], message: string)</code></h4>
+<p>Adds a toast notification. Auto-dismisses after animation.</p>
+<h4 id="removetoast-id-string"><code>removeToast(id: string)</code></h4>
+<p>Manually removes a toast.</p>
+<hr>
+<h3 id="prunestore">pruneStore</h3>
+<p><strong>File</strong>: <code>src/store/pruneStore.ts</code></p>
+<p><strong>Persistence</strong>: In-memory only (transient)</p>
+<h4 id="state">State</h4>
+<pre><code class="language-typescript">interface PruneState {
+  pruneActive: boolean;
+  pruneGoal: string;
+  isPruning: boolean;
+}</code></pre>
+<h4 id="actions">Actions</h4>
+<pre><code class="language-typescript">setPruneActive(active: boolean): void
+setPruneGoal(goal: string): void
+setIsPruning(pruning: boolean): void</code></pre>
+<p>This store is intentionally simple — it only tracks the current pruning operation's state. The actual pruning logic (scoring branches) lives in <code>useBranchPruning</code> hook.</p>
+<hr>
+<h3 id="store-dependency-graph">Store Dependency Graph</h3>
+<pre><code>canvasManagerStore (persistent)
+    │
+    ├── canvasStore (debounced save → canvasManagerStore)
+    │
+uiStore (persistent, independent)
+    │
+analyticsStore (persistent, independent)
+    │
+ragStore (persistent, independent)
+    │
+toastStore (transient, independent)
+    │
+pruneStore (transient, independent)</code></pre>
+<p>Stores are independent — they do not subscribe to each other. Cross-store communication happens at the component/hook level (e.g., <code>useStreamMessage</code> reads from <code>ragStore</code> and writes to <code>canvasStore</code> and <code>analyticsStore</code>).</p>
+<hr>
+<h3 id="persistence-details">Persistence Details</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Store</th><th>localStorage Key</th><th>Serialization</th><th>Validation</th></tr></thead>
+<tbody>
+<tr><td>canvasManager</td><td><code>mosaic-canvases</code></td><td>JSON</td><td><code>validateCanvasData</code></td></tr>
+<tr><td>canvas data</td><td><code>mosaic-canvas-data-{id}</code></td><td>JSON</td><td><code>validateCanvasData</code></td></tr>
+<tr><td>uiStore</td><td><code>mosaic-ui</code></td><td>JSON</td><td><code>validateUIState</code></td></tr>
+<tr><td>analyticsStore</td><td><code>mosaic-analytics</code></td><td>JSON</td><td>None</td></tr>
+<tr><td>ragStore</td><td><code>mosaic-rag</code></td><td>JSON</td><td><code>validateRagDocs</code></td></tr>
+</tbody>
+</table></div>
+<p>All persisted stores validate their data on load using the validation utilities in <code>src/utils/validation.ts</code>. Invalid data is reset to defaults.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="api-reference.html#hook-api-reference">Hook API Reference</a> — All custom hooks with parameters and return types</li>
+<li><a href="api-reference.html#component-api-reference">Component API Reference</a> — All component props and usage</li>
+<li><a href="architecture.html#state-management-and-persistence">State Management and Persistence</a> — Architecture deep-dive</li>
+</ul>
+</section>
+<section id="hook-api-reference"><h2 id="hook-api-reference">Hook API Reference</h2>
+<p>Mosaic uses custom React hooks to encapsulate complex logic. This page documents every hook's parameters, return values, and behavior.</p>
+<hr>
+<h3 id="usestreammessage">useStreamMessage</h3>
+<p><strong>File</strong>: <code>src/hooks/useStreamMessage.ts</code></p>
+<p><strong>Purpose</strong>: Core streaming hook. Sends a message to the AI provider, streams the response into a node, and triggers post-processing (confidence, tendrils, analytics).</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useStreamMessage(): {
+  sendMessage: (params: SendMessageParams) =&gt; Promise&lt;void&gt;;
+  stopStreaming: () =&gt; void;
+  isStreaming: boolean;
+}</code></pre>
+<h4 id="sendmessageparams">SendMessageParams</h4>
+<pre><code class="language-typescript">interface SendMessageParams {
+  parentNodeId: string;    // The node to reply to
+  text: string;            // The user's message
+  model?: string;          // Override the selected model
+  debate?: boolean;        // If true, triggers parallel debate instead
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>sendMessage</code></td><td><code>(params) => Promise<void></code></td><td>Sends a message and streams the response</td></tr>
+<tr><td><code>stopStreaming</code></td><td><code>() => void</code></td><td>Aborts the current streaming request</td></tr>
+<tr><td><code>isStreaming</code></td><td><code>boolean</code></td><td>True while a streaming response is in progress</td></tr>
+</tbody>
+</table></div>
+<h4 id="internal-flow">Internal Flow</h4>
+<p>When <code>sendMessage</code> is called:</p>
+<ol>
+<li><strong>Create branch node</strong>: Adds a <code>branch</code> node for the user's message</li>
+<li><strong>Build conversation path</strong>: Walks up parent edges via <code>getConversationPath()</code> to build message history</li>
+<li><strong>Check RAG context</strong>: If RAG is enabled, calls <code>ragStore.searchChunks()</code> for top 3 chunks (with optional query embedding from <code>embedTexts()</code>)</li>
+<li><strong>Inject context</strong>: Appends RAG context to the system prompt</li>
+<li><strong>Send to provider</strong>: Calls <code>streamProvider()</code> which returns an <code>AsyncGenerator<string></code>. The hook iterates with <code>for await...of</code> to receive text chunks.</li>
+<li><strong>Stream chunks</strong>: Each chunk updates the response node's label incrementally</li>
+<li><strong>Post-processing</strong>:</li>
+</ol>
+<p>   - Calls <code>useConfidenceScore</code> (if enabled) to score the response</p>
+<p>   - Calls <code>useSuggestionTendrils</code> (if enabled) to generate follow-ups</p>
+<p>   - Calls <code>analyticsStore.recordCompletion()</code> to track usage</p>
+<ol>
+<li><strong>Error handling</strong>: If streaming fails, sets <code>error</code> field on the response node</li>
+</ol>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { sendMessage, stopStreaming, isStreaming } = useStreamMessage();
+
+// Send a message
+await sendMessage({ parentNodeId: 'node-1', text: 'Hello!' });
+
+// Stop streaming mid-response
+stopStreaming();
+
+// Parallel debate
+await sendMessage({ parentNodeId: 'node-1', text: 'Compare approaches', debate: true });
+
+// Override model
+await sendMessage({ parentNodeId: 'node-1', text: 'Explain', model: 'gpt-4o' });</code></pre>
+<hr>
+<h3 id="useconfidencescore">useConfidenceScore</h3>
+<p><strong>File</strong>: <code>src/hooks/useConfidenceScore.ts</code></p>
+<p><strong>Purpose</strong>: After a response completes, asks the AI to self-score its response (0-100).</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useConfidenceScore(): {
+  scoreResponse: (nodeId: string, text: string, model: string) =&gt; Promise&lt;void&gt;;
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>scoreResponse</code></td><td><code>(nodeId, text, model) => Promise<void></code></td><td>Sends calibration prompt and updates node with score</td></tr>
+</tbody>
+</table></div>
+<h4 id="calibration-prompt">Calibration Prompt</h4>
+<pre><code>Rate the confidence of your previous response on a scale of 0-100.
+Consider: factual accuracy, clarity, completeness, and how well it addressed the user's question.
+Respond with ONLY a number between 0 and 100.</code></pre>
+<h4 id="behavior">Behavior</h4>
+<ul>
+<li><strong>Timeout</strong>: 8 seconds (AbortController)</li>
+<li><strong>Failure mode</strong>: Silent — no error thrown, node simply won't have a confidence badge</li>
+<li><strong>Updates</strong>: Sets the <code>confidence</code> field on the response node via <code>updateNode()</code></li>
+</ul>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { scoreResponse } = useConfidenceScore();
+await scoreResponse('node-5', 'The full response text...', 'mistral-large-latest');</code></pre>
+<hr>
+<h3 id="usesuggestiontendrils">useSuggestionTendrils</h3>
+<p><strong>File</strong>: <code>src/hooks/useSuggestionTendrils.ts</code></p>
+<p><strong>Purpose</strong>: Generates 3 follow-up suggestion nodes after an AI response.</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useSuggestionTendrils(): {
+  generateTendrils: (nodeId: string, conversationPath: string[], model: string) =&gt; Promise&lt;void&gt;;
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>generateTendrils</code></td><td><code>(nodeId, conversationPath, model) => Promise<void></code></td><td>Generates 3 suggestions and spawns suggestion nodes</td></tr>
+</tbody>
+</table></div>
+<h4 id="generation-prompt">Generation Prompt</h4>
+<pre><code>Based on our conversation, suggest 3 follow-up questions the user might want to ask next.
+Return them as a JSON array of strings: ["question1", "question2", "question3"]</code></pre>
+<h4 id="behavior">Behavior</h4>
+<ul>
+<li>Creates 3 <code>suggestion</code> type nodes connected via <code>tendrilEdge</code></li>
+<li>Sets a 30-second auto-dismiss timer (setTimeout)</li>
+<li>Each suggestion node has click handler for materialization</li>
+<li>If user clicks a suggestion, its text is copied to the parent node's input and the suggestion node is removed</li>
+</ul>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { generateTendrils } = useSuggestionTendrils();
+await generateTendrils('node-5', ['msg1', 'msg2', 'msg3'], 'mistral-large-latest');</code></pre>
+<hr>
+<h3 id="usebranchpruning">useBranchPruning</h3>
+<p><strong>File</strong>: <code>src/hooks/useBranchPruning.ts</code></p>
+<p><strong>Purpose</strong>: Scores leaf branches for relevance to a user-provided goal and dims low-scoring branches.</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useBranchPruning(): {
+  pruneBranches: (goal: string) =&gt; Promise&lt;void&gt;;
+  clearPrune: () =&gt; void;
+  isPruning: boolean;
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>pruneBranches</code></td><td><code>(goal) => Promise<void></code></td><td>Scores all branches against goal</td></tr>
+<tr><td><code>clearPrune</code></td><td><code>() => void</code></td><td>Restores all pruned branches</td></tr>
+<tr><td><code>isPruning</code></td><td><code>boolean</code></td><td>True while pruning is in progress</td></tr>
+</tbody>
+</table></div>
+<h4 id="scoring-logic">Scoring Logic</h4>
+<ol>
+<li>Collects all leaf nodes (nodes with no children)</li>
+<li>For each leaf, builds the conversation path</li>
+<li>Sends path content to AI with scoring prompt</li>
+<li>Parses numeric score from response (0-100)</li>
+<li>Branches with score < 40 get <code>pruned: true</code> (configurable threshold)</li>
+<li>Updates <code>pruneStore</code> state</li>
+</ol>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { pruneBranches, clearPrune, isPruning } = useBranchPruning();
+await pruneBranches('I need to decide on a database for high-traffic web app');
+clearPrune(); // Restore all</code></pre>
+<hr>
+<h3 id="usedistillation">useDistillation</h3>
+<p><strong>File</strong>: <code>src/hooks/useDistillation.ts</code></p>
+<p><strong>Purpose</strong>: Summarizes all leaf branches into a single distillation node.</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useDistillation(): {
+  distill: () =&gt; Promise&lt;void&gt;;
+  isDistilling: boolean;
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>distill</code></td><td><code>() => Promise<void></code></td><td>Collects leaves, sends for synthesis, creates distillation node</td></tr>
+<tr><td><code>isDistilling</code></td><td><code>boolean</code></td><td>True while distillation is in progress</td></tr>
+</tbody>
+</table></div>
+<h4 id="behavior">Behavior</h4>
+<ol>
+<li>Collects all leaf nodes (BFS traversal)</li>
+<li>For each leaf, retrieves conversation path via <code>getConversationPath()</code></li>
+<li>Constructs a synthesis prompt with all leaf content</li>
+<li>Streams the AI response into a new <code>distillation</code> type node</li>
+<li>Creates gold <code>distillEdge</code> connections from distillation node to each source leaf</li>
+<li>Positions distillation node at the bottom-center of the viewport</li>
+</ol>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { distill, isDistilling } = useDistillation();
+await distill();</code></pre>
+<hr>
+<h3 id="useparalleldebate">useParallelDebate</h3>
+<p><strong>File</strong>: <code>src/hooks/useParallelDebate.ts</code></p>
+<p><strong>Purpose</strong>: Sends the same input to multiple models simultaneously and displays all responses.</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useParallelDebate(): {
+  debate: (params: DebateParams) =&gt; Promise&lt;void&gt;;
+  isDebating: boolean;
+}</code></pre>
+<pre><code class="language-typescript">interface DebateParams {
+  parentNodeId: string;
+  text: string;
+  models: string[];  // Models to use (from uiStore.debateModels)
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>debate</code></td><td><code>(params) => Promise<void></code></td><td>Fans out requests to all models</td></tr>
+<tr><td><code>isDebating</code></td><td><code>boolean</code></td><td>True while debate is in progress</td></tr>
+</tbody>
+</table></div>
+<h4 id="behavior">Behavior</h4>
+<ol>
+<li>Creates one <code>branch</code> node for the user message</li>
+<li>Fans out <code>streamProvider()</code> calls via <code>Promise.allSettled()</code></li>
+<li>Each model's response streams into its own <code>response</code> node</li>
+<li>Response nodes are positioned in a fan layout (angular spread)</li>
+<li>Failed models don't affect successful ones (allSettled)</li>
+</ol>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { debate, isDebating } = useParallelDebate();
+await debate({
+  parentNodeId: 'node-1',
+  text: 'Compare databases',
+  models: ['mistral-large-latest', 'gpt-4o', 'claude-sonnet-4-20250514']
+});</code></pre>
+<hr>
+<h3 id="usedocumentparser">useDocumentParser</h3>
+<p><strong>File</strong>: <code>src/hooks/useDocumentParser.ts</code></p>
+<p><strong>Purpose</strong>: Parses uploaded text/code files into chunks for RAG.</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useDocumentParser(): {
+  parseDocument: (file: File) =&gt; Promise&lt;RagDocument | null&gt;;
+  isParsing: boolean;
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>parseDocument</code></td><td>`(file) => Promise<RagDocument \</td><td>null>`</td><td>Reads file, chunks text, returns RagDocument</td></tr>
+<tr><td><code>isParsing</code></td><td><code>boolean</code></td><td>True while parsing</td></tr>
+</tbody>
+</table></div>
+<h4 id="chunking-algorithm">Chunking Algorithm</h4>
+<pre><code class="language-typescript">const CHUNK_SIZE = 800;    // Characters per chunk
+const CHUNK_OVERLAP = 100;  // Character overlap between chunks</code></pre>
+<ol>
+<li>Read file as text (FileReader)</li>
+<li>Split text into chunks of CHUNK<em>SIZE with CHUNK</em>OVERLAP overlap</li>
+<li>Each chunk gets a unique ID and metadata (documentId, chunkIndex)</li>
+<li>Returns RagDocument with all chunks</li>
+</ol>
+<h4 id="supported-formats">Supported Formats</h4>
+<p>25+ file extensions: <code>.txt</code>, <code>.md</code>, <code>.json</code>, <code>.csv</code>, <code>.py</code>, <code>.js</code>, <code>.ts</code>, <code>.jsx</code>, <code>.tsx</code>, <code>.rs</code>, <code>.go</code>, <code>.java</code>, <code>.c</code>, <code>.cpp</code>, <code>.h</code>, <code>.hpp</code>, <code>.css</code>, <code>.html</code>, <code>.xml</code>, <code>.yaml</code>, <code>.yml</code>, <code>.toml</code>, <code>.pdf</code></p>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { parseDocument, isParsing } = useDocumentParser();
+const doc = await parseDocument(fileInput.files[0]);
+if (doc) {
+  ragStore.getState().addDocument(doc);
+}</code></pre>
+<hr>
+<h3 id="useollamadetect">useOllamaDetect</h3>
+<p><strong>File</strong>: <code>src/hooks/useOllamaDetect.ts</code></p>
+<p><strong>Purpose</strong>: Detects Ollama connection and lists available models.</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useOllamaDetect(): {
+  checking: boolean;
+  retry: () =&gt; Promise&lt;void&gt;;
+  connected: boolean;
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>checking</code></td><td><code>boolean</code></td><td>True while detection is in progress</td></tr>
+<tr><td><code>retry</code></td><td><code>() => Promise<void></code></td><td>Manually trigger re-detection</td></tr>
+<tr><td><code>connected</code></td><td><code>boolean</code></td><td>Current connection state from uiStore</td></tr>
+</tbody>
+</table></div>
+<h4 id="behavior">Behavior</h4>
+<ol>
+<li>On mount, polls Ollama API at <code>uiStore.ollamaUrl</code> (default <code>http://localhost:11434</code>)</li>
+<li>Calls <code>checkOllamaConnection()</code> — if reachable, calls <code>listOllamaModels()</code></li>
+<li>Updates <code>uiStore.ollamaConnected</code> and <code>uiStore.ollamaModels</code></li>
+<li>Runs automatically on app mount via <code>App.tsx</code> — no manual triggering needed</li>
+</ol>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { checking, retry, connected } = useOllamaDetect();
+// Auto-detects on mount — retry() for manual re-check</code></pre>
+<hr>
+<h3 id="usespeechrecognition">useSpeechRecognition</h3>
+<p><strong>File</strong>: <code>src/hooks/useSpeechRecognition.ts</code></p>
+<p><strong>Purpose</strong>: Wraps the Web Speech API for voice input.</p>
+<h4 id="parameters">Parameters</h4>
+<pre><code class="language-typescript">function useSpeechRecognition(): {
+  transcript: string;
+  isListening: boolean;
+  error: string | null;
+  startListening: () =&gt; void;
+  stopListening: () =&gt; void;
+  supported: boolean;
+}</code></pre>
+<h4 id="return-values">Return Values</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Value</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>transcript</code></td><td><code>string</code></td><td>Current speech transcription</td></tr>
+<tr><td><code>isListening</code></td><td><code>boolean</code></td><td>True while microphone is active</td></tr>
+<tr><td><code>error</code></td><td>`string \</td><td>null`</td><td>Error message (if any)</td></tr>
+<tr><td><code>startListening</code></td><td><code>() => void</code></td><td>Start speech recognition</td></tr>
+<tr><td><code>stopListening</code></td><td><code>() => void</code></td><td>Stop speech recognition</td></tr>
+<tr><td><code>supported</code></td><td><code>boolean</code></td><td>True if browser supports Web Speech API</td></tr>
+</tbody>
+</table></div>
+<h4 id="usage">Usage</h4>
+<pre><code class="language-typescript">const { transcript, isListening, startListening, stopListening, supported } = useSpeechRecognition();
+
+return (
+  &lt;div&gt;
+    &lt;button onClick={startListening} disabled={!supported || isListening}&gt;
+      🎤 {isListening ? 'Listening...' : 'Start'}
+    &lt;/button&gt;
+    &lt;button onClick={stopListening}&gt;Stop&lt;/button&gt;
+    &lt;p&gt;Transcript: {transcript}&lt;/p&gt;
+  &lt;/div&gt;
+);</code></pre>
+<h3 id="hook-lifecycle-and-side-effects">Hook Lifecycle and Side Effects</h3>
+<p>Understanding when hooks fire and what side effects they trigger is important for debugging and extending Mosaic.</p>
+<h4 id="usestreammessage-lifecycle">useStreamMessage Lifecycle</h4>
+<pre><code>1. User presses Enter
+2. sendMessage({ parentNodeId, text }) called
+3.   → Create branch node (side effect: canvasStore mutation)
+4.   → Set isStreaming = true
+5.   → Build conversation path (getConversationPath up the tree)
+6.   → If RAG enabled: searchChunks(query) (side effect: API call)
+7.   → Send to streamProvider(model, messages, config)
+8.     → For each chunk: updateNode(nodeId, { label: label + chunk })
+9.       → (side effect: canvasStore mutation → React Flow re-render)
+10.  → Stream complete
+11.  → Set isStreaming = false
+12.  → Parallel side effects (Promise.all):
+13.    → useConfidenceScore.scoreResponse() (if enabled)
+14.    → useSuggestionTendrils.generateTendrils() (if enabled)
+15.    → analyticsStore.recordCompletion()
+16.  → Debounced save to canvasManagerStore</code></pre>
+<h4 id="error-states-and-recovery">Error States and Recovery</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Hook</th><th>Error State</th><th>Recovery</th></tr></thead>
+<tbody>
+<tr><td>useStreamMessage</td><td>Node shows error message + retry button</td><td>Click retry → re-sends message</td></tr>
+<tr><td>useConfidenceScore</td><td>No badge shown (silent)</td><td>Next response re-attempts</td></tr>
+<tr><td>useSuggestionTendrils</td><td>No suggestion nodes created (silent)</td><td>Next response re-attempts</td></tr>
+<tr><td>useBranchPruning</td><td>Partial results (some branches scored)</td><td>Retry pruning</td></tr>
+<tr><td>useDistillation</td><td>No distillation node created</td><td>Retry distillation</td></tr>
+<tr><td>useParallelDebate</td><td>Failed models show error; successful models shown</td><td>Retry individual failed branches</td></tr>
+<tr><td>useDocumentParser</td><td>File rejected with error message</td><td>Fix file and re-upload</td></tr>
+<tr><td>useOllamaDetect</td><td>Ollama option grayed out</td><td>Click "Detect" to retry</td></tr>
+<tr><td>useSpeechRecognition</td><td>Error message shown</td><td>Click mic again</td></tr>
+</tbody>
+</table></div>
+<h4 id="performance-considerations">Performance Considerations</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Hook</th><th>Computation Cost</th><th>Network Cost</th><th>When to Optimize</th></tr></thead>
+<tbody>
+<tr><td>useStreamMessage</td><td>Low (concatenation)</td><td>High (full streaming)</td><td>Large conversation history</td></tr>
+<tr><td>useConfidenceScore</td><td>Low</td><td>Medium (one completion)</td><td>High-volume use (disable if not needed)</td></tr>
+<tr><td>useSuggestionTendrils</td><td>Low</td><td>Medium (one completion)</td><td>High-volume use (disable if not needed)</td></tr>
+<tr><td>useBranchPruning</td><td>Low</td><td>High (one completion per leaf)</td><td>Large canvases (many leaves)</td></tr>
+<tr><td>useDistillation</td><td>Low</td><td>High (large context)</td><td>Very large canvases</td></tr>
+<tr><td>useParallelDebate</td><td>Low</td><td>Very High (N completions)</td><td>Many models selected</td></tr>
+<tr><td>useDocumentParser</td><td>Medium (chunking)</td><td>None</td><td>Large files (many chunks)</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="hook-dependency-graph">Hook Dependency Graph</h3>
+<pre><code>useStreamMessage
+  ├── useConfidenceScore (called after stream completes)
+  ├── useSuggestionTendrils (called after stream completes)
+  └── analyticsStore.recordCompletion (called after stream completes)
+
+useParallelDebate
+  └── useStreamMessage (multiple parallel calls)
+
+useBranchPruning
+  └── streamProvider (for each leaf branch)
+
+useDistillation
+  └── streamProvider (for synthesis)</code></pre>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="api-reference.html#store-api-reference">Store API Reference</a> — All stores with state and actions</li>
+<li><a href="api-reference.html#component-api-reference">Component API Reference</a> — All components with props</li>
+<li><a href="api-reference.html#utilities-and-types-reference">Utilities and Types Reference</a> — Utility functions and type definitions</li>
+</ul>
+</section>
+<section id="component-api-reference"><h2 id="component-api-reference">Component API Reference</h2>
+<p>This page documents every React component in Mosaic, including props, behavior, and usage notes.</p>
+<hr>
+<h3 id="canvas-components">Canvas Components</h3>
+<h4 id="mosaiccanvas">MosaicCanvas</h4>
+<p><strong>File</strong>: <code>src/components/canvas/MosaicCanvas.tsx</code></p>
+<p>The main canvas wrapper. Renders the React Flow component with all custom nodes and edges.</p>
+<pre><code class="language-typescript">// No props — reads from Zustand stores directly
+function MosaicCanvas(): JSX.Element</code></pre>
+<p><strong>Internal structure</strong>:</p>
+<ul>
+<li>Wraps <code><ReactFlow></code> with <code><ReactFlowProvider></code></li>
+<li>Registers custom node types: <code>messageNode</code></li>
+<li>Registers custom edge types: <code>liquidEdge</code>, <code>tendrilEdge</code>, <code>distillEdge</code></li>
+<li>Handles node drag, edge connections, node clicks</li>
+<li>Renders <code><Background></code>, <code><MiniMap></code> (conditional), <code><Controls></code></li>
+<li>Filters out collapsed/descendant nodes from view</li>
+<li>Handles zoom keyboard shortcuts (+, -, F)</li>
+</ul>
+<hr>
+<h4 id="messagenode">MessageNode</h4>
+<p><strong>File</strong>: <code>src/components/canvas/MessageNode.tsx</code> (683 lines — the largest component)</p>
+<p>The core node component. Renders as a glass card with message content, controls, and interactive elements.</p>
+<pre><code class="language-typescript">interface MessageNodeProps {
+  id: string;
+  data: NodeData;
+  selected: boolean;
+}
+
+// Memoized with React.memo + deep comparison
+const MessageNode = React.memo(function MessageNode(props: MessageNodeProps): JSX.Element</code></pre>
+<p><strong>NodeData shape</strong>:</p>
+<pre><code class="language-typescript">interface NodeData {
+  label: string;                     // Message content (Markdown)
+  nodeType: 'root' | 'branch' | 'response' | 'suggestion' | 'distillation';
+  collapsed?: boolean;
+  bookmarked?: boolean;
+  confidence?: number;               // 0-100 confidence score
+  isStreaming?: boolean;
+  error?: string;
+}</code></pre>
+<p><strong>Sub-components rendered</strong>:</p>
+<ul>
+<li><code>GlassCard</code> — the glass container</li>
+<li><code>NodeInput</code> — inline input (when active)</li>
+<li><code>react-markdown</code> — renders message content with GFM</li>
+<li><code>CodeBlock</code> — interactive code blocks within markdown</li>
+<li>Confidence badge (when nodeType='response' and confidence exists)</li>
+<li>Bookmark star icon</li>
+<li>Collapse badge with count</li>
+<li>Typing indicator (when isStreaming)</li>
+<li>Resize handle (bottom-right)</li>
+<li>Error display with retry button</li>
+</ul>
+<p><strong>Context menu items</strong>:</p>
+<ul>
+<li>Bookmark toggle</li>
+<li>Collapse/Expand</li>
+<li>Auto-arrange</li>
+<li>Delete (with cascade confirmation)</li>
+<li>Undo</li>
+</ul>
+<p><strong>Special behaviors by node type</strong>:</p>
+<ul>
+<li><code>suggestion</code>: Dimmed (0.45 opacity), italic text, click-to-materialize</li>
+<li><code>distillation</code>: Gold border with pulse animation</li>
+<li><code>root</code>: Cannot be deleted</li>
+<li><code>pruned</code>: Reduced opacity</li>
+</ul>
+<hr>
+<h4 id="nodeinput">NodeInput</h4>
+<p><strong>File</strong>: <code>src/components/canvas/NodeInput.tsx</code></p>
+<p>Inline input component for composing messages.</p>
+<pre><code class="language-typescript">interface NodeInputProps {
+  parentNodeId: string;
+  placeholder?: string;
+}</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Textarea with auto-grow</li>
+<li><strong>Enter</strong>: Send message</li>
+<li><strong>Shift+Enter</strong>: Send with parallel debate</li>
+<li><strong>Mic button</strong>: Speech recognition (uses <code>useSpeechRecognition</code>)</li>
+<li><strong>Send button</strong>: Arrow icon</li>
+<li><strong>Debate button</strong>: Multi-model icon (visible when debate models selected)</li>
+<li>Max length: 10,000 characters</li>
+<li>Placeholder: "Type a message..." (or "Send a follow-up..." for non-root nodes)</li>
+</ul>
+<p><strong>Internal</strong>:</p>
+<ul>
+<li>Uses <code>useStreamMessage().sendMessage()</code> for sending</li>
+<li>Clears text after successful send</li>
+<li>Shows character count near limit</li>
+</ul>
+<hr>
+<h4 id="codeblock">CodeBlock</h4>
+<p><strong>File</strong>: <code>src/components/canvas/CodeBlock.tsx</code></p>
+<p>Rendered inside markdown content for code fences.</p>
+<pre><code class="language-typescript">interface CodeBlockProps {
+  language: string;
+  value: string;
+}</code></pre>
+<p><strong>Language mapping</strong>:</p>
+<ul>
+<li><code>js</code>, <code>jsx</code>, <code>ts</code>, <code>tsx</code> → <code>javascript</code></li>
+<li><code>py</code>, <code>python</code> → <code>python</code></li>
+<li>All others → read-only display (no run button)</li>
+</ul>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Language badge</li>
+<li>Run button (▶️) — executes code via <code>codeRunner.runCode()</code></li>
+<li>Stop button (⏹) — cancels execution via AbortController</li>
+<li>Collapse/expand toggle for long code</li>
+<li>Output pane: shows stdout, results, errors</li>
+<li>Error display with red styling</li>
+<li>Dismiss button for output</li>
+<li>Confirmation dialog for AI-generated code (once per session)</li>
+</ul>
+<p><strong>Internal</strong>:</p>
+<ul>
+<li>Uses <code>codeRunner.runCode()</code> from <code>src/utils/codeRunner.ts</code></li>
+<li>Reads <code>language</code> prop to select JavaScript or Python runtime</li>
+<li>Updates output state progressively as results arrive</li>
+</ul>
+<hr>
+<h4 id="liquidedge">LiquidEdge</h4>
+<p><strong>File</strong>: <code>src/components/canvas/LiquidEdge.tsx</code></p>
+<p>Default Bezier edge for conversation connections.</p>
+<pre><code class="language-typescript">interface LiquidEdgeProps {
+  id: string;
+  source: string;
+  target: string;
+  data?: EdgeData;
+  selected?: boolean;
+}</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Solid Bezier curve</li>
+<li><code>pathLength</code> animation on mount (draws in)</li>
+<li>Pruned edges get reduced opacity (0.3)</li>
+<li>Pruned edges get modified dash pattern</li>
+</ul>
+<hr>
+<h4 id="tendriledge">TendrilEdge</h4>
+<p><strong>File</strong>: <code>src/components/canvas/TendrilEdge.tsx</code></p>
+<p>Dotted edge for suggestion connections.</p>
+<pre><code class="language-typescript">interface TendrilEdgeProps {
+  id: string;
+  source: string;
+  target: string;
+}</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Dotted Bezier: <code>stroke-dasharray="3 8"</code></li>
+<li>Opacity: 0.4</li>
+<li>No animation</li>
+</ul>
+<hr>
+<h4 id="distilledge">DistillEdge</h4>
+<p><strong>File</strong>: <code>src/components/canvas/DistillEdge.tsx</code></p>
+<p>Gold dashed edge for distillation connections.</p>
+<pre><code class="language-typescript">interface DistillEdgeProps {
+  id: string;
+  source: string;
+  target: string;
+}</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Gold color: <code>hsla(45, 90%, 65%, 0.6)</code></li>
+<li>Dashed pattern</li>
+<li>No animation</li>
+</ul>
+<hr>
+<h3 id="glass-ui-components">Glass UI Components</h3>
+<h4 id="glasscard">GlassCard</h4>
+<p><strong>File</strong>: <code>src/components/glass/GlassCard.tsx</code></p>
+<p>Universal glass container with two rendering modes.</p>
+<pre><code class="language-typescript">interface GlassCardProps {
+  children: React.ReactNode;
+  className?: string;
+  lens?: boolean;              // Use Lens refraction mode
+  clear?: boolean;             // Transparent variant
+  tint?: string;               // Override glass tint color
+  disableRipple?: boolean;     // Disable click ripple effect
+  onClick?: () =&gt; void;
+  style?: React.CSSProperties;
+}</code></pre>
+<p><strong>Modes</strong>:</p>
+<ul>
+<li><strong>Lens mode</strong> (<code>lens={true}</code>): Uses <code><Lens></code> component for SVG filter refraction. More computationally expensive but visually richer.</li>
+<li><strong>Standard mode</strong>: CSS-based glass layers:</li>
+</ul>
+<p>  1. Backdrop blur filter layer</p>
+<p>  2. Tint overlay layer (semi-transparent background)</p>
+<p>  3. Shine/reflection layer (gradient)</p>
+<p>  4. Ripple effect layer (on click)</p>
+<p>  5. Content layer</p>
+<hr>
+<h4 id="lens">Lens</h4>
+<p><strong>File</strong>: <code>src/components/glass/Lens.tsx</code></p>
+<p>Physics-based refraction lens using SVG displacement map.</p>
+<pre><code class="language-typescript">interface LensProps {
+  children: React.ReactNode;
+  width?: number;
+  height?: number;
+  surface?: SurfaceProfile;     // convex_squircle (default), convex_circle, concave, lip
+  variant?: 'regular' | 'clear';
+  interactive?: boolean;        // Enable touch/pointer displacement
+  className?: string;
+}</code></pre>
+<p><strong>Surface profiles</strong>:</p>
+<ul>
+<li><code>convex_squircle</code>: Smooth rounded convex (default)</li>
+<li><code>convex_circle</code>: Spherical convex</li>
+<li><code>concave</code>: Inward curve</li>
+<li><code>lip</code>: Raised ring edge</li>
+</ul>
+<p><strong>Implementation</strong>: Uses SVG <code><feDisplacementMap></code> filter with a dynamically generated canvas-based displacement map. See <a href="architecture.html#liquid-glass-physics-engine">Liquid-Glass Physics Engine</a> for the full technical explanation.</p>
+<hr>
+<h4 id="draglens">DragLens</h4>
+<p><strong>File</strong>: <code>src/components/glass/DragLens.tsx</code></p>
+<p>Fixed-position draggable lens overlay on the canvas.</p>
+<pre><code class="language-typescript">// No props — self-contained component
+function DragLens(): JSX.Element</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>120x120 pixel lens</li>
+<li>Pointer-based dragging with <code>pointer capture</code></li>
+<li>Acts as a magnifying/refraction demo tool</li>
+<li>Initial position: bottom-right of canvas (offset from minimap)</li>
+</ul>
+<hr>
+<h4 id="fluidslider">FluidSlider</h4>
+<p><strong>File</strong>: <code>src/components/glass/FluidSlider.tsx</code></p>
+<p>Spring-animated slider with glass knob.</p>
+<pre><code class="language-typescript">interface FluidSliderProps {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number) =&gt; void;
+  formatValue?: (value: number) =&gt; string;
+  label?: string;
+}</code></pre>
+<p><strong>Spring parameters</strong>:</p>
+<ul>
+<li>Idle: stiffness 180, damping 15</li>
+<li>Active (dragging): stiffness 300, damping 20</li>
+</ul>
+<p><strong>Usage</strong>: Zoom controls, temperature setting.</p>
+<hr>
+<h4 id="tactileswitch">TactileSwitch</h4>
+<p><strong>File</strong>: <code>src/components/glass/TactileSwitch.tsx</code></p>
+<p>Spring-animated toggle switch with glass knob.</p>
+<pre><code class="language-typescript">interface TactileSwitchProps {
+  checked: boolean;
+  onChange: (checked: boolean) =&gt; void;
+  label?: string;
+}</code></pre>
+<p><strong>Spring parameters</strong>: Same as FluidSlider.</p>
+<p><strong>Usage</strong>: Minimap toggle, confidence toggle, tendrils toggle.</p>
+<hr>
+<h4 id="segmentcontrol">SegmentControl</h4>
+<p><strong>File</strong>: <code>src/components/glass/SegmentControl.tsx</code></p>
+<p>Segmented button group with active segment highlighted by Lens refraction.</p>
+<pre><code class="language-typescript">interface SegmentControlProps {
+  segments: { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) =&gt; void;
+}</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Active segment uses <code><Lens></code> component for visual distinction</li>
+<li>Smooth spring animation on segment switch</li>
+</ul>
+<hr>
+<h4 id="glasseffectcontainer">GlassEffectContainer</h4>
+<p><strong>File</strong>: <code>src/components/glass/GlassEffectContainer.tsx</code></p>
+<p>Provides shared backdrop context for grouped glass elements.</p>
+<pre><code class="language-typescript">interface GlassEffectContainerProps {
+  children: React.ReactNode;
+}</code></pre>
+<p>Uses React Context to share the backdrop element reference among child glass components.</p>
+<hr>
+<h3 id="ui-components">UI Components</h3>
+<h4 id="topbar">TopBar</h4>
+<p><strong>File</strong>: <code>src/components/ui/TopBar.tsx</code></p>
+<p>Top navigation bar.</p>
+<pre><code class="language-typescript">// No props — reads from stores
+function TopBar(): JSX.Element</code></pre>
+<p><strong>Elements</strong>:</p>
+<ul>
+<li>Mosaic logo</li>
+<li>Model selector dropdown (groups models by provider with colored dots: blue → Mistral, green → OpenAI, orange → Anthropic, yellow → Gemini, purple → Ollama)</li>
+<li>Ollama models dynamically appended when connected</li>
+<li>Action buttons: Search, Bookmarks, Documents, Analytics, Distill, Prune, New Chat, Settings</li>
+</ul>
+<h4 id="settingsdrawer">SettingsDrawer</h4>
+<p><strong>File</strong>: <code>src/components/ui/SettingsDrawer.tsx</code></p>
+<p>Full settings modal.</p>
+<pre><code class="language-typescript">// No props — reads/writes uiStore
+function SettingsDrawer(): JSX.Element</code></pre>
+<p><strong>Sections</strong>:</p>
+<ul>
+<li><strong>Theme</strong>: Grid of 5 theme selectors (Void, Dusk, Sand, Snow, Sunrise)</li>
+<li><strong>API Keys</strong>: Per-provider masked inputs for Mistral, OpenAI, Anthropic, and Gemini (using a reusable <code>ApiKeySection</code> component). Keys are XOR-encrypted before storage.</li>
+<li><strong>Ollama</strong>: URL input field, Connect button with live status indicator, auto-detected model list</li>
+<li><strong>System Prompt</strong>: Textarea (4000 character max) for custom AI instructions</li>
+<li><strong>Temperature</strong>: FluidSlider (0.0–2.0)</li>
+<li><strong>Canvas</strong>: Toggles for Minimap, Confidence scoring, Tendrils</li>
+<li><strong>Actions</strong>: Auto-arrange, Export JSON, Import JSON, Clear canvas</li>
+<li><strong>Shortcuts</strong>: Opens shortcuts modal</li>
+</ul>
+<h4 id="searchoverlay">SearchOverlay</h4>
+<p><strong>File</strong>: <code>src/components/ui/SearchOverlay.tsx</code></p>
+<p>Fixed-position search interface.</p>
+<pre><code class="language-typescript">// No props — reads/writes uiStore
+function SearchOverlay(): JSX.Element</code></pre>
+<p><strong>Features</strong>: Glass-styled search input, real-time filtering, 20 max results, keyboard navigation, result highlighting on canvas.</p>
+<h4 id="zoomcontrols">ZoomControls</h4>
+<p><strong>File</strong>: <code>src/components/ui/ZoomControls.tsx</code></p>
+<p>Fixed bottom-center zoom controls.</p>
+<pre><code class="language-typescript">// No props — reads canvas viewport
+function ZoomControls(): JSX.Element</code></pre>
+<p><strong>Features</strong>: FluidSlider for zoom (0.1x-2x), +/- buttons, percentage display.</p>
+<h4 id="canvastabs">CanvasTabs</h4>
+<p><strong>File</strong>: <code>src/components/ui/CanvasTabs.tsx</code></p>
+<p>Tab bar for multi-canvas management.</p>
+<pre><code class="language-typescript">// No props — reads/writes canvasManagerStore
+function CanvasTabs(): JSX.Element</code></pre>
+<p><strong>Features</strong>: Tab switching, rename (double-click), delete with auto-switch, new tab button. Active tab highlighted with Lens refraction.</p>
+<h4 id="welcomescreen">WelcomeScreen</h4>
+<p><strong>File</strong>: <code>src/components/ui/WelcomeScreen.tsx</code></p>
+<p>Animated particle welcome overlay.</p>
+<pre><code class="language-typescript">// No props — reads uiStore.showWelcome
+function WelcomeScreen(): JSX.Element</code></pre>
+<p><strong>Phases</strong>: Idle (200 floating particles with mouse repulsion) → Burst (click scatters particles) → Gone (dismissed).</p>
+<h4 id="documentpanel-analyticspanel">DocumentPanel, AnalyticsPanel</h4>
+<p><strong>File</strong>: <code>src/components/ui/DocumentPanel.tsx</code>, <code>src/components/ui/AnalyticsPanel.tsx</code></p>
+<p>Slide-in panels.</p>
+<pre><code class="language-typescript">// No props — read/write their respective stores
+function DocumentPanel(): JSX.Element
+function AnalyticsPanel(): JSX.Element</code></pre>
+<h4 id="contextmenu">ContextMenu</h4>
+<p><strong>File</strong>: <code>src/components/ui/ContextMenu.tsx</code></p>
+<p>Right-click context menu.</p>
+<pre><code class="language-typescript">interface ContextMenuProps {
+  items: ContextMenuItem[];
+  position: { x: number; y: number };
+  onClose: () =&gt; void;
+}
+
+interface ContextMenuItem {
+  label: string;
+  icon?: string;
+  shortcut?: string;
+  destructive?: boolean;
+  onClick: () =&gt; void;
+}</code></pre>
+<p>Adjusts position to stay within viewport bounds.</p>
+<h4 id="toastcontainer">ToastContainer</h4>
+<p><strong>File</strong>: <code>src/components/ui/ToastContainer.tsx</code></p>
+<p>Toast notification container.</p>
+<pre><code class="language-typescript">// No props — reads toastStore
+function ToastContainer(): JSX.Element</code></pre>
+<p><strong>Toast types</strong>: <code>info</code> (accent), <code>success</code> (green), <code>error</code> (red). Auto-dismiss with spring animation.</p>
+<h4 id="prunebanner">PruneBanner</h4>
+<p><strong>File</strong>: <code>src/components/ui/PruneBanner.tsx</code></p>
+<p>Prune status banner.</p>
+<pre><code class="language-typescript">// No props — reads pruneStore
+function PruneBanner(): JSX.Element</code></pre>
+<p>Shows "Restore all" button when pruning is active.</p>
+<h4 id="pythonterminal">PythonTerminal</h4>
+<p><strong>File</strong>: <code>src/components/ui/PythonTerminal.tsx</code></p>
+<p>Floating Python REPL.</p>
+<pre><code class="language-typescript">// No props — self-contained
+function PythonTerminal(): JSX.Element</code></pre>
+<p><strong>Features</strong>: 520x320 draggable widget, command history, <code>reset()</code>/<code>clear()</code> commands, persistent state, color-coded output (input/output/error/system).</p>
+<h4 id="errorboundary">ErrorBoundary</h4>
+<p><strong>File</strong>: <code>src/components/ui/ErrorBoundary.tsx</code></p>
+<p>Class-based error boundary.</p>
+<pre><code class="language-typescript">interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}</code></pre>
+<p>Shows error message with "Try Again" button on failure.</p>
+<hr>
+<h3 id="accessibility-considerations">Accessibility Considerations</h3>
+<p>Mosaic's components follow accessibility best practices:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Component</th><th>Accessibility Features</th></tr></thead>
+<tbody>
+<tr><td>MessageNode</td><td>ARIA labels for node type, role="button" for clickable areas, keyboard tab navigation</td></tr>
+<tr><td>NodeInput</td><td>Proper label association, aria-describedby for help text, role="textbox"</td></tr>
+<tr><td>GlassCard</td><td>Focusable when interactive, role="region" with aria-label</td></tr>
+<tr><td>TactileSwitch</td><td>role="switch", aria-checked, keyboard activation (Enter/Space)</td></tr>
+<tr><td>FluidSlider</td><td>role="slider", aria-valuemin/max/now, keyboard arrow keys</td></tr>
+<tr><td>SearchOverlay</td><td>role="dialog", aria-modal, focus trap, aria-live for results</td></tr>
+<tr><td>SettingsDrawer</td><td>role="dialog", aria-modal, focus trap, Escape to close</td></tr>
+<tr><td>ShortcutsModal</td><td>role="dialog", aria-label, keyboard navigation</td></tr>
+<tr><td>ToastContainer</td><td>role="alert", aria-live="polite"</td></tr>
+<tr><td>PythonTerminal</td><td>role="application", aria-label, keyboard input handling</td></tr>
+</tbody>
+</table></div>
+<p>All components respect <code>prefers-reduced-motion</code> (disables animations) and <code>prefers-reduced-transparency</code> (reduces glass effects).</p>
+<hr>
+<h3 id="responsive-behavior">Responsive Behavior</h3>
+<p>Mosaic's window has a minimum size of 800x600:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Window Width</th><th>Behavior</th></tr></thead>
+<tbody>
+<tr><td>≥ 1280px (default)</td><td>Full layout: TopBar, canvas, minimap, zoom controls</td></tr>
+<tr><td>800-1279px</td><td>Compact TopBar (icons without labels), canvas fills available space</td></tr>
+<tr><td>< 800px</td><td>Not allowed (minimum window size enforced by Tauri)</td></tr>
+</tbody>
+</table></div>
+<p>The Settings drawer, DocumentPanel, and AnalyticsPanel are overlay panels that work at any window size.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="api-reference.html#utilities-and-types-reference">Utilities and Types Reference</a> — Utility functions and type definitions</li>
+<li><a href="api-reference.html#store-api-reference">Store API Reference</a> — All Zustand stores</li>
+<li><a href="user-guide.html#keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</a> — Complete UI documentation</li>
+</ul>
+</section>
+<section id="utilities-and-types-reference"><h2 id="utilities-and-types-reference">Utilities and Types Reference</h2>
+<p>This page documents Mosaic's utility functions, type definitions, and helper modules.</p>
+<hr>
+<h3 id="types-src-types-index-ts">Types (<code>src/types/index.ts</code>)</h3>
+<h4 id="node-types">Node Types</h4>
+<pre><code class="language-typescript">type NodeType = 'root' | 'branch' | 'response' | 'suggestion' | 'distillation';
+type EdgeType = 'liquidEdge' | 'tendrilEdge' | 'distillEdge';</code></pre>
+<h4 id="nodedata">NodeData</h4>
+<pre><code class="language-typescript">interface NodeData {
+  label: string;
+  nodeType: NodeType;
+  collapsed?: boolean;
+  bookmarked?: boolean;
+  confidence?: number;       // 0-100, only for response nodes
+  isStreaming?: boolean;
+  error?: string;            // Error message if streaming failed
+}</code></pre>
+<h4 id="edgedata">EdgeData</h4>
+<pre><code class="language-typescript">interface EdgeData {
+  edgeType: EdgeType;
+}</code></pre>
+<h4 id="canvasdata">CanvasData</h4>
+<pre><code class="language-typescript">interface CanvasData {
+  nodes: Node[];
+  edges: Edge[];
+  viewport?: { x: number; y: number; zoom: number };
+  bookmarkedIds?: string[];
+}</code></pre>
+<h4 id="provider-types-v0-3-0">Provider Types (v0.3.0+)</h4>
+<pre><code class="language-typescript">type ProviderId = 'mistral' | 'openai' | 'anthropic' | 'gemini' | 'ollama';
+
+type ProviderType = ProviderId; // Alias for compatibility
+
+interface ModelOption {
+  id: string;                // Model identifier (e.g., 'mistral-large-latest', 'openai/gpt-4o')
+  label: string;             // Display name (e.g., 'Mistral Large', 'GPT-4o')
+  provider: ProviderId;
+  supportsEmbeddings: boolean; // Whether this model can produce embeddings
+}
+
+interface ProviderDefinition {
+  id: ProviderId;
+  name: string;              // Human-readable name (e.g., 'Mistral AI')
+  baseUrl: string;           // API base URL
+  requiresKey: boolean;
+  color: string;             // UI indicator color
+}</code></pre>
+<h4 id="built-in-models">Built-in Models</h4>
+<p>The <code>BUILT<em>IN</em>MODELS</code> array in <code>src/api/config.ts</code> defines all statically known models:</p>
+<pre><code class="language-typescript">const BUILT_IN_MODELS: ModelOption[] = [
+  { id: 'mistral-large-latest',     label: 'Mistral Large',     provider: 'mistral',  supportsEmbeddings: true },
+  { id: 'mistral-small-latest',     label: 'Mistral Small',     provider: 'mistral',  supportsEmbeddings: true },
+  { id: 'openai/gpt-4o',            label: 'GPT-4o',            provider: 'openai',   supportsEmbeddings: true },
+  { id: 'openai/gpt-4o-mini',       label: 'GPT-4o Mini',       provider: 'openai',   supportsEmbeddings: true },
+  { id: 'anthropic/claude-sonnet-4-20250514', label: 'Claude Sonnet 4', provider: 'anthropic', supportsEmbeddings: false },
+  { id: 'anthropic/claude-3-5-haiku-20241022', label: 'Claude Haiku 3.5', provider: 'anthropic', supportsEmbeddings: false },
+  { id: 'gemini/gemini-2.5-pro',    label: 'Gemini 2.5 Pro',    provider: 'gemini',   supportsEmbeddings: true },
+  { id: 'gemini/gemini-2.5-flash',  label: 'Gemini 2.5 Flash',  provider: 'gemini',   supportsEmbeddings: true },
+];</code></pre>
+<p>Ollama models are not in this list — they are dynamically detected at runtime via the Ollama API.</p>
+<h4 id="rag-types">RAG Types</h4>
+<pre><code class="language-typescript">interface RagDocument {
+  id: string;
+  filename: string;
+  size: number;              // File size in bytes
+  chunks: RagChunk[];
+}
+
+interface RagChunk {
+  id: string;
+  text: string;
+  embedding?: number[];      // Optional embedding vector
+  metadata: {
+    documentId: string;
+    chunkIndex: number;
+  };
+}
+
+interface RagSearchResult {
+  chunk: RagChunk;
+  score: number;             // Cosine similarity score (0-1)
+}</code></pre>
+<h4 id="analytics-types">Analytics Types</h4>
+<pre><code class="language-typescript">interface CanvasStats {
+  totalTokens: number;
+  totalCost: number;
+  modelBreakdown: Record&lt;string, {
+    tokens: number;
+    cost: number;
+    count: number;
+  }&gt;;
+  completions: Array&lt;{
+    model: string;
+    tokens: number;
+    cost: number;
+    timestamp: number;
+  }&gt;;
+}
+
+interface NodeStats {
+  totalNodes: number;
+  branchNodes: number;
+  responseNodes: number;
+  rootNodes: number;
+  totalMessages: number;
+  depth: number;              // Maximum conversation tree depth
+  branchCount: number;        // Number of branching points
+}</code></pre>
+<h4 id="glass-ui-types">Glass UI Types</h4>
+<pre><code class="language-typescript">type SurfaceProfile = 'convex_squircle' | 'convex_circle' | 'concave' | 'lip';
+type GlassVariant = 'regular' | 'clear';
+
+interface LensParams {
+  width: number;
+  height: number;
+  surface: SurfaceProfile;
+  variant: GlassVariant;
+  interactive?: boolean;
+}
+
+interface DisplacementMap {
+  canvas: HTMLCanvasElement;
+  scale: number;
+  updatedAt: number;
+}</code></pre>
+<h4 id="toast-types">Toast Types</h4>
+<pre><code class="language-typescript">interface Toast {
+  id: string;
+  type: 'info' | 'success' | 'error';
+  message: string;
+}</code></pre>
+<h4 id="prune-types">Prune Types</h4>
+<pre><code class="language-typescript">interface PruneState {
+  pruneActive: boolean;
+  pruneGoal: string;
+  isPruning: boolean;
+}</code></pre>
+<hr>
+<h3 id="code-runner-src-utils-coderunner-ts">Code Runner (<code>src/utils/codeRunner.ts</code>)</h3>
+<p>The code runner manages a Web Worker for sandboxed code execution.</p>
+<pre><code class="language-typescript">interface CodeResult {
+  output: string;             // stdout + returned value
+  error?: string;             // Error message if execution failed
+  executionTime?: number;     // Execution time in ms
+}</code></pre>
+<h4 id="functions">Functions</h4>
+<h4 id="runcode-lang-javascript-python-code-string-promise-coderesult"><code>runCode(lang: 'javascript' | 'python', code: string): Promise<CodeResult></code></h4>
+<p>Executes code in the sandboxed worker. Creates the worker on first call.</p>
+<pre><code class="language-typescript">import { runCode } from '@/utils/codeRunner';
+
+const result = await runCode('javascript', 'console.log("Hello!")');
+console.log(result.output); // "Hello!"</code></pre>
+<p><strong>Timeout</strong>: 30 seconds. Throws on timeout.</p>
+<h4 id="replexec-code-string-promise-coderesult"><code>replExec(code: string): Promise<CodeResult></code></h4>
+<p>Executes code in the persistent Python REPL environment. Variables persist between calls.</p>
+<pre><code class="language-typescript">await replExec('x = 42');
+const result = await replExec('print(x * 2)');
+// result.output === "84"</code></pre>
+<h4 id="replreset-promise-void"><code>replReset(): Promise<void></code></h4>
+<p>Resets the Python REPL environment (clears all variables).</p>
+<h4 id="terminateworker-void"><code>terminateWorker(): void</code></h4>
+<p>Terminates the Web Worker for cleanup. Called on component unmount.</p>
+<h4 id="worker-communication-protocol">Worker Communication Protocol</h4>
+<pre><code>Main Thread → Worker:    { exec_id: string, lang: string, code: string }
+Worker → Main Thread:    { exec_id: string, type: 'stdout' | 'result' | 'error', data: string }</code></pre>
+<hr>
+<h3 id="validation-src-utils-validation-ts">Validation (<code>src/utils/validation.ts</code>)</h3>
+<pre><code class="language-typescript">function validateNodeData(data: unknown): data is NodeData
+function validateImportedCanvas(data: unknown): data is CanvasData
+function validateCanvasData(data: unknown): data is CanvasData
+function validateRagDocs(data: unknown): data is RagDocument[]
+function validateUIState(data: unknown): data is { theme: string; temperature: number; [key: string]: unknown }</code></pre>
+<p>All validation functions:</p>
+<ol>
+<li>Check that input is an object</li>
+<li>Check required fields exist and have correct types</li>
+<li>Return <code>true</code> if valid, <code>false</code> otherwise</li>
+<li>Used by stores on <code>localStorage</code> load to prevent corrupted data from crashing the app</li>
+</ol>
+<hr>
+<h3 id="deep-clone-src-utils-deepclone-ts">Deep Clone (<code>src/utils/deepClone.ts</code>)</h3>
+<pre><code class="language-typescript">function deepClone&lt;T&gt;(obj: T): T</code></pre>
+<p>Uses <code>structuredClone()</code> when available (modern browsers) with a manual JSON-based fallback. Used by the undo system to capture state snapshots.</p>
+<hr>
+<h3 id="auto-layout-src-utils-layout-ts">Auto-Layout (<code>src/utils/layout.ts</code>)</h3>
+<pre><code class="language-typescript">interface LayoutResult {
+  nodes: Node[];
+  edges: Edge[];
+}</code></pre>
+<pre><code class="language-typescript">function autoLayout(nodes: Node[], edges: Edge[], startNodeId?: string): LayoutResult</code></pre>
+<p><strong>Algorithm</strong>: BFS radial tree layout:</p>
+<ol>
+<li>Find root node (or start node)</li>
+<li>BFS traversal to determine tree depth and child relationships</li>
+<li>Position root at center</li>
+<li>Position children in concentric rings with angular spacing</li>
+<li>Angular spacing = 2π / childCount at each level</li>
+<li>Returns new positions for all nodes</li>
+</ol>
+<hr>
+<h3 id="encryption-src-utils-encryption-ts">Encryption (<code>src/utils/encryption.ts</code>)</h3>
+<pre><code class="language-typescript">const SALT = 'MosaicKeySalt';
+
+function encrypt(text: string): string {
+  // XOR each character with salt character (cycling)
+  // Base64-encode the result
+}
+
+function decrypt(encoded: string): string {
+  // Base64-decode
+  // XOR each character with salt character (cycling)
+}</code></pre>
+<p>Used for API key storage in localStorage. <strong>Not production-grade encryption</strong> — prevents casual exposure. API keys are decrypted for use and cached in memory.</p>
+<hr>
+<h3 id="provider-config-src-api-config-ts">Provider Config (<code>src/api/config.ts</code>)</h3>
+<pre><code class="language-typescript">const PROVIDER_DEFS: Record&lt;ProviderId, ProviderDefinition&gt; = {
+  mistral:   { id: 'mistral',   name: 'Mistral AI', baseUrl: 'https://api.mistral.ai/v1',  requiresKey: true,  color: '#3B82F6' },
+  openai:    { id: 'openai',    name: 'OpenAI',     baseUrl: 'https://api.openai.com/v1',   requiresKey: true,  color: '#22C55E' },
+  anthropic: { id: 'anthropic', name: 'Anthropic',  baseUrl: 'https://api.anthropic.com/v1', requiresKey: true,  color: '#F97316' },
+  gemini:    { id: 'gemini',    name: 'Gemini',     baseUrl: 'https://generativelanguage.googleapis.com/v1beta', requiresKey: true, color: '#EAB308' },
+  ollama:    { id: 'ollama',    name: 'Ollama',     baseUrl: '',  requiresKey: false, color: '#A855F7' },
+};</code></pre>
+<h4 id="api-key-storage">API Key Storage</h4>
+<pre><code class="language-typescript">// Store keys in localStorage with per-provider keys
+const STORAGE_KEYS = {
+  mistral: 'mosaic-api-key-mistral',
+  openai: 'mosaic-api-key-openai',
+  anthropic: 'mosaic-api-key-anthropic',
+  gemini: 'mosaic-api-key-gemini',
+};
+// Ollama has no API key</code></pre>
+<p>Keys are XOR-encrypted before storage and decrypted on read. Cached in a runtime <code>Map<ProviderId, string></code> for performance.</p>
+<h4 id="api-key-storage">API Key Storage</h4>
+<pre><code class="language-typescript">// Store keys in localStorage
+const STORAGE_KEYS = {
+  mistral: 'mosaic-api-key-mistral',
+  openai: 'mosaic-api-key-openai',
+  anthropic: 'mosaic-api-key-anthropic',
+  gemini: 'mosaic-api-key-gemini',
+};
+// Ollama has no API key</code></pre>
+<p>Keys are XOR-encrypted before storage and decrypted on read. Cached in a runtime Map for performance.</p>
+<hr>
+<h3 id="provider-router-src-api-providers-ts">Provider Router (<code>src/api/providers.ts</code>)</h3>
+<pre><code class="language-typescript">function streamProvider(
+  model: string,
+  messages: Message[],
+  config: StreamConfig
+): Promise&lt;ReadableStreamDefaultReader&gt;
+
+function embedTexts(texts: string[]): Promise&lt;number[][]&gt;</code></pre>
+<h4 id="streamconfig">StreamConfig</h4>
+<pre><code class="language-typescript">interface StreamConfig {
+  temperature?: number;
+  systemPrompt?: string;
+  signal?: AbortSignal;      // For cancellation
+  onChunk?: (chunk: string) =&gt; void;  // Streaming callback
+}</code></pre>
+<h4 id="model-routing">Model Routing</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Model prefix pattern</th><th>Provider function</th></tr></thead>
+<tbody>
+<tr><td><code>mistral-*</code></td><td><code>streamMistral()</code></td></tr>
+<tr><td><code>gpt-*</code></td><td><code>streamOpenAI()</code></td></tr>
+<tr><td><code>claude-*</code></td><td><code>streamAnthropic()</code></td></tr>
+<tr><td><code>gemini-*</code></td><td><code>streamGemini()</code></td></tr>
+<tr><td>anything else</td><td><code>streamOllama()</code></td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="constants">Constants</h3>
+<pre><code class="language-typescript">// File size limits
+const MAX_DOCUMENTS = 50;
+const MAX_TOTAL_SIZE = 50 * 1024 * 1024;     // 50 MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;       // 10 MB
+
+// Chunking
+const CHUNK_SIZE = 800;
+const CHUNK_OVERLAP = 100;
+
+// Undo
+const MAX_UNDO_HISTORY = 50;
+
+// Code execution
+const EXECUTION_TIMEOUT = 30000;              // 30 seconds
+
+// Pruning
+const PRUNE_THRESHOLD = 40;
+
+// Streaming
+const CONFIDENCE_TIMEOUT = 8000;              // 8 seconds
+const TENDRILL_AUTO_DISMISS = 30000;          // 30 seconds
+
+// Analytics
+const MAX_COMPLETIONS = 100;
+const DEFAULT_TOKEN_RATE = 0.25;              // chars per token
+
+// Pricing
+const PRICING: Record&lt;string, { input: number; output: number }&gt; = {
+  'mistral-large-latest': { input: 2.00, output: 6.00 },
+  'mistral-small-latest': { input: 0.20, output: 0.60 },
+  // Other models use defaults
+};
+
+// Canvas
+const DEFAULT_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const MIN_ZOOM = 0.05;
+const MAX_ZOOM = 3;
+const SAVE_DEBOUNCE = 300;                    // ms</code></pre>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="api-reference.html#store-api-reference">Store API Reference</a> — All Zustand stores</li>
+<li><a href="api-reference.html#hook-api-reference">Hook API Reference</a> — All custom hooks</li>
+<li><a href="architecture.html#code-sandbox-architecture">Code Sandbox Architecture</a> — Deep dive into code execution</li>
+</ul>
+</section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking (category pages)
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+<script>
+// Node background
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
+</html>

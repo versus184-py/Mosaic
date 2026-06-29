@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Mosaic documentation — User Guide — Documentation">
+<meta property="og:title" content="Mosaic — User Guide — Documentation">
+<meta name="theme-color" content="#08080c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<title>Mosaic — User Guide — Documentation</title>
+</head>
+<body>
+
+<canvas id="node-bg"></canvas>
+
+<nav id="nav" role="navigation">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 32 32" fill="currentColor"><rect x="1" y="1" width="13" height="13" rx="3" opacity="1"/><rect x="18" y="1" width="13" height="13" rx="3" opacity="0.65"/><rect x="1" y="18" width="13" height="13" rx="3" opacity="0.65"/><rect x="18" y="18" width="13" height="13" rx="3" opacity="0.3"/></svg>
+    Mosaic
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#providers">Providers</a>
+    <a href="technical.html">Technical</a>
+    <a href="wiki.html">Docs</a>
+    <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  </div>
+  <a href="index.html#download" class="nav-cta">Download</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="index.html#providers">Providers</a>
+  <a href="technical.html">Technical</a>
+  <a href="wiki.html">Docs</a>
+  <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+  <a href="index.html#download" class="nav-cta">Download</a>
+</div>
+
+<section class="tech-hero">
+  <h1>User Guide</h1>
+  <p>Master the canvas, node system, provider integration, RAG pipeline, and advanced AI features.</p>
+</section>
+
+<div class="tech-layout">
+  <aside class="tech-toc" id="toc">
+    <div class="tech-toc-inner glass">
+      <div class="tech-toc-title">User Guide</div>
+      <a href="#canvas-and-node-system">Canvas and Node System</a>
+<a href="#llm-provider-integration">LLM Provider Integration</a>
+<a href="#rag-system-guide">RAG System Guide</a>
+<a href="#advanced-ai-features">Advanced AI Features</a>
+<a href="#keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</a>
+      <a href="wiki.html" style="margin-top:8px;color:var(--accent)">&larr; All docs</a>
+    </div>
+  </aside>
+  <main class="tech-content">
+    <section id="canvas-and-node-system"><h2 id="canvas-and-node-system">Canvas and Node System</h2>
+<p>Mosaic's core innovation is its <strong>infinite spatial canvas</strong> — a 2D plane where conversations grow as branching trees instead of a linear scroll. This page documents the canvas mechanics, node types, edge types, and all node operations.</p>
+<hr>
+<h3 id="architecture">Architecture</h3>
+<p>The canvas is built on <strong>React Flow</strong> (@xyflow/react v12), a powerful library for node-based editors. Mosaic wraps React Flow in a custom <code>MosaicCanvas</code> component that provides:</p>
+<ul>
+<li>Infinite pan-and-zoom (zoom range: 0.05x to 3x)</li>
+<li>Custom node rendering with glass cards</li>
+<li>Custom edge rendering with animated paths</li>
+<li>Minimap navigation</li>
+<li>Background grid</li>
+<li>Node selection, drag, and connection</li>
+</ul>
+<p>The canvas state is managed by <strong>canvasStore</strong> (Zustand), which holds nodes, edges, viewport, position history, and bookmarks.</p>
+<hr>
+<h3 id="node-types">Node Types</h3>
+<p>Each message in Mosaic is a <strong>node</strong>. There are five node types, each with distinct visual and behavioral characteristics:</p>
+<h4 id="root-node">Root Node</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>root</code></td></tr>
+<tr><td>Purpose</td><td>Starting point of every conversation canvas</td></tr>
+<tr><td>Visual</td><td>Standard glass card with welcome message</td></tr>
+<tr><td>Special</td><td>Cannot be deleted; exactly one per canvas</td></tr>
+<tr><td>Created</td><td>Automatically when a new canvas is created</td></tr>
+</tbody>
+</table></div>
+<p>The root node contains the welcome message. Click it to begin your first conversation.</p>
+<h4 id="branch-node">Branch Node</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>branch</code></td></tr>
+<tr><td>Purpose</td><td>User messages that start or continue a conversation thread</td></tr>
+<tr><td>Visual</td><td>Standard glass card with user icon</td></tr>
+<tr><td>Special</td><td>Can fork from any previous node</td></tr>
+<tr><td>Created</td><td>When user sends a message</td></tr>
+</tbody>
+</table></div>
+<p>A branch node represents a user's input. It always has a parent node (either the root, a previous branch, or a response). When you click a node and type a message, a new branch node is created as a child of that node.</p>
+<h4 id="response-node">Response Node</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>response</code></td></tr>
+<tr><td>Purpose</td><td>AI response to a user message</td></tr>
+<tr><td>Visual</td><td>Standard glass card with AI icon, optional confidence badge</td></tr>
+<tr><td>Special</td><td>Shows typing indicator while streaming; retry on error</td></tr>
+<tr><td>Created</td><td>When AI responds to a user message</td></tr>
+</tbody>
+</table></div>
+<p>Response nodes stream their content token-by-token. While streaming, you'll see an animated typing indicator (bouncing dots). If the stream fails, a retry button appears. When complete, the response is rendered as formatted Markdown (via <code>react-markdown</code> with GFM support). Code blocks within responses get interactive <strong>Run</strong> buttons.</p>
+<h4 id="suggestion-node">Suggestion Node</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>suggestion</code></td></tr>
+<tr><td>Purpose</td><td>AI-generated follow-up questions for quick branching</td></tr>
+<tr><td>Visual</td><td>Dimmed (0.45 opacity), italic text, connected with dotted edge</td></tr>
+<tr><td>Special</td><td>Auto-dismisses after 30 seconds; materializes into branch on click</td></tr>
+<tr><td>Created</td><td>Automatically after AI response (if tendrils enabled)</td></tr>
+</tbody>
+</table></div>
+<p>Suggestion nodes are <strong>auto-generated</strong> potential follow-ups. They appear after each AI response if the "suggestion tendrils" feature is enabled. They connect via a dotted <strong>TendrilEdge</strong> and auto-dismiss after 30 seconds if not clicked. Clicking a suggestion node <strong>materializes</strong> it into a real branch — the suggestion text is copied to the input and you can refine it before sending.</p>
+<h4 id="distillation-node">Distillation Node</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>distillation</code></td></tr>
+<tr><td>Purpose</td><td>AI-generated summary of multiple conversation branches</td></tr>
+<tr><td>Visual</td><td>Gold border with pulse animation, connected with gold dashed edges</td></tr>
+<tr><td>Special</td><td>Created by the distillation feature</td></tr>
+<tr><td>Created</td><td>When user triggers branch distillation</td></tr>
+</tbody>
+</table></div>
+<p>Distillation nodes synthesize multiple leaf branches into a single coherent summary. They connect to all source leaves via distinctive <strong>DistillEdge</strong> connections.</p>
+<hr>
+<h3 id="edge-types">Edge Types</h3>
+<p>Edges connect nodes and indicate the relationship between them.</p>
+<h4 id="liquidedge-default">LiquidEdge (Default)</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>liquidEdge</code></td></tr>
+<tr><td>Visual</td><td>Solid Bezier curve with animated path drawing on mount</td></tr>
+<tr><td>Opacity</td><td>Full (reduced to 0.3 for pruned branches)</td></tr>
+<tr><td>Animation</td><td><code>pathLength</code> animation on mount</td></tr>
+</tbody>
+</table></div>
+<p>This is the standard conversation edge. It connects any parent-child pair of nodes.</p>
+<h4 id="tendriledge">TendrilEdge</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>tendrilEdge</code></td></tr>
+<tr><td>Visual</td><td>Dotted Bezier curve (stroke-dasharray: 3 8)</td></tr>
+<tr><td>Opacity</td><td>0.4</td></tr>
+<tr><td>Use</td><td>Connecting suggestion nodes to their parent responses</td></tr>
+</tbody>
+</table></div>
+<p>TendrilEdges connect suggestion nodes to their parent responses. The dotted style visually distinguishes suggestions from actual conversation branches.</p>
+<h4 id="distilledge">DistillEdge</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td><code>distillEdge</code></td></tr>
+<tr><td>Visual</td><td>Gold (<code>hsla(45, 90%, 65%, 0.6)</code>) dashed Bezier curve</td></tr>
+<tr><td>Use</td><td>Connecting distillation nodes to source leaves</td></tr>
+</tbody>
+</table></div>
+<p>DistillEdges visually indicate that a node is a distillation/synthesis of the connected leaf nodes.</p>
+<hr>
+<h3 id="node-operations">Node Operations</h3>
+<h4 id="creating-nodes">Creating Nodes</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Click a node → type message → Enter</td><td>New branch node + response node created as children</td></tr>
+<tr><td>Click a suggestion node</td><td>Suggestion text copied to input, ready to send</td></tr>
+<tr><td><code>Shift+Enter</code> in input</td><td>Parallel debate — multiple response nodes created</td></tr>
+</tbody>
+</table></div>
+<h4 id="selecting-and-moving">Selecting and Moving</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Click a node</td><td>Select it (blue highlight border)</td></tr>
+<tr><td>Drag a node's title area</td><td>Move the node and all descendants (position persists)</td></tr>
+<tr><td>Click empty space</td><td>Deselect all nodes</td></tr>
+</tbody>
+</table></div>
+<h4 id="context-menu">Context Menu</h4>
+<p>Right-click any node to open the context menu:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Item</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>Bookmark</strong></td><td>Toggle bookmark on this node</td></tr>
+<tr><td><strong>Collapse / Expand</strong></td><td>Collapse children behind a count badge</td></tr>
+<tr><td><strong>Auto-arrange</strong></td><td>Run auto-layout from this node</td></tr>
+<tr><td><strong>Delete</strong></td><td>Delete this node (with cascade confirmation if it has children)</td></tr>
+<tr><td><strong>Undo</strong></td><td>Undo last position change</td></tr>
+</tbody>
+</table></div>
+<h4 id="deleting-nodes">Deleting Nodes</h4>
+<p>Press <code>Delete</code> or <code>Backspace</code> on a selected node, or use the context menu.</p>
+<p><strong>Cascade deletion</strong>: If a node has children, a confirmation dialog appears:</p>
+<pre><code>This will delete this node and all descendant nodes.
+Are you sure?
+[Cancel] [Delete]</code></pre>
+<p><strong>Protected nodes</strong>: Root nodes cannot be deleted.</p>
+<h4 id="collapsing-nodes">Collapsing Nodes</h4>
+<p>Collapsing a node hides all its descendant nodes behind a badge showing the count:</p>
+<pre><code>[Parent node] ─── [Child 1]
+              ─── [Child 2]
+              ─── [Child 3]
+
+After collapse:
+
+[Parent node (+3)]</code></pre>
+<p>To collapse:</p>
+<ol>
+<li>Right-click a node → <strong>Collapse</strong></li>
+<li>Or use the collapse button on the node if visible</li>
+</ol>
+<p>To expand:</p>
+<ol>
+<li>Click the collapse badge on the parent</li>
+<li>Or right-click → <strong>Expand</strong></li>
+</ol>
+<p>Collapsed state is persistent (saved in the canvas data).</p>
+<h4 id="bookmarking-nodes">Bookmarking Nodes</h4>
+<p>Bookmarks help you tag important nodes for quick reference:</p>
+<ol>
+<li>Right-click a node → <strong>Bookmark</strong> (or click the star icon)</li>
+<li>Bookmarked nodes show a filled star icon (★)</li>
+<li>Click the <strong>Bookmarks</strong> button (★) in the TopBar to filter: only bookmarked nodes visible</li>
+<li>Click again to show all nodes</li>
+</ol>
+<p>Bookmarks are saved per canvas.</p>
+<hr>
+<h3 id="auto-layout">Auto-Layout</h3>
+<p>Mosaic includes an <strong>auto-layout</strong> algorithm that arranges nodes in a radial tree pattern:</p>
+<ol>
+<li>The root node is placed at the center</li>
+<li>Children are arranged in concentric rings around the root</li>
+<li>BFS (Breadth-First Search) traversal determines placement order</li>
+<li>Angular spacing accounts for the number of children at each level</li>
+</ol>
+<p><strong>Trigger auto-layout</strong>:</p>
+<ul>
+<li>Right-click any node → <strong>Auto-arrange</strong> (from that node downward)</li>
+<li>Settings drawer → <strong>Auto-arrange</strong> (entire canvas)</li>
+</ul>
+<p>Auto-layout also runs automatically when new nodes are created (new nodes are placed at an optimal angle based on existing children count).</p>
+<h4 id="layout-algorithm-details">Layout Algorithm Details</h4>
+<p>The layout uses these parameters:</p>
+<ul>
+<li><strong>Level spacing</strong>: 250px between parent and child levels</li>
+<li><strong>Child arc</strong>: Children are distributed within a 45-degree arc centered on the parent's outgoing direction</li>
+<li><strong>Sibling spacing</strong>: Minimum 200px between sibling nodes</li>
+<li><strong>Radial distribution</strong>: Nodes at the same depth form concentric rings</li>
+</ul>
+<p>For example, a tree with root at center and 3 levels of branching would be arranged as:</p>
+<ul>
+<li>Level 0 (root): center (0, 0)</li>
+<li>Level 1: ring at radius 250px with angular spacing of 2π / (number of children)</li>
+<li>Level 2: ring at radius 500px, children of each L1 node arranged in their own arc</li>
+<li>Level 3: ring at radius 750px, same recursive pattern</li>
+</ul>
+<p>This creates a natural, easy-to-read conversation tree where related branches cluster together.</p>
+<h4 id="node-position-calculation-for-new-nodes">Node Position Calculation for New Nodes</h4>
+<p>When a new node is created as a child of an existing node, its position is calculated:</p>
+<pre><code class="language-typescript">function calculateChildPosition(parent: Node, existingChildren: Node[]): { x: number; y: number } {
+  const LEVEL_SPACING = 250;
+  const CHILD_SPACING = 200;
+  
+  // Distribute children in an arc
+  const arcAngle = Math.PI / 3;  // 60 degrees
+  const childCount = existingChildren.length;
+  const newIndex = childCount;  // This child is the (count)th
+  
+  const angleRange = Math.min(arcAngle, (childCount) * 0.3);
+  const startAngle = -angleRange / 2;
+  const stepAngle = childCount &gt; 0 ? angleRange / childCount : 0;
+  const angle = startAngle + newIndex * stepAngle;
+  
+  return {
+    x: parent.position.x + LEVEL_SPACING * Math.cos(angle),
+    y: parent.position.y + LEVEL_SPACING * Math.sin(angle),
+  };
+}</code></pre>
+<p>The arc widens as more children are added, ensuring nodes don't overlap regardless of how many times a parent is branched from.</p>
+<hr>
+<h3 id="undo-history">Undo History</h3>
+<p>The canvas maintains a <strong>position history</strong> (ring buffer, max 50 entries) for safe experimentation:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>Undoable?</th></tr></thead>
+<tbody>
+<tr><td>Node position drag</td><td>Yes</td></tr>
+<tr><td>Node add/remove</td><td>Yes</td></tr>
+<tr><td>Clear canvas</td><td>Yes</td></tr>
+<tr><td>Node edit (text)</td><td>No</td></tr>
+</tbody>
+</table></div>
+<p>Press <code>Ctrl+Z</code> to undo the last position change.</p>
+<p>The undo system uses <code>deepClone</code> (with <code>structuredClone</code> and a manual fallback) to capture complete state snapshots before each change.</p>
+<hr>
+<h3 id="multi-canvas-tabs">Multi-Canvas Tabs</h3>
+<p>Mosaic supports <strong>multiple canvases</strong> in a tabbed interface:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>How</th></tr></thead>
+<tbody>
+<tr><td><strong>Create new canvas</strong></td><td>Click the <code>+</code> tab or Ctrl+N</td></tr>
+<tr><td><strong>Switch canvas</strong></td><td>Click a tab</td></tr>
+<tr><td><strong>Rename canvas</strong></td><td>Double-click a tab label</td></tr>
+<tr><td><strong>Delete canvas</strong></td><td>Right-click a tab → Delete (auto-switches to another tab)</td></tr>
+<tr><td><strong>Duplicate canvas</strong></td><td>Settings drawer → Duplicate</td></tr>
+</tbody>
+</table></div>
+<p>Each canvas has its own:</p>
+<ul>
+<li>Nodes and edges</li>
+<li>Bookmarked nodes</li>
+<li>Position history</li>
+<li>Analytics data</li>
+</ul>
+<p>Canvas data is saved to <code>localStorage</code> under keys <code>mosaic-canvas-data-{id}</code>. The canvas index is stored under <code>mosaic-canvases</code>.</p>
+<hr>
+<h3 id="canvas-viewport">Canvas Viewport</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td>Click+drag on empty space</td><td>Pan the canvas</td></tr>
+<tr><td>Scroll wheel</td><td>Zoom in/out</td></tr>
+<tr><td><code>+</code> / <code>=</code></td><td>Zoom in</td></tr>
+<tr><td><code>-</code></td><td>Zoom out</td></tr>
+<tr><td><code>F</code></td><td>Fit view to show all nodes</td></tr>
+<tr><td>Zoom slider</td><td>Fine-grained zoom (0.1x to 2x)</td></tr>
+</tbody>
+</table></div>
+<p>The viewport is saved across sessions.</p>
+<hr>
+<h3 id="search">Search</h3>
+<p>Press <code>Ctrl+F</code> or click the search icon (🔍) in the TopBar to open the <strong>Search Overlay</strong>:</p>
+<ul>
+<li>Searches <strong>node labels</strong> and <strong>message content</strong></li>
+<li>Shows up to 20 results with node type badges</li>
+<li>Navigate results with ArrowUp/ArrowDown</li>
+<li>Press Enter to select a result and focus that node</li>
+<li>Press Escape to close</li>
+<li>Matched nodes get an accent glow highlight</li>
+</ul>
+<hr>
+<h3 id="node-data-structure">Node Data Structure</h3>
+<p>Internally, each node carries the following data (defined in <code>src/types/index.ts</code>):</p>
+<pre><code class="language-typescript">interface NodeData {
+  label: string;          // The message text (Markdown)
+  nodeType: 'root' | 'branch' | 'response' | 'suggestion' | 'distillation';
+  collapsed?: boolean;    // Is this node collapsed?
+  bookmarked?: boolean;   // Is this node bookmarked?
+  confidence?: number;    // Confidence score (0-100) for responses
+  isStreaming?: boolean;  // Is the AI currently streaming a response?
+  error?: string;         // Error message if streaming failed
+}</code></pre>
+<p>Edge data:</p>
+<pre><code class="language-typescript">interface EdgeData {
+  edgeType: 'liquidEdge' | 'tendrilEdge' | 'distillEdge';
+}</code></pre>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#llm-provider-integration">LLM Provider Integration</a> — Configure AI providers</li>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — Confidence scoring, tendrils, distillation, pruning</li>
+<li><a href="user-guide.html#keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</a> — All shortcuts and UI elements</li>
+</ul>
+</section>
+<section id="llm-provider-integration"><h2 id="llm-provider-integration">LLM Provider Integration</h2>
+<p>Mosaic connects to <strong>five LLM providers</strong>: Mistral AI (primary), OpenAI, Anthropic, Gemini, and Ollama (local). This page documents the provider architecture, configuration, model options, and how providers interact with features like streaming, embeddings, and parallel debate.</p>
+<hr>
+<h3 id="architecture-overview">Architecture Overview</h3>
+<p>The provider system is designed around a <strong>unified interface</strong> with provider-specific implementations:</p>
+<pre><code>User Input
+    │
+    ▼
+useStreamMessage (hook)
+    │
+    ▼
+streamProvider(model, messages, config)
+    │
+    ├── Mistral: streamMistral()
+    ├── OpenAI: streamOpenAI()
+    ├── Anthropic: streamAnthropic()
+    ├── Gemini: streamGemini()
+    └── Ollama: streamOllama()
+    │
+    ▼
+SSE Stream → Chunk-by-chunk parsing → canvasStore update</code></pre>
+<h4 id="provider-router-src-api-providers-ts">Provider Router (<code>src/api/providers.ts</code>)</h4>
+<p>The <code>streamProvider()</code> function routes requests based on the model name prefix:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Model Prefix</th><th>Provider</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>mistral-*</code></td><td>Mistral AI</td><td><code>streamMistral()</code></td></tr>
+<tr><td><code>gpt-*</code></td><td>OpenAI</td><td><code>streamOpenAI()</code></td></tr>
+<tr><td><code>claude-*</code></td><td>Anthropic</td><td><code>streamAnthropic()</code></td></tr>
+<tr><td><code>gemini-*</code></td><td>Gemini</td><td><code>streamGemini()</code></td></tr>
+<tr><td>Any other</td><td>Ollama</td><td><code>streamOllama()</code></td></tr>
+</tbody>
+</table></div>
+<p>The <code>embedTexts()</code> function similarly routes embedding requests through available providers in priority order: Ollama → Mistral → OpenAI → Gemini.</p>
+<hr>
+<h3 id="provider-configuration">Provider Configuration</h3>
+<h4 id="request-construction">Request Construction</h4>
+<p>Each provider function constructs the appropriate HTTP request:</p>
+<pre><code class="language-typescript">// Common interface
+interface ProviderRequest {
+  url: string;
+  method: 'POST';
+  headers: Record&lt;string, string&gt;;
+  body: string;  // JSON-serialized
+  signal?: AbortSignal;
+}</code></pre>
+<p>The differences between providers are primarily in:</p>
+<ul>
+<li><strong>Authentication</strong>: Bearer token vs. x-api-key header vs. URL parameter</li>
+<li><strong>Message format</strong>: OpenAI-compatible format vs. Anthropic's content blocks vs. Gemini's contents/parts</li>
+<li><strong>System prompt placement</strong>: Part of messages array vs. separate system parameter vs. systemInstruction field</li>
+<li><strong>Streaming response format</strong>: Standard SSE vs. event-based SSE vs. JSON lines</li>
+</ul>
+<h4 id="api-key-storage">API Key Storage</h4>
+<p>API keys are stored in <code>localStorage</code> using <strong>XOR encryption</strong> with a salt key (<code>MosaicKeySalt</code>):</p>
+<pre><code class="language-typescript">// Encryption (simplified)
+function encryptKey(key: string): string {
+  const salt = 'MosaicKeySalt';
+  let result = '';
+  for (let i = 0; i &lt; key.length; i++) {
+    result += String.fromCharCode(
+      key.charCodeAt(i) ^ salt.charCodeAt(i % salt.length)
+    );
+  }
+  return btoa(result);
+}</code></pre>
+<p>Keys are cached in memory after decryption to avoid repeated decoding. This is not production-grade encryption — it prevents <strong>casual exposure</strong> of keys in localStorage but should not be considered secure against determined access.</p>
+<h4 id="provider-configuration-table">Provider Configuration Table</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Provider</th><th>Auth Method</th><th>Header</th><th>Env/Setting</th></tr></thead>
+<tbody>
+<tr><td>Mistral</td><td>Bearer token</td><td><code>Authorization: Bearer {key}</code></td><td>Settings → API Key</td></tr>
+<tr><td>OpenAI</td><td>Bearer token</td><td><code>Authorization: Bearer {key}</code></td><td>Settings → OpenAI</td></tr>
+<tr><td>Anthropic</td><td>x-api-key</td><td><code>x-api-key: {key}</code></td><td>Settings → Anthropic</td></tr>
+<tr><td>Gemini</td><td>URL query</td><td><code>?key={key}</code> (in URL)</td><td>Settings → Gemini</td></tr>
+<tr><td>Ollama</td><td>None</td><td>—</td><td>Settings → URL</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="provider-details">Provider Details</h3>
+<h4 id="mistral-ai-primary-provider">Mistral AI (Primary Provider)</h4>
+<p><strong>API Base</strong>: <code>https://api.mistral.ai/v1</code></p>
+<p><strong>Supported Models</strong>:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Model</th><th>ID</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td>Mistral Large</td><td><code>mistral-large-latest</code></td><td>Complex reasoning, code generation, analysis</td></tr>
+<tr><td>Mistral Small</td><td><code>mistral-small-latest</code></td><td>Quick responses, simpler tasks, cost-effective</td></tr>
+</tbody>
+</table></div>
+<p><strong>Streaming</strong>: SSE-based streaming with <code>{ "choices": [{ "delta": { "content": "..." } }] }</code> chunks.</p>
+<p><strong>Embeddings</strong>: Available via <code>mistral-embed</code> model (used for RAG embedding search).</p>
+<p><strong>Pricing</strong> (built into analytics):</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Model</th><th>Input (per 1M tokens)</th><th>Output (per 1M tokens)</th></tr></thead>
+<tbody>
+<tr><td>Mistral Large</td><td>$2.00</td><td>$6.00</td></tr>
+<tr><td>Mistral Small</td><td>$0.20</td><td>$0.60</td></tr>
+</tbody>
+</table></div>
+<h4 id="openai">OpenAI</h4>
+<p><strong>API Base</strong>: <code>https://api.openai.com/v1</code></p>
+<p><strong>Supported Models</strong>:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Model</th><th>ID</th></tr></thead>
+<tbody>
+<tr><td>GPT-4o</td><td><code>gpt-4o</code></td></tr>
+<tr><td>GPT-4o mini</td><td><code>gpt-4o-mini</code></td></tr>
+</tbody>
+</table></div>
+<p><strong>Streaming</strong>: SSE with <code>data: { choices: [{ delta: { content: "..." } }] }</code> — terminated by <code>data: [DONE]</code>.</p>
+<p><strong>Embeddings</strong>: Available via <code>text-embedding-3-small</code> model.</p>
+<h4 id="anthropic">Anthropic</h4>
+<p><strong>API Base</strong>: <code>https://api.anthropic.com/v1</code></p>
+<p><strong>Supported Models</strong>:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Model</th><th>ID</th></tr></thead>
+<tbody>
+<tr><td>Claude Sonnet 4</td><td><code>claude-sonnet-4-20250514</code></td></tr>
+<tr><td>Claude Haiku 3.5</td><td><code>claude-haiku-3-5-20241022</code></td></tr>
+</tbody>
+</table></div>
+<p><strong>Streaming</strong>: SSE with <code>content<em>block</em>delta</code> events. Anthropic's streaming format differs from others — it sends <code>message<em>start</code>, <code>content</em>block<em>start</code>, <code>content</em>block<em>delta</code>, <code>content</em>block<em>stop</code>, and <code>message</em>stop</code> events.</p>
+<p><strong>Embeddings</strong>: Not supported (Anthropic does not offer an embeddings API).</p>
+<h4 id="gemini">Gemini</h4>
+<p><strong>API Base</strong>: <code>https://generativelanguage.googleapis.com/v1beta</code></p>
+<p><strong>Supported Models</strong>:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Model</th><th>ID</th></tr></thead>
+<tbody>
+<tr><td>Gemini 2.5 Pro</td><td><code>gemini/gemini-2.5-pro</code></td></tr>
+<tr><td>Gemini 2.5 Flash</td><td><code>gemini/gemini-2.5-flash</code></td></tr>
+</tbody>
+</table></div>
+<p><strong>Streaming</strong>: SSE with <code>candidates[0].content.parts[0].text</code> chunk extraction.</p>
+<p><strong>Embeddings</strong>: Available via <code>text-embedding-004</code> model.</p>
+<h4 id="ollama-local">Ollama (Local)</h4>
+<p><strong>API Base</strong>: Configurable (default <code>http://localhost:11434</code>)</p>
+<p><strong>Authentication</strong>: None required.</p>
+<p><strong>Model Discovery</strong>: Mosaic auto-detects available models on startup via the <code>useOllamaDetect</code> hook, which polls <code>http://localhost:11434/api/tags</code>. Connection status and model list are updated automatically in the Settings drawer.</p>
+<p><strong>Streaming</strong>: JSON-lines streaming from Ollama's <code>/api/chat</code> endpoint.</p>
+<p><strong>Embeddings</strong>: Available via <code>nomic-embed-text</code> model (must be pulled in Ollama first).</p>
+<p><strong>Setup</strong>:</p>
+<ol>
+<li>Install <a href="https://ollama.com/">Ollama</a></li>
+<li>Run <code>ollama serve</code></li>
+<li>Pull models: <code>ollama pull llama3.2</code> (or any model)</li>
+<li>In Mosaic Settings, set URL to <code>http://localhost:11434</code></li>
+<li>Mosaic auto-detects on startup — no manual detection needed</li>
+</ol>
+<blockquote><p><strong>Note</strong>: Ollama must be running on the same machine. Mosaic checks the connection on startup and grays out Ollama options if unavailable.</p></blockquote>
+<hr>
+<h3 id="streaming-implementation">Streaming Implementation</h3>
+<h4 id="protocol-differences">Protocol Differences</h4>
+<p>Each provider uses a slightly different SSE format. Mosaic's provider modules parse each format and normalize the output.</p>
+<p><strong>Mistral / OpenAI / Gemini</strong> (standard SSE):</p>
+<pre><code>data: {"choices":[{"delta":{"content":"Hello"}}]}
+data: {"choices":[{"delta":{"content":" world"}}]}
+data: [DONE]</code></pre>
+<p><strong>Anthropic</strong> (event-based):</p>
+<pre><code>event: message_start
+data: {"type":"message_start",...}
+
+event: content_block_delta
+data: {"type":"content_block_delta","delta":{"text":"Hello"}}
+
+event: message_stop
+data: {"type":"message_stop",...}</code></pre>
+<p><strong>Ollama</strong> (JSON lines):</p>
+<pre><code class="language-json">{"message":{"content":"Hello"}}
+{"message":{"content":" world"}}
+{"done":true}</code></pre>
+<h4 id="error-handling">Error Handling</h4>
+<p>All providers implement robust error handling:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Scenario</th><th>Behavior</th></tr></thead>
+<tbody>
+<tr><td>Network error</td><td>Retry with exponential backoff</td></tr>
+<tr><td>Invalid API key</td><td>Show error with provider-specific message</td></tr>
+<tr><td>Rate limited</td><td>Show rate limit error</td></tr>
+<tr><td>Stream timeout</td><td>Abort and show retry button on response node</td></tr>
+<tr><td>Abort (user stop)</td><td>Cleanly cancel stream via AbortController</td></tr>
+</tbody>
+</table></div>
+<h4 id="abortcontroller">AbortController</h4>
+<p>Each streaming request is associated with an <strong>AbortController</strong>. This enables:</p>
+<ul>
+<li>Stopping a response mid-stream (user clicks stop)</li>
+<li>Cancelling stale requests when a new one is sent</li>
+<li>Cleanup on component unmount</li>
+</ul>
+<hr>
+<h3 id="model-selection">Model Selection</h3>
+<p>Users select models from a dropdown in the TopBar. Models are grouped by provider with colored indicators:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Provider</th><th>Color</th></tr></thead>
+<tbody>
+<tr><td>Mistral</td><td>Blue</td></tr>
+<tr><td>OpenAI</td><td>Green</td></tr>
+<tr><td>Anthropic</td><td>Orange</td></tr>
+<tr><td>Gemini</td><td>Yellow</td></tr>
+<tr><td>Ollama</td><td>Purple</td></tr>
+</tbody>
+</table></div>
+<h4 id="available-models">Available Models</h4>
+<p>The <code>getAvailableModels()</code> function (in <code>uiStore</code>) returns:</p>
+<ul>
+<li>All built-in models from all configured providers</li>
+<li>Auto-detected Ollama models (when Ollama is connected)</li>
+<li>Models are grouped and sorted for easy selection</li>
+</ul>
+<h4 id="active-provider-detection">Active Provider Detection</h4>
+<p>The UI automatically detects which provider is selected and:</p>
+<ul>
+<li>Shows/hides provider-specific settings</li>
+<li>Validates that the required API key is configured</li>
+<li>Shows a warning if no key is available for the selected model</li>
+</ul>
+<h4 id="provider-factory-pattern">Provider Factory Pattern</h4>
+<p>Each provider module exports a consistent interface — an <code>AsyncGenerator</code> for streaming and a <code>Promise</code> for embeddings:</p>
+<pre><code class="language-typescript">// src/api/mistral.ts
+export async function* streamMistral(
+  messages: { role: string; content: string }[],
+  temperature: number,
+  signal: AbortSignal,
+  model: string
+): AsyncGenerator&lt;string&gt; { ... }
+
+export async function embedMistral(
+  texts: string[]
+): Promise&lt;number[][]&gt; { ... }</code></pre>
+<p>The central <code>streamProvider()</code> router in <code>providers.ts</code> uses <code>yield*</code> to delegate to each provider's generator:</p>
+<pre><code class="language-typescript">export async function* streamProvider(
+  messages: { role: string; content: string }[],
+  temperature: number,
+  signal: AbortSignal,
+  model: string
+): AsyncGenerator&lt;string&gt; {
+  const provider = getProviderForModel(model);
+  switch (provider) {
+    case "mistral": yield* streamMistral(...); break;
+    case "openai":  yield* streamOpenAI(...);  break;
+    // ...
+  }
+}</code></pre>
+<p>This pattern makes it easy to add new providers — implement <code>stream<em></code> (AsyncGenerator) and <code>embed</em></code>, register the model in <code>config.ts</code>, and add the routing case in <code>providers.ts</code>.</p>
+<hr>
+<h3 id="embeddings-for-rag">Embeddings for RAG</h3>
+<p>Mosaic's RAG system uses embeddings for semantic search. The <code>embedTexts()</code> function tries providers in this order:</p>
+<ol>
+<li><strong>Ollama</strong> (fastest, local) — <code>nomic-embed-text</code></li>
+<li><strong>Mistral</strong> — <code>mistral-embed</code></li>
+<li><strong>OpenAI</strong> — <code>text-embedding-3-small</code></li>
+<li><strong>Gemini</strong> — <code>text-embedding-004</code></li>
+</ol>
+<p>Each provider is tried in sequence; if one fails, the next is attempted. <code>embedTexts()</code> returns <code>null</code> only if <strong>all</strong> providers fail — it never throws. If <code>null</code> is returned, the RAG system falls back to <strong>TF-IDF cosine similarity</strong> (a statistical method that requires no external API).</p>
+<hr>
+<h3 id="parallel-debate">Parallel Debate</h3>
+<p>The <strong>parallel debate</strong> feature (triggered by <code>Shift+Enter</code>) sends the same input to <strong>multiple models simultaneously</strong>:</p>
+<ol>
+<li>The user selects which models to include (in Settings → Debate Models)</li>
+<li>When <code>Shift+Enter</code> is pressed, <code>useParallelDebate</code> fans out requests via <code>Promise.allSettled</code></li>
+<li>Each response streams independently into its own response node</li>
+<li>Response nodes are arranged in a fan pattern for side-by-side comparison</li>
+</ol>
+<p>This allows you to compare how different models handle the same prompt in real time.</p>
+<hr>
+<h3 id="security">Security</h3>
+<ul>
+<li><strong>API keys never leave your machine</strong> — they are sent directly to provider APIs from the webview</li>
+<li><strong>CSP restricts connect-src</strong> to known API endpoints only</li>
+<li><strong>No third-party telemetry</strong> — Mosaic does not collect or transmit usage data</li>
+</ul>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#rag-system-guide">RAG System Guide</a> — How documents are indexed and searched</li>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — Confidence scoring, distillation, pruning, debate</li>
+<li><a href="architecture.html#provider-protocol-and-streaming">Provider Protocol and Streaming</a> — Deep dive into streaming implementation</li>
+</ul>
+</section>
+<section id="rag-system-guide"><h2 id="rag-system-guide">RAG System Guide</h2>
+<p>Mosaic's <strong>Retrieval-Augmented Generation (RAG)</strong> system lets you upload documents and have the AI draw relevant context from them when answering questions. This turns Mosaic into a powerful tool for working with your own data — research papers, codebases, documentation, meeting notes, and more.</p>
+<hr>
+<h3 id="how-rag-works">How RAG Works</h3>
+<p>The RAG pipeline has three phases:</p>
+<h4 id="phase-1-document-ingestion">Phase 1: Document Ingestion</h4>
+<pre><code>Upload File → Read Text → Chunk (800 chars, 100 overlap) → Store in ragStore</code></pre>
+<p>When you upload a document:</p>
+<ol>
+<li>The file is read as text</li>
+<li><code>useDocumentParser</code> splits the text into <strong>chunks</strong> of 800 characters with 100-character overlap (this means each chunk shares 100 characters with the previous one, ensuring context isn't lost at boundaries)</li>
+<li>Chunks are stored in the <code>ragStore</code> with metadata (filename, size, chunk index)</li>
+<li>The document appears in the DocumentPanel</li>
+</ol>
+<h4 id="phase-2-query-time-search">Phase 2: Query-Time Search</h4>
+<pre><code>User sends message → Check if RAG enabled → Search top 3 chunks → Append to system prompt</code></pre>
+<p>When you send a message with RAG enabled:</p>
+<ol>
+<li>The user's input is used as a search query</li>
+<li><code>ragStore.searchChunks(query, 3)</code> finds the 3 most relevant chunks</li>
+<li>Relevance is determined by <strong>cosine similarity</strong>:</li>
+</ol>
+<p>   - <strong>Primary</strong>: Embedding cosine similarity (using any connected provider's embedding API)</p>
+<p>   - <strong>Fallback</strong>: TF-IDF cosine similarity (statistical, no external API needed)</p>
+<ol>
+<li>The top 3 chunks are formatted as context and appended to the system prompt</li>
+</ol>
+<h4 id="phase-3-augmented-generation">Phase 3: Augmented Generation</h4>
+<pre><code>System Prompt + RAG Context + User Message → AI → Context-Aware Response</code></pre>
+<p>The AI receives the full context and generates a response informed by your documents.</p>
+<hr>
+<h3 id="supported-file-formats">Supported File Formats</h3>
+<p>Mosaic supports 25+ file formats through the DocumentPanel upload dialog:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Category</th><th>Extensions</th></tr></thead>
+<tbody>
+<tr><td>Plain text</td><td><code>.txt</code></td></tr>
+<tr><td>Markdown</td><td><code>.md</code></td></tr>
+<tr><td>Data</td><td><code>.json</code>, <code>.csv</code>, <code>.xml</code>, <code>.yaml</code>, <code>.yml</code>, <code>.toml</code></td></tr>
+<tr><td>Python</td><td><code>.py</code></td></tr>
+<tr><td>JavaScript/TypeScript</td><td><code>.js</code>, <code>.jsx</code>, <code>.ts</code>, <code>.tsx</code></td></tr>
+<tr><td>Rust</td><td><code>.rs</code></td></tr>
+<tr><td>Go</td><td><code>.go</code></td></tr>
+<tr><td>Java</td><td><code>.java</code></td></tr>
+<tr><td>C/C++</td><td><code>.c</code>, <code>.cpp</code>, <code>.h</code>, <code>.hpp</code></td></tr>
+<tr><td>Web</td><td><code>.css</code>, <code>.html</code></td></tr>
+<tr><td>Other</td><td><code>.pdf</code> (text extraction)</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="limits-and-constraints">Limits and Constraints</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Limit</th><th>Value</th><th>Enforcement</th></tr></thead>
+<tbody>
+<tr><td>Max documents per canvas</td><td>50</td><td><code>ragStore</code> validation</td></tr>
+<tr><td>Max total size</td><td>50 MB</td><td><code>ragStore</code> validation</td></tr>
+<tr><td>Max per file</td><td>10 MB</td><td>File picker + validation</td></tr>
+<tr><td>Chunk size</td><td>800 characters</td><td><code>useDocumentParser</code></td></tr>
+<tr><td>Chunk overlap</td><td>100 characters</td><td><code>useDocumentParser</code></td></tr>
+<tr><td>Chunks returned per query</td><td>3</td><td><code>searchChunks()</code> parameter</td></tr>
+<tr><td>RAG context location</td><td>Appended to system prompt</td><td><code>useStreamMessage</code></td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="using-the-documentpanel">Using the DocumentPanel</h3>
+<h4 id="opening-the-panel">Opening the Panel</h4>
+<p>Click the <strong>Documents</strong> button (📄) in the TopBar to open the DocumentPanel — a slide-in panel on the right side of the window.</p>
+<h4 id="adding-documents">Adding Documents</h4>
+<ol>
+<li>Click <strong>Upload</strong> in the DocumentPanel</li>
+<li>Select one or more files from your file system</li>
+<li>Files are parsed and chunked automatically</li>
+<li>Each document appears in the list with:</li>
+</ol>
+<p>   - Filename</p>
+<p>   - Number of chunks</p>
+<p>   - File size</p>
+<h4 id="enabling-rag">Enabling RAG</h4>
+<p>Toggle the <strong>RAG Enable</strong> switch in the DocumentPanel:</p>
+<ul>
+<li><strong>On</strong>: Context from relevant documents is automatically included with every AI query</li>
+<li><strong>Off</strong>: Documents are stored but not searched (no context injection)</li>
+</ul>
+<h4 id="managing-documents">Managing Documents</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>View document details</td><td>Click the expand arrow on a document entry</td></tr>
+<tr><td>Remove a document</td><td>Click the delete icon next to the document</td></tr>
+<tr><td>Clear all documents</td><td>Click <strong>Clear All</strong> in the DocumentPanel</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="search-algorithm-details">Search Algorithm Details</h3>
+<h4 id="embedding-search-primary">Embedding Search (Primary)</h4>
+<p>When available, Mosaic uses <strong>embeddings</strong> for semantic search:</p>
+<ol>
+<li>The query is sent to the provider's embedding API</li>
+<li>Each document chunk is also represented as an embedding vector</li>
+<li>Cosine similarity is computed between the query embedding and each chunk embedding</li>
+<li>The top 3 chunks with the highest similarity scores are returned</li>
+</ol>
+<p><strong>Embedding provider priority</strong>: Ollama → Mistral → OpenAI → Gemini</p>
+<h4 id="understanding-embeddings">Understanding Embeddings</h4>
+<p>Embeddings are <strong>numerical vector representations</strong> of text that capture semantic meaning:</p>
+<pre><code class="language-typescript">// Example embedding vectors (1536 dimensions for text-embedding-3-small)
+"Python is a programming language" → [0.023, -0.045, 0.112, ..., 0.008]  // 1536 numbers
+"JavaScript is for web development" → [0.018, -0.039, 0.098, ..., 0.012]  // Similar to above
+"Banana bread recipe" → [-0.042, 0.067, -0.088, ..., 0.031]  // Different from above</code></pre>
+<p>The key insight: similar meanings produce similar vectors. Cosine similarity measures the angle between vectors:</p>
+<pre><code>cosine_similarity(A, B) = (A · B) / (||A|| × ||B||)</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>A · B</code> is the dot product of the two vectors</li>
+<li><code>||A||</code> and <code>||B||</code> are the magnitudes (lengths) of each vector</li>
+<li>Result ranges from -1 (opposite meaning) to 1 (identical meaning)</li>
+<li>Values above 0.8 indicate strong semantic similarity</li>
+</ul>
+<p>This is why embeddings can find relevant chunks even when they use different words than the query — they match on meaning, not just keywords.</p>
+<h4 id="tf-idf-cosine-similarity-fallback">TF-IDF Cosine Similarity (Fallback)</h4>
+<p>If no embedding provider is available, Mosaic falls back to <strong>TF-IDF</strong> (Term Frequency-Inverse Document Frequency):</p>
+<p><strong>TF-IDF</strong> is a statistical measure that evaluates how important a word is to a document within a collection:</p>
+<pre><code>TF(t, d) = (number of times term t appears in document d) / (total terms in document d)
+IDF(t) = log(total documents / number of documents containing term t)
+TF-IDF(t, d) = TF(t, d) × IDF(t)</code></pre>
+<p><strong>How TF-IDF works step by step:</strong></p>
+<ol>
+<li><strong>Tokenization</strong>: Split all text into individual words (tokens)</li>
+<li><strong>Vocabulary building</strong>: Collect all unique tokens across all chunks</li>
+<li><strong>TF calculation</strong>: For each token in each chunk, compute Term Frequency:</li>
+</ol>
+<p>   - If "Python" appears 3 times in a 100-word chunk: TF = 3/100 = 0.03</p>
+<ol>
+<li><strong>IDF calculation</strong>: For each token, compute Inverse Document Frequency:</li>
+</ol>
+<p>   - If "Python" appears in 2 out of 10 chunks: IDF = log(10/2) = 0.699</p>
+<ol>
+<li><strong>TF-IDF calculation</strong>: Multiply TF × IDF for each token</li>
+<li><strong>Vector construction</strong>: Each chunk becomes a vector of TF-IDF values (one per vocabulary token)</li>
+<li><strong>Query vector</strong>: The same process is applied to the query</li>
+<li><strong>Similarity scoring</strong>: Cosine similarity between query vector and each chunk vector</li>
+<li><strong>Ranking</strong>: Return the top K chunks with highest similarity scores</li>
+</ol>
+<p><strong>Example</strong>: Consider two chunks and a query:</p>
+<pre><code>Chunk 1: "Python is great for data science and machine learning"
+Chunk 2: "JavaScript is used for web development and frontend"
+Query: "data science with Python"</code></pre>
+<p>TF-IDF would give:</p>
+<ul>
+<li>"Python" appears in Chunk 1 → higher TF-IDF in Chunk 1</li>
+<li>"data" appears in Chunk 1 and Query → higher similarity score for Chunk 1</li>
+<li>Chunk 1 would be ranked higher than Chunk 2 for this query</li>
+</ul>
+<p><strong>When TF-IDF is used</strong>: TF-IDF is the fallback when no embedding provider is available. It works entirely in the browser with zero external API calls. It's fast and doesn't require any provider configuration. The tradeoff is that TF-IDF is <strong>keyword-based</strong> — it won't find semantic matches that use different vocabulary. For example, searching for "automobile" won't match a chunk containing "car" unless the same document also uses "automobile."</p>
+<p>This is a lightweight, zero-dependency approach that works entirely in the browser without external API calls.</p>
+<hr>
+<h3 id="rag-context-injection">RAG Context Injection</h3>
+<p>When RAG is enabled and a query is sent, the context is injected into the system prompt as follows:</p>
+<pre><code>[System Prompt]
+...
+[END SYSTEM PROMPT]
+
+[RELEVANT CONTEXT FROM DOCUMENTS]
+--- Source: filename1.txt ---
+[chunk content]
+--- Source: filename2.md ---
+[chunk content]
+--- Source: filename3.py ---
+[chunk content]
+
+User: [original query]</code></pre>
+<p>The AI sees this augmented prompt and uses the document context to inform its response.</p>
+<hr>
+<h3 id="best-practices">Best Practices</h3>
+<h4 id="for-better-search-results">For Better Search Results</h4>
+<ul>
+<li><strong>Be specific</strong> in your queries — vague questions return less relevant chunks</li>
+<li><strong>Use relevant documents</strong> for each canvas — don't mix unrelated documents</li>
+<li><strong>Chunk overlapping is automatic</strong> — you don't need to worry about context at chunk boundaries (100-character overlap handles it)</li>
+</ul>
+<h4 id="for-large-documents">For Large Documents</h4>
+<ul>
+<li>Break very large documents (100K+ characters) into smaller files before uploading</li>
+<li>Consider the 10 MB per-file limit when preparing documents</li>
+<li>For codebases, upload individual files rather than combining them</li>
+</ul>
+<h4 id="when-rag-seems-unhelpful">When RAG Seems Unhelpful</h4>
+<ul>
+<li>Check that RAG is enabled (toggle in DocumentPanel)</li>
+<li>Verify that your query relates to the uploaded documents</li>
+<li>If embedding search fails, Mosaic falls back to TF-IDF — results may be less semantically accurate</li>
+<li>Try rephrasing your query with keywords from the documents</li>
+</ul>
+<hr>
+<h3 id="under-the-hood">Under the Hood</h3>
+<p>The RAG system is implemented across several files:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>File</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><code>src/store/ragStore.ts</code></td><td>Document/chunk storage, search implementation</td></tr>
+<tr><td><code>src/hooks/useDocumentParser.ts</code></td><td>File reading and chunking logic</td></tr>
+<tr><td><code>src/hooks/useStreamMessage.ts</code></td><td>Context injection during message streaming</td></tr>
+<tr><td><code>src/components/ui/DocumentPanel.tsx</code></td><td>UI for document management</td></tr>
+<tr><td><code>src/api/providers.ts</code></td><td><code>embedTexts()</code> for embedding search</td></tr>
+</tbody>
+</table></div>
+<p>The <code>ragStore</code> persists to <code>localStorage</code> under the key <code>mosaic-rag</code>. When loading stored data, <code>validateRagDocs()</code> ensures the data integrity before use.</p>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#advanced-ai-features">Advanced AI Features</a> — Combine RAG with distillation, pruning, debate</li>
+<li><a href="tutorials.html#tutorial-using-rag-with-documents">Tutorial - Using RAG with Documents</a> — Step-by-step walkthrough</li>
+<li><a href="security.html#security-model">Security Model</a> — How document data is protected</li>
+</ul>
+</section>
+<section id="advanced-ai-features"><h2 id="advanced-ai-features">Advanced AI Features</h2>
+<p>Mosaic includes several advanced AI features that go beyond basic chat — confidence scoring, suggestion tendrils, branch distillation, branch pruning, and parallel debate. This page explains each feature, how to use it, and what's happening under the hood.</p>
+<hr>
+<h3 id="confidence-scoring">Confidence Scoring</h3>
+<p>After each AI response, Mosaic can optionally ask the AI to <strong>self-score</strong> its response on a scale of 0-100.</p>
+<h4 id="how-it-works">How It Works</h4>
+<ol>
+<li>After a response finishes streaming, a <strong>calibration prompt</strong> is sent to the AI:</li>
+</ol>
+<pre><code>Rate the confidence of your previous response on a scale of 0-100.
+Consider: factual accuracy, clarity, completeness, and how well it addressed the user's question.
+Respond with ONLY a number between 0 and 100.</code></pre>
+<ol>
+<li>The AI's numeric response is captured as the <strong>confidence score</strong></li>
+<li>A <strong>confidence badge</strong> is displayed on the response node showing the score</li>
+<li>The score is stored in the node's <code>confidence</code> field</li>
+</ol>
+<h4 id="configuration">Configuration</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Setting</th><th>Location</th><th>Default</th></tr></thead>
+<tbody>
+<tr><td>Confidence scoring</td><td>Settings → Confidence</td><td>Enabled</td></tr>
+</tbody>
+</table></div>
+<h4 id="visual">Visual</h4>
+<p>The confidence badge appears in the top-right of response nodes:</p>
+<pre><code>┌─────────────────────┐
+│ AI Response...   92 │  ← Confidence badge
+│                     │
+│ [content]           │
+└─────────────────────┘</code></pre>
+<h4 id="technical-details">Technical Details</h4>
+<ul>
+<li><strong>Timeout</strong>: 8 seconds (if the AI doesn't respond, the feature silently fails)</li>
+<li><strong>Failure behavior</strong>: No badge is shown; no error is raised (silent fail)</li>
+<li><strong>Cost</strong>: Each confidence check counts as one additional completion (tokens tracked in analytics)</li>
+</ul>
+<h4 id="how-to-interpret-confidence-scores">How to Interpret Confidence Scores</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Score Range</th><th>Meaning</th><th>Recommended Action</th></tr></thead>
+<tbody>
+<tr><td>90-100</td><td>High confidence — AI is certain</td><td>Trust the answer</td></tr>
+<tr><td>70-89</td><td>Moderate confidence</td><td>Check specific claims</td></tr>
+<tr><td>50-69</td><td>Low confidence — AI is uncertain</td><td>Verify with another source</td></tr>
+<tr><td>0-49</td><td>Very low confidence</td><td>Request clarification or rephrase</td></tr>
+</tbody>
+</table></div>
+<p><strong>Important caveat</strong>: Confidence scoring is the AI evaluating its own output. It is not a measure of objective correctness. The AI may be confidently wrong (scoring 95 on an incorrect answer) or diffidently right (scoring 60 on a perfect answer). Use it as a general guide, not an absolute truth indicator.</p>
+<hr>
+<h3 id="suggestion-tendrils">Suggestion Tendrils</h3>
+<p>After each AI response, Mosaic can automatically generate <strong>follow-up suggestions</strong> — potential next questions or directions the conversation could take.</p>
+<h4 id="how-it-works">How It Works</h4>
+<ol>
+<li>After a response completes, a <strong>generation prompt</strong> is sent to the AI:</li>
+</ol>
+<pre><code>Based on our conversation, suggest 3 follow-up questions the user might want to ask next.
+Return them as a JSON array of strings: ["question1", "question2", "question3"]</code></pre>
+<ol>
+<li>The resulting suggestions are rendered as <strong>suggestion nodes</strong></li>
+<li>Suggestion nodes connect to the parent response via a dotted <strong>TendrilEdge</strong></li>
+<li>They auto-dismiss after <strong>30 seconds</strong> if not clicked</li>
+</ol>
+<h4 id="interacting-with-suggestions">Interacting with Suggestions</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Action</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td><strong>Click</strong> a suggestion node</td><td>Suggestion text is copied to the input field, ready to send (materialization)</td></tr>
+<tr><td><strong>Ignore</strong> for 30 seconds</td><td>Node auto-dismisses (removed from canvas)</td></tr>
+<tr><td><strong>Use as-is</strong></td><td>Click, optionally edit, then press Enter</td></tr>
+</tbody>
+</table></div>
+<h4 id="configuration">Configuration</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Setting</th><th>Location</th><th>Default</th></tr></thead>
+<tbody>
+<tr><td>Suggestion tendrils</td><td>Settings → Tendrils</td><td>Enabled</td></tr>
+<tr><td>Auto-dismiss</td><td><code>useSuggestionTendrils</code></td><td>30 seconds</td></tr>
+</tbody>
+</table></div>
+<h4 id="visual">Visual</h4>
+<p>Suggestion nodes have a distinct appearance:</p>
+<ul>
+<li><strong>Dimmed</strong> (0.45 opacity) to indicate they are tentative</li>
+<li><strong>Italic text</strong></li>
+<li>Connected with a <strong>dotted edge</strong> (TendrilEdge)</li>
+<li>No bookmark or collapse controls</li>
+</ul>
+<h4 id="technical-details">Technical Details</h4>
+<ul>
+<li><strong>Node type</strong>: <code>suggestion</code></li>
+<li><strong>Edge type</strong>: <code>tendrilEdge</code></li>
+<li><strong>Auto-dismiss timer</strong>: 30 seconds (setTimeout in <code>useSuggestionTendrils</code>)</li>
+<li><strong>Materialization</strong>: On click, suggestion text is passed to the node input; the suggestion node is removed</li>
+<li><strong>Cost</strong>: Each tendril generation counts as one completion</li>
+</ul>
+<hr>
+<h3 id="branch-distillation">Branch Distillation</h3>
+<p>Branch distillation <strong>summarizes multiple conversation branches</strong> into a single synthesis node. This is useful when you've explored several parallel paths and want to consolidate insights.</p>
+<h4 id="how-it-works">How It Works</h4>
+<ol>
+<li>The user clicks the <strong>Distill</strong> button (🌿) in the TopBar</li>
+<li><code>useDistillation</code> collects all <strong>leaf nodes</strong> (endpoints of branches) on the canvas</li>
+<li>Each leaf's conversation path is retrieved (walking up parent edges)</li>
+<li>A <strong>synthesis prompt</strong> is constructed with all the leaf content</li>
+<li>The AI streams a unified summary into a new <strong>distillation node</strong></li>
+<li>The distillation node is placed at the bottom-center of the canvas</li>
+<li><strong>DistillEdges</strong> (gold dashed lines) connect the distillation node to each source leaf</li>
+</ol>
+<h4 id="visual">Visual</h4>
+<pre><code>[Branch 1 leaf] ───╮
+                   ├── [Distillation Node] (gold border, gold edges)
+[Branch 2 leaf] ───╯</code></pre>
+<p>Distillation nodes have:</p>
+<ul>
+<li><strong>Gold border</strong> with pulse animation</li>
+<li><strong>Gold dashed edges</strong> (DistillEdge)</li>
+<li>"Distillation" label</li>
+</ul>
+<h4 id="when-to-use-distillation">When to Use Distillation</h4>
+<ul>
+<li>After running parallel debate on multiple models</li>
+<li>After exploring several branching directions</li>
+<li>Before archiving a canvas — distill key insights first</li>
+<li>When preparing a summary for export</li>
+</ul>
+<h4 id="technical-details">Technical Details</h4>
+<ul>
+<li><strong>Node type</strong>: <code>distillation</code></li>
+<li><strong>Edge type</strong>: <code>distillEdge</code></li>
+<li><strong>Leaf collection</strong>: BFS traversal to find all leaf nodes</li>
+<li><strong>Prompt construction</strong>: All leaf conversation paths are concatenated with labels</li>
+<li><strong>Streaming</strong>: The distillation response streams into the new node</li>
+</ul>
+<hr>
+<h3 id="branch-pruning">Branch Pruning</h3>
+<p>Branch pruning uses <strong>AI-driven relevance scoring</strong> to dim low-value branches, reducing visual clutter on large canvases.</p>
+<h4 id="how-it-works">How It Works</h4>
+<ol>
+<li>The user clicks the <strong>Prune</strong> button (🧹) in the TopBar</li>
+<li>A dialog asks for a <strong>pruning goal</strong> — what's the user's primary objective?</li>
+<li><code>useBranchPruning</code> sends each leaf branch's content to the AI with a scoring prompt</li>
+<li>Each branch receives a <strong>relevance score</strong> (0-100) against the goal</li>
+<li>Branches with scores <strong>below 40</strong> are marked as <code>pruned: true</code></li>
+<li>Pruned nodes are <strong>dimmed</strong> (opacity reduced, edges faded)</li>
+<li>A <strong>Prune Banner</strong> appears at the bottom of the canvas</li>
+</ol>
+<h4 id="visual-effects">Visual Effects</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Element</th><th>Normal</th><th>Pruned</th></tr></thead>
+<tbody>
+<tr><td>Node</td><td>Full opacity</td><td>Reduced opacity</td></tr>
+<tr><td>Edge</td><td>Full opacity</td><td>Reduced opacity (0.3)</td></tr>
+<tr><td>Dash pattern</td><td>Solid</td><td>Modified dash</td></tr>
+</tbody>
+</table></div>
+<h4 id="restoring-pruned-branches">Restoring Pruned Branches</h4>
+<p>Click <strong>Restore All</strong> on the Prune Banner to un-prune all branches. Pruning is non-destructive — it only changes visual properties, the data is preserved.</p>
+<h4 id="configuration">Configuration</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Setting</th><th>Location</th><th>Default</th></tr></thead>
+<tbody>
+<tr><td>Prune threshold</td><td><code>useBranchPruning</code></td><td>40</td></tr>
+<tr><td>Prune state</td><td><code>pruneStore</code></td><td>Transient (not persisted)</td></tr>
+</tbody>
+</table></div>
+<h4 id="when-to-prune">When to Prune</h4>
+<ul>
+<li>After extensive branching when the canvas becomes cluttered</li>
+<li>When you have a specific goal and want to focus on relevant branches</li>
+<li>Before distillation — pruned branches can be excluded from synthesis</li>
+</ul>
+<hr>
+<h3 id="parallel-debate">Parallel Debate</h3>
+<p>Parallel debate sends the <strong>same user input</strong> to <strong>multiple AI models simultaneously</strong> and displays all responses for side-by-side comparison.</p>
+<h4 id="how-it-works">How It Works</h4>
+<ol>
+<li>The user selects which models to include in debates (Settings → Debate Models)</li>
+<li>Type a message and press <strong>Shift+Enter</strong> (instead of Enter)</li>
+<li><code>useParallelDebate</code> fans out the request to all selected models via <code>Promise.allSettled</code></li>
+<li>Each model's response streams independently into its own response node</li>
+<li>Response nodes are arranged in a <strong>fan pattern</strong> around the user's message</li>
+</ol>
+<pre><code>                    ┌── [Model A Response]
+                    │
+[User Message] ─────┼── [Model B Response]
+                    │
+                    └── [Model C Response]</code></pre>
+<h4 id="setup">Setup</h4>
+<ol>
+<li>Open Settings → <strong>Debate Models</strong></li>
+<li>Select 2+ models from any provider (e.g., Mistral Large, GPT-4o, Claude Sonnet, Gemini 2.5 Flash)</li>
+<li>Close Settings</li>
+<li>When typing, use <strong>Shift+Enter</strong> instead of Enter to trigger debate</li>
+</ol>
+<h4 id="use-cases">Use Cases</h4>
+<ul>
+<li><strong>Compare reasoning styles</strong> across different models</li>
+<li><strong>Verify factual accuracy</strong> — if all models agree, confidence is higher</li>
+<li><strong>Cost/quality tradeoff</strong> — compare a cheap model's output with an expensive one</li>
+<li><strong>Explore different approaches</strong> to the same problem</li>
+</ul>
+<h4 id="technical-details">Technical Details</h4>
+<ul>
+<li><strong>Execution</strong>: <code>Promise.allSettled</code> — all models run in parallel</li>
+<li><strong>Failure handling</strong>: One model failing doesn't affect others</li>
+<li><strong>Node placement</strong>: Fan layout based on the number of models</li>
+<li><strong>Analytics</strong>: Each response is tracked separately in analytics</li>
+</ul>
+<hr>
+<h3 id="best-practices-and-use-cases">Best Practices and Use Cases</h3>
+<h4 id="when-to-use-each-feature">When to Use Each Feature</h4>
+<p><strong>Confidence scoring</strong> is most useful when:</p>
+<ul>
+<li>Evaluating factual or technical answers where accuracy matters</li>
+<li>Comparing responses from parallel debate</li>
+<li>Gauging the AI's certainty about its own output</li>
+<li>Building trust with the AI's responses over time</li>
+</ul>
+<p><strong>Suggestion tendrils</strong> are most useful when:</p>
+<ul>
+<li>You're in an exploration phase and want ideas for where to go next</li>
+<li>You're learning about a topic and want to discover related areas</li>
+<li>You want to quickly branch into multiple directions without typing</li>
+</ul>
+<p><strong>Branch distillation</strong> is most useful when:</p>
+<ul>
+<li>You've explored several parallel paths and want a summary</li>
+<li>You're preparing to archive or export a canvas</li>
+<li>You need to present findings to someone who doesn't need all the details</li>
+<li>You want to compare the distilled output across different approaches</li>
+</ul>
+<p><strong>Branch pruning</strong> is most useful when:</p>
+<ul>
+<li>Your canvas has grown large (15+ nodes) and feels cluttered</li>
+<li>You have a specific goal and want to focus on relevant branches</li>
+<li>Before distillation — to ensure only relevant branches are synthesized</li>
+</ul>
+<p><strong>Parallel debate</strong> is most useful when:</p>
+<ul>
+<li>You want to compare how different models approach the same problem</li>
+<li>Fact-checking by asking multiple models the same question</li>
+<li>Cost/quality analysis — comparing a cheap model's output with an expensive one</li>
+<li>Creative tasks where diverse perspectives are valuable</li>
+</ul>
+<h4 id="performance-considerations">Performance Considerations</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Feature</th><th>API Calls</th><th>Token Consumption</th><th>Time Impact</th></tr></thead>
+<tbody>
+<tr><td>Confidence scoring</td><td>1 per response</td><td>Small (calibration prompt ~50 tokens)</td><td>~2-8s</td></tr>
+<tr><td>Suggestion tendrils</td><td>1 per response</td><td>Small (generation prompt ~100 tokens)</td><td>~3-10s</td></tr>
+<tr><td>Branch distillation</td><td>1 per trigger</td><td>Large (all leaf content as context)</td><td>~10-30s</td></tr>
+<tr><td>Branch pruning</td><td>1 per leaf</td><td>Medium (branch content + scoring prompt)</td><td>~5-15s per leaf</td></tr>
+<tr><td>Parallel debate</td><td>N per trigger</td><td>N × normal response tokens</td><td>~same as slowest model</td></tr>
+</tbody>
+</table></div>
+<p>For very large canvases, pruning before distillation can significantly reduce the number of leaves to process, saving both time and token costs.</p>
+<hr>
+<h3 id="feature-comparison-table">Feature Comparison Table</h3>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Feature</th><th>Trigger</th><th>Cost</th><th>Persistence</th></tr></thead>
+<tbody>
+<tr><td>Confidence scoring</td><td>Automatic after response</td><td>1 completion per response</td><td>Stored in node data</td></tr>
+<tr><td>Suggestion tendrils</td><td>Automatic after response</td><td>1 completion per response</td><td>Transient (30s auto-dismiss)</td></tr>
+<tr><td>Branch distillation</td><td>Manual (button click)</td><td>1 completion</td><td>Persistent node</td></tr>
+<tr><td>Branch pruning</td><td>Manual (button click + goal)</td><td>1 completion per leaf</td><td>Visual only (reversible)</td></tr>
+<tr><td>Parallel debate</td><td>Manual (Shift+Enter)</td><td>N completions (one per model)</td><td>Persistent nodes</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="tutorials.html#tutorial-advanced-features-in-practice">Tutorial - Advanced Features in Practice</a> — End-to-end walkthrough combining all features</li>
+<li><a href="tutorials.html#tutorial-branching-and-parallel-exploration">Tutorial - Branching and Parallel Exploration</a> — Deep dive into branching strategies</li>
+<li><a href="architecture.html#overall-architecture-and-data-flow">Overall Architecture and Data Flow</a> — How features interact with the streaming pipeline</li>
+</ul>
+</section>
+<section id="keyboard-shortcuts-and-ui-reference"><h2 id="keyboard-shortcuts-and-ui-reference">Keyboard Shortcuts and UI Reference</h2>
+<p>This page documents every keyboard shortcut, UI element, and panel in Mosaic.</p>
+<hr>
+<h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+<h4 id="navigation">Navigation</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Shortcut</th><th>Action</th><th>Context</th></tr></thead>
+<tbody>
+<tr><td><code>Ctrl+N</code></td><td>New chat (new canvas)</td><td>Global</td></tr>
+<tr><td><code>Ctrl+F</code></td><td>Open search overlay</td><td>Global</td></tr>
+<tr><td><code>Ctrl+Z</code></td><td>Undo last position change</td><td>Canvas</td></tr>
+<tr><td><code>F</code></td><td>Fit canvas view to show all nodes</td><td>Canvas</td></tr>
+<tr><td><code>+</code> / <code>=</code></td><td>Zoom in</td><td>Canvas</td></tr>
+<tr><td><code>-</code></td><td>Zoom out</td><td>Canvas</td></tr>
+<tr><td><code>Escape</code></td><td>Deselect node / close overlay</td><td>Global</td></tr>
+</tbody>
+</table></div>
+<h4 id="editing">Editing</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Shortcut</th><th>Action</th><th>Context</th></tr></thead>
+<tbody>
+<tr><td><code>Delete</code></td><td>Delete selected node</td><td>Canvas</td></tr>
+<tr><td><code>Backspace</code></td><td>Delete selected node</td><td>Canvas</td></tr>
+<tr><td><code>Enter</code></td><td>Send message (when input is focused)</td><td>Node input</td></tr>
+<tr><td><code>Shift+Enter</code></td><td>Send with parallel debate</td><td>Node input</td></tr>
+</tbody>
+</table></div>
+<h4 id="general">General</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>?</code></td><td>Show shortcuts modal</td></tr>
+<tr><td><code>Ctrl+,</code></td><td>Open settings (via gear button)</td></tr>
+</tbody>
+</table></div>
+<h4 id="search-overlay-navigation">Search Overlay Navigation</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Key</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>ArrowUp</code></td><td>Move to previous result</td></tr>
+<tr><td><code>ArrowDown</code></td><td>Move to next result</td></tr>
+<tr><td><code>Enter</code></td><td>Select highlighted result</td></tr>
+<tr><td><code>Escape</code></td><td>Close search overlay</td></tr>
+</tbody>
+</table></div>
+<h4 id="python-terminal">Python Terminal</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Key</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>ArrowUp</code></td><td>Previous command in history</td></tr>
+<tr><td><code>ArrowDown</code></td><td>Next command in history</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h3 id="ui-elements-reference">UI Elements Reference</h3>
+<h4 id="topbar">TopBar</h4>
+<p>The TopBar runs along the top edge of the window and provides quick access to all major features:</p>
+<pre><code>┌──────────────────────────────────────────────────────────────┐
+│  Mosaic  │  Model: Mistral Large ▼  │  🔍  ★  📄  📊  🌿  │
+│          │                          │  🧹  ➕  ⚙️          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Icon</th><th>Element</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>—</td><td>Model dropdown</td><td>Select AI provider and model</td></tr>
+<tr><td>🔍</td><td>Search</td><td>Open search overlay (Ctrl+F)</td></tr>
+<tr><td>★</td><td>Bookmarks</td><td>Toggle bookmarks-only view</td></tr>
+<tr><td>📄</td><td>Documents</td><td>Open DocumentPanel (RAG)</td></tr>
+<tr><td>📊</td><td>Analytics</td><td>Open AnalyticsPanel</td></tr>
+<tr><td>🌿</td><td>Distill</td><td>Trigger branch distillation</td></tr>
+<tr><td>🧹</td><td>Prune</td><td>Trigger branch pruning</td></tr>
+<tr><td>➕</td><td>New chat</td><td>Create new canvas (Ctrl+N)</td></tr>
+<tr><td>⚙️</td><td>Settings</td><td>Open Settings drawer</td></tr>
+</tbody>
+</table></div>
+<h4 id="canvas-area">Canvas Area</h4>
+<p>The main canvas area occupies most of the window:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Element</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Background grid</strong></td><td>Subtle dot grid pattern for spatial reference</td></tr>
+<tr><td><strong>Nodes</strong></td><td>Conversation messages (see <a href="user-guide.html#canvas-and-node-system">Canvas and Node System</a>)</td></tr>
+<tr><td><strong>Edges</strong></td><td>Connections between nodes</td></tr>
+<tr><td><strong>Minimap</strong></td><td>(Optional) Overview of the entire canvas in bottom-right</td></tr>
+<tr><td><strong>DragLens</strong></td><td>(Optional) Floating refraction lens overlay</td></tr>
+</tbody>
+</table></div>
+<h4 id="zoom-controls">Zoom Controls</h4>
+<p>Fixed at the bottom-center of the window:</p>
+<pre><code>            [+]
+[Zoom: 100% ■━━━━━━━○]
+            [-]</code></pre>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Control</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>+</code> button</td><td>Zoom in</td></tr>
+<tr><td><code>-</code> button</td><td>Zoom out</td></tr>
+<tr><td>Slider</td><td>Fine-grained zoom (0.1x to 2x)</td></tr>
+<tr><td>Percentage display</td><td>Current zoom level</td></tr>
+</tbody>
+</table></div>
+<p>The zoom slider is implemented as a <code>FluidSlider</code> — a spring-animated glass component.</p>
+<h4 id="minimap">Minimap</h4>
+<p>Located in the bottom-right corner (when enabled). Shows:</p>
+<ul>
+<li>All nodes as small rectangles</li>
+<li>Current viewport as a highlighted rectangle</li>
+<li>Node positions relative to each other</li>
+</ul>
+<p>Toggle via Settings → Minimap.</p>
+<hr>
+<h3 id="panels">Panels</h3>
+<h4 id="settings-drawer">Settings Drawer</h4>
+<p>Opened by clicking the gear icon (⚙️) in the TopBar. A full-width modal divided into sections:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Section</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td><strong>Theme</strong></td><td>Grid of 5 themes: Void, Dusk, Sand, Snow, Sunrise</td></tr>
+<tr><td><strong>API Keys</strong></td><td>Masked inputs for Mistral, OpenAI, Anthropic, Gemini keys</td></tr>
+<tr><td><strong>Ollama</strong></td><td>URL input, Detect button, connection status</td></tr>
+<tr><td><strong>System Prompt</strong></td><td>Textarea for custom AI instructions</td></tr>
+<tr><td><strong>Temperature</strong></td><td>Slider (0.0 to 2.0)</td></tr>
+<tr><td><strong>Canvas</strong></td><td>Toggles: Minimap, Confidence scoring, Tendrils</td></tr>
+<tr><td><strong>Actions</strong></td><td>Auto-arrange, Export JSON, Import JSON, Clear canvas</td></tr>
+<tr><td><strong>Shortcuts</strong></td><td>Open shortcuts modal</td></tr>
+</tbody>
+</table></div>
+<h4 id="search-overlay">Search Overlay</h4>
+<p>Opened by clicking the search icon (🔍) or pressing <code>Ctrl+F</code>:</p>
+<ul>
+<li>Fixed-position overlay with glass styling</li>
+<li>Text input with real-time filtering</li>
+<li>Up to 20 results with node type badges</li>
+<li>Keyboard navigation (ArrowUp/Down, Enter)</li>
+<li>Escape to close</li>
+<li>Matched nodes highlighted with accent glow</li>
+</ul>
+<h4 id="documentpanel">DocumentPanel</h4>
+<p>Opened by clicking the Documents icon (📄):</p>
+<ul>
+<li>Slide-in panel from the right</li>
+<li>Lists all uploaded documents with chunk count and size</li>
+<li>RAG enable/disable toggle</li>
+<li>Upload button (supports 25+ file formats)</li>
+<li>Clear All button</li>
+<li>Per-document delete</li>
+</ul>
+<h4 id="analyticspanel">AnalyticsPanel</h4>
+<p>Opened by clicking the Analytics icon (📊):</p>
+<ul>
+<li>Slide-in panel from the right</li>
+<li><strong>Canvas Statistics</strong>: total nodes, root/branch/response counts, messages, max depth, branch points</li>
+<li><strong>Token Usage</strong>: per-model token counts</li>
+<li><strong>Cost</strong>: per-model and total cost (USD)</li>
+<li><strong>Model Breakdown</strong>: per-model completion counts</li>
+<li>Reset analytics button</li>
+</ul>
+<h4 id="shortcuts-modal">Shortcuts Modal</h4>
+<p>Opened by pressing <code>?</code> or from Settings drawer:</p>
+<ul>
+<li>Lists all keyboard shortcuts grouped by category:</li>
+</ul>
+<p>  - Navigation</p>
+<p>  - Editing</p>
+<p>  - Canvas</p>
+<p>  - General</p>
+<ul>
+<li>Glass-styled modal with dismiss button</li>
+</ul>
+<h4 id="context-menu">Context Menu</h4>
+<p>Opened by right-clicking a node:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Item</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>Bookmark</td><td>Toggle bookmark</td></tr>
+<tr><td>Collapse / Expand</td><td>Toggle branch collapse</td></tr>
+<tr><td>Auto-arrange</td><td>Run auto-layout from this node</td></tr>
+<tr><td>Delete</td><td>Delete node (with cascade confirmation)</td></tr>
+<tr><td>Undo</td><td>Undo last position change</td></tr>
+</tbody>
+</table></div>
+<h4 id="prune-banner">Prune Banner</h4>
+<p>Appears at the bottom when pruning is active:</p>
+<pre><code>[🧹 Prune active — some branches dimmed by relevance scoring]
+[Restore All]</code></pre>
+<p>Click <strong>Restore All</strong> to un-prune all branches.</p>
+<h4 id="toast-notifications">Toast Notifications</h4>
+<p>Appear at the top-center of the window. Auto-dismiss with spring animation:</p>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Type</th><th>Color</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Info</td><td>Accent (blue)</td><td>General notifications</td></tr>
+<tr><td>Success</td><td>Green</td><td>Operation completed successfully</td></tr>
+<tr><td>Error</td><td>Red</td><td>Operation failed</td></tr>
+</tbody>
+</table></div>
+<h4 id="python-terminal">Python Terminal</h4>
+<p>A floating REPL terminal (520x320 pixels):</p>
+<ul>
+<li>Persistent Python environment</li>
+<li>Command history with ArrowUp/Down</li>
+<li>Supports <code>reset()</code>, <code>clear()</code>, and <code>!reset</code>, <code>!clear</code></li>
+<li>Input/output/error/system message types with different colors</li>
+<li>Draggable position</li>
+</ul>
+<h4 id="welcome-screen">Welcome Screen</h4>
+<p>Appears on first launch:</p>
+<ul>
+<li>Animated canvas particle system (200 particles)</li>
+<li>Mouse repulsion effect</li>
+<li>"Click anywhere to begin" prompt</li>
+<li>Three phases: idle (floating), burst (particles scatter), gone (dismissed)</li>
+<li>Fades into main app on interaction</li>
+</ul>
+<h4 id="onboarding-hint">Onboarding Hint</h4>
+<p>Appears on first use:</p>
+<ul>
+<li>Small bubble: "Click a node to reply"</li>
+<li>Dismissed permanently via localStorage flag</li>
+<li>Only shown once per installation</li>
+</ul>
+<hr>
+<h3 id="theme-css-custom-properties">Theme CSS Custom Properties</h3>
+<p>Each theme defines a set of CSS custom properties used throughout the app. These are defined in <code>src/styles/globals.css</code> under <code>.theme-{void|dusk|sand|snow|sunrise}</code> classes.</p>
+<h4 id="core-variables">Core Variables</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Variable</th><th>Purpose</th><th>Example Values</th></tr></thead>
+<tbody>
+<tr><td><code>--bg</code></td><td>Base background</td><td><code>#0a0a0f</code> (Void), <code>#1a0a2e</code> (Dusk), <code>#f5e6d3</code> (Sand)</td></tr>
+<tr><td><code>--bg-1</code></td><td>Elevated surface 1</td><td><code>#14141f</code> (Void), <code>#2a1040</code> (Dusk)</td></tr>
+<tr><td><code>--bg-2</code></td><td>Elevated surface 2</td><td><code>#1e1e2e</code> (Void), <code>#3a1a50</code> (Dusk)</td></tr>
+<tr><td><code>--bg-3</code></td><td>Elevated surface 3</td><td><code>#28283e</code> (Void)</td></tr>
+</tbody>
+</table></div>
+<h4 id="glass-variables">Glass Variables</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>--glass</code></td><td>Glass background color (semi-transparent)</td></tr>
+<tr><td><code>--glass-hover</code></td><td>Glass background on hover</td></tr>
+<tr><td><code>--glass-active</code></td><td>Glass background when active</td></tr>
+<tr><td><code>--glass-border</code></td><td>Glass border color</td></tr>
+<tr><td><code>--glass-edge</code></td><td>Glass edge highlight color</td></tr>
+<tr><td><code>--glass-content-bg</code></td><td>Inner content background</td></tr>
+<tr><td><code>--glass-tint-a/b/c</code></td><td>Tint overlay colors (RGB only)</td></tr>
+</tbody>
+</table></div>
+<h4 id="text-variables">Text Variables</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>--text</code></td><td>Primary text color</td></tr>
+<tr><td><code>--text-secondary</code></td><td>Secondary/subtle text</td></tr>
+<tr><td><code>--text-muted</code></td><td>Muted text (disabled, hints)</td></tr>
+</tbody>
+</table></div>
+<h4 id="effect-variables">Effect Variables</h4>
+<div class="glass" style="padding:0;overflow-x:auto"><table>
+<thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>--shadow</code></td><td>Drop shadow color (semi-transparent)</td></tr>
+<tr><td><code>--accent</code></td><td>Accent color (interactive elements)</td></tr>
+<tr><td><code>--accent-alpha</code></td><td>Accent with transparency (glows)</td></tr>
+<tr><td><code>--grid-color</code></td><td>Canvas background grid color</td></tr>
+<tr><td><code>--dialog-bg</code></td><td>Modal/dialog backdrop</td></tr>
+</tbody>
+</table></div>
+<h4 id="example-void-theme">Example: Void Theme</h4>
+<pre><code class="language-css">.theme-void {
+  --bg: #0a0a0f;
+  --bg-1: #14141f;
+  --bg-2: #1e1e2e;
+  --bg-3: #28283e;
+  --glass: rgba(20, 20, 35, 0.7);
+  --glass-hover: rgba(30, 30, 50, 0.8);
+  --glass-active: rgba(40, 40, 65, 0.9);
+  --glass-border: rgba(100, 100, 140, 0.2);
+  --glass-edge: rgba(150, 150, 200, 0.1);
+  --text: #e8e8f0;
+  --text-secondary: #a0a0b8;
+  --text-muted: #606078;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --accent: #3b82f6;
+  --accent-alpha: rgba(59, 130, 246, 0.3);
+  --grid-color: rgba(100, 100, 140, 0.08);
+  --dialog-bg: rgba(0, 0, 0, 0.6);
+}</code></pre>
+<h4 id="adding-a-custom-theme">Adding a Custom Theme</h4>
+<ol>
+<li>Add a new class in <code>src/styles/globals.css</code> (e.g., <code>.theme-ocean { ... }</code>)</li>
+<li>Define all required CSS custom properties</li>
+<li>Add the theme name to the theme selector in Settings</li>
+<li>The <code>uiStore.setTheme()</code> function will handle the class toggle automatically</li>
+</ol>
+<hr>
+<h3 id="next-steps">Next Steps</h3>
+<ul>
+<li><a href="user-guide.html#canvas-and-node-system">Canvas and Node System</a> — Node types, operations, and edge types</li>
+<li><a href="getting-started.html#tutorial-your-first-conversation">Tutorial - Your First Conversation</a> — Step-by-step walkthrough</li>
+<li><a href="#shortcuts">Shortcuts</a> are also documented inline throughout this wiki</li>
+</ul>
+</section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2026 Mosaic. MIT License.</span>
+    <div class="footer-links">
+      <a href="wiki.html">Docs</a>
+      <a href="https://github.com/versus184-py/Mosaic/releases" target="_blank">Releases</a>
+      <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-picker" role="radiogroup" aria-label="Theme">
+  <button class="theme-btn active" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
+  <button class="theme-btn" data-theme="sand" onclick="applyTheme('sand')">Sand</button>
+</div>
+
+<script src="theme.js"></script>
+<script>
+// TOC active state tracking (category pages)
+(function(){
+  const tocLinks=document.querySelectorAll('.tech-toc a');
+  if(!tocLinks.length)return;
+  window.addEventListener('scroll',()=>{
+    let current='';
+    const sections=document.querySelectorAll('.tech-content section');
+    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
+    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
+  },{passive:true});
+})();
+</script>
+<script>
+// Node background
+(function(){
+  const canvas = document.getElementById('node-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [], w, h, accent;
+  const NODE_COUNT = 35, CONN_DIST = 180;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  function getAccent() {
+    const el = document.documentElement;
+    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
+    const d = document.createElement('div');
+    d.style.color = c; document.body.appendChild(d);
+    const rgb = getComputedStyle(d).color;
+    d.remove();
+    const m = rgb.match(/[\d.]+/g);
+    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
+  }
+  class Node {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = 2 + Math.random() * 3;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > w) this.vx *= -1;
+      if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+  }
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
+    accent = getAccent();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    accent = getAccent();
+    const { r, g, b } = accent;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONN_DIST) {
+          const alpha = (1 - dist / CONN_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+      ctx.fill();
+      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+      ctx.shadowBlur = 8;
+    });
+    ctx.shadowBlur = 0;
+    nodes.forEach(n => n.update());
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
+  init();
+  draw();
+})();
+</script>
+</body>
+</html>
