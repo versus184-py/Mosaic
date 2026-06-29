@@ -695,6 +695,11 @@ details[open] .faq-answer{animation:faqFade 0.4s var(--ease-out)}
 }
 .tech-content h3{font-size:17px;font-weight:600;margin-bottom:10px;margin-top:28px}
 .tech-content p{font-size:15px;color:var(--text-secondary);line-height:1.7;margin-bottom:16px}
+.tech-content a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-alpha);transition:all var(--transition-fast);font-weight:500}
+.tech-content a:hover{color:var(--text);border-bottom-color:var(--accent)}
+.tech-content a[href^="http"]::after{content:" ↗";font-size:0.85em;opacity:0.7}
+.tech-content a code{color:var(--accent);border-bottom:1px solid var(--accent-alpha)}
+.tech-content a:hover code{color:var(--text);border-bottom-color:var(--accent)}
 .tech-content ul{padding-left:20px;margin-bottom:16px}
 .tech-content li{font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:4px}
 .tech-content .glass{padding:24px;margin-bottom:16px}
