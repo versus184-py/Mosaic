@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Mosaic documentation — Documentation">
+<meta name="description" content="Mosaic documentation — Comprehensive guides, tutorials, API references, and architecture deep-dives.">
 <meta property="og:title" content="Mosaic — Documentation">
 <meta name="theme-color" content="#08080c">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='13' height='13' rx='3' fill='%23c084fc'/%3E%3Crect x='18' y='1' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='1' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.6'/%3E%3Crect x='18' y='18' width='13' height='13' rx='3' fill='%23c084fc' opacity='0.25'/%3E%3C/svg%3E">
@@ -23,7 +23,7 @@
     <a href="index.html#features">Features</a>
     <a href="index.html#providers">Providers</a>
     <a href="technical.html">Technical</a>
-    <a href="wiki.html">Docs</a>
+    <a href="wiki.html" class="active">Docs</a>
     <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
   </div>
   <a href="index.html#download" class="nav-cta">Download</a>
@@ -34,67 +34,224 @@
   <a href="index.html#features">Features</a>
   <a href="index.html#providers">Providers</a>
   <a href="technical.html">Technical</a>
-  <a href="wiki.html">Docs</a>
+  <a href="wiki.html" class="active">Docs</a>
   <a href="https://github.com/versus184-py/Mosaic" target="_blank">GitHub</a>
   <a href="index.html#download" class="nav-cta">Download</a>
 </div>
 
-<section class="tech-hero">
-  <h1>Documentation</h1>
-  <p>Comprehensive guides, tutorials, API references, and architecture deep-dives for Mosaic.</p>
+<!-- ===== WIKI HERO ===== -->
+<section class="wiki-hero">
+  <div class="wiki-hero-bg"></div>
+  <div class="wiki-hero-glow"></div>
+  <div class="wiki-hero-content">
+    <div class="wiki-hero-badge">Documentation v0.3.0</div>
+    <h1>Explore the <em>Docs</em></h1>
+    <p>Everything you need to know about Mosaic — from your first conversation to architecture deep-dives, API references, and community guides.</p>
+    <div class="wiki-search-wrapper">
+      <svg class="wiki-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="wiki-search" id="wikiSearch" placeholder="Search documentation..." autocomplete="off">
+      <kbd class="wiki-search-hint">/</kbd>
+    </div>
+    <div class="wiki-stats">
+      <span class="wiki-stat"><span class="wiki-stat-num">31</span> articles</span>
+      <span class="wiki-stat-divider"></span>
+      <span class="wiki-stat"><span class="wiki-stat-num">7</span> categories</span>
+      <span class="wiki-stat-divider"></span>
+      <span class="wiki-stat"><span class="wiki-stat-num">49K</span> words</span>
+    </div>
+  </div>
 </section>
 
-<div class="wiki-grid">
-  <a href="getting-started.html" class="wiki-card glass">
-  <div class="glass-edge"></div>
-  <span class="wiki-card-icon">⭐</span>
-  <h3>Getting Started</h3>
-  <p>Install Mosaic, configure API providers, and send your first message on the branching canvas.</p>
-  <span class="wiki-card-count">3 articles</span>
-</a>
-<a href="user-guide.html" class="wiki-card glass">
-  <div class="glass-edge"></div>
-  <span class="wiki-card-icon">◎</span>
-  <h3>User Guide</h3>
-  <p>Master the canvas, node system, provider integration, RAG pipeline, and advanced AI features.</p>
-  <span class="wiki-card-count">5 articles</span>
-</a>
-<a href="tutorials.html" class="wiki-card glass">
-  <div class="glass-edge"></div>
-  <span class="wiki-card-icon">→</span>
-  <h3>Tutorials</h3>
-  <p>Step-by-step walkthroughs for branching, RAG, code execution, customization, and advanced workflows.</p>
-  <span class="wiki-card-count">5 articles</span>
-</a>
-<a href="api-reference.html" class="wiki-card glass">
-  <div class="glass-edge"></div>
-  <span class="wiki-card-icon">⎔</span>
-  <h3>API Reference</h3>
-  <p>Complete reference for Zustand stores, React hooks, UI components, utilities, and TypeScript types.</p>
-  <span class="wiki-card-count">4 articles</span>
-</a>
-<a href="architecture.html" class="wiki-card glass">
-  <div class="glass-edge"></div>
-  <span class="wiki-card-icon">△</span>
-  <h3>Architecture</h3>
-  <p>Deep dives into overall data flow, the Liquid Glass physics engine, code sandbox, provider protocol, and state management.</p>
-  <span class="wiki-card-count">5 articles</span>
-</a>
-<a href="security.html" class="wiki-card glass">
-  <div class="glass-edge"></div>
-  <span class="wiki-card-icon">◈</span>
-  <h3>Security & Operations</h3>
-  <p>Security model, troubleshooting guide, deployment pipeline, and distribution details.</p>
-  <span class="wiki-card-count">3 articles</span>
-</a>
-<a href="community.html" class="wiki-card glass">
-  <div class="glass-edge"></div>
-  <span class="wiki-card-icon">◆</span>
-  <h3>Community</h3>
-  <p>Contributing guide, changelog and roadmap, project governance, and future ideas.</p>
-  <span class="wiki-card-count">4 articles</span>
-</a>
+<!-- ===== CATEGORY GRID ===== -->
+<div class="wiki-grid" id="wikiGrid">
+  <a href="getting-started.html" class="wiki-card glass" data-tags="install setup configure first conversation quickstart">
+    <div class="glass-edge"></div>
+    <div class="wiki-card-top">
+      <span class="wiki-card-icon">&#9733;</span>
+      <div class="wiki-card-articles">
+        <div class="wiki-card-article-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <h3>Getting Started</h3>
+    <p>Install Mosaic, configure API providers, and send your first message on the branching canvas.</p>
+    <div class="wiki-card-footer">
+      <span class="wiki-card-count">3 articles</span>
+      <span class="wiki-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </div>
+    <div class="wiki-card-preview">
+      <span>Home</span><span>Installation Guide</span><span>Your First Conversation</span>
+    </div>
+  </a>
+
+  <a href="user-guide.html" class="wiki-card glass" data-tags="canvas nodes providers llm mistral openai anthropic gemini ollama rag embeddings advanced keyboard shortcuts">
+    <div class="glass-edge"></div>
+    <div class="wiki-card-top">
+      <span class="wiki-card-icon">&#9678;</span>
+      <div class="wiki-card-articles">
+        <div class="wiki-card-article-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <h3>User Guide</h3>
+    <p>Master the canvas, node system, provider integration, RAG pipeline, and advanced AI features.</p>
+    <div class="wiki-card-footer">
+      <span class="wiki-card-count">5 articles</span>
+      <span class="wiki-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </div>
+    <div class="wiki-card-preview">
+      <span>Canvas &amp; Node System</span><span>LLM Provider Integration</span><span>RAG System Guide</span><span>Advanced AI Features</span><span>Keyboard Shortcuts</span>
+    </div>
+  </a>
+
+  <a href="tutorials.html" class="wiki-card glass" data-tags="tutorial walkthrough branching parallel rag code execution customize">
+    <div class="glass-edge"></div>
+    <div class="wiki-card-top">
+      <span class="wiki-card-icon">&#8594;</span>
+      <div class="wiki-card-articles">
+        <div class="wiki-card-article-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <h3>Tutorials</h3>
+    <p>Step-by-step walkthroughs for branching, RAG, code execution, customization, and advanced workflows.</p>
+    <div class="wiki-card-footer">
+      <span class="wiki-card-count">5 articles</span>
+      <span class="wiki-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </div>
+    <div class="wiki-card-preview">
+      <span>Branching &amp; Parallel Exploration</span><span>Using RAG with Documents</span><span>Advanced Features</span><span>Customizing Mosaic</span><span>Running Code Inline</span>
+    </div>
+  </a>
+
+  <a href="api-reference.html" class="wiki-card glass" data-tags="api reference store hook component utilities types typescript">
+    <div class="glass-edge"></div>
+    <div class="wiki-card-top">
+      <span class="wiki-card-icon">&#8996;</span>
+      <div class="wiki-card-articles">
+        <div class="wiki-card-article-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <h3>API Reference</h3>
+    <p>Complete reference for Zustand stores, React hooks, UI components, utilities, and TypeScript types.</p>
+    <div class="wiki-card-footer">
+      <span class="wiki-card-count">4 articles</span>
+      <span class="wiki-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </div>
+    <div class="wiki-card-preview">
+      <span>Store API</span><span>Hook API</span><span>Component API</span><span>Utilities &amp; Types</span>
+    </div>
+  </a>
+
+  <a href="architecture.html" class="wiki-card glass" data-tags="architecture data flow liquid glass physics code sandbox provider protocol state management">
+    <div class="glass-edge"></div>
+    <div class="wiki-card-top">
+      <span class="wiki-card-icon">&#9651;</span>
+      <div class="wiki-card-articles">
+        <div class="wiki-card-article-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <h3>Architecture</h3>
+    <p>Deep dives into overall data flow, the Liquid Glass physics engine, code sandbox, provider protocol, and state management.</p>
+    <div class="wiki-card-footer">
+      <span class="wiki-card-count">5 articles</span>
+      <span class="wiki-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </div>
+    <div class="wiki-card-preview">
+      <span>Overall Architecture</span><span>Liquid Glass Physics</span><span>Code Sandbox</span><span>Provider Protocol</span><span>State Management</span>
+    </div>
+  </a>
+
+  <a href="security.html" class="wiki-card glass" data-tags="security troubleshooting faq deployment distribution operations">
+    <div class="glass-edge"></div>
+    <div class="wiki-card-top">
+      <span class="wiki-card-icon">&#9672;</span>
+      <div class="wiki-card-articles">
+        <div class="wiki-card-article-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <h3>Security &amp; Operations</h3>
+    <p>Security model, troubleshooting guide, deployment pipeline, and distribution details.</p>
+    <div class="wiki-card-footer">
+      <span class="wiki-card-count">3 articles</span>
+      <span class="wiki-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </div>
+    <div class="wiki-card-preview">
+      <span>Security Model</span><span>Troubleshooting &amp; FAQ</span><span>Deployment &amp; Distribution</span>
+    </div>
+  </a>
+
+  <a href="community.html" class="wiki-card glass" data-tags="community contributing changelog roadmap governance future ideas">
+    <div class="glass-edge"></div>
+    <div class="wiki-card-top">
+      <span class="wiki-card-icon">&#9670;</span>
+      <div class="wiki-card-articles">
+        <div class="wiki-card-article-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <h3>Community</h3>
+    <p>Contributing guide, changelog and roadmap, project governance, and future ideas.</p>
+    <div class="wiki-card-footer">
+      <span class="wiki-card-count">4 articles</span>
+      <span class="wiki-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </div>
+    <div class="wiki-card-preview">
+      <span>Contributing Guide</span><span>Changelog &amp; Roadmap</span><span>Project Governance</span><span>Future Ideas</span>
+    </div>
+  </a>
 </div>
+
+<!-- ===== EMPTY SEARCH STATE ===== -->
+<div class="wiki-empty" id="wikiEmpty">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  <h3>No results found</h3>
+  <p>Try a different search term, or browse the categories above.</p>
+</div>
+
+<!-- ===== QUICK LINKS ===== -->
+<section class="wiki-quick">
+  <div class="wiki-quick-inner">
+    <div class="section-tag">Quick Links</div>
+    <h2>Popular topics</h2>
+    <div class="wiki-quick-grid">
+      <a href="getting-started.html#installation-guide" class="wiki-quick-link glass">
+        <span class="wiki-quick-num">01</span>
+        <span class="wiki-quick-text">Installation Guide</span>
+      </a>
+      <a href="user-guide.html#canvas-and-node-system" class="wiki-quick-link glass">
+        <span class="wiki-quick-num">02</span>
+        <span class="wiki-quick-text">Canvas &amp; Node System</span>
+      </a>
+      <a href="user-guide.html#rag-system-guide" class="wiki-quick-link glass">
+        <span class="wiki-quick-num">03</span>
+        <span class="wiki-quick-text">RAG System Guide</span>
+      </a>
+      <a href="architecture.html#liquid-glass-physics-engine" class="wiki-quick-link glass">
+        <span class="wiki-quick-num">04</span>
+        <span class="wiki-quick-text">Liquid Glass Engine</span>
+      </a>
+      <a href="security.html#security-model" class="wiki-quick-link glass">
+        <span class="wiki-quick-num">05</span>
+        <span class="wiki-quick-text">Security Model</span>
+      </a>
+      <a href="community.html#contributing-guide" class="wiki-quick-link glass">
+        <span class="wiki-quick-num">06</span>
+        <span class="wiki-quick-text">Contributing Guide</span>
+      </a>
+    </div>
+  </div>
+</section>
 
 <footer class="footer">
   <div class="footer-inner">
@@ -114,94 +271,93 @@
 
 <script src="theme.js"></script>
 <script>
-// TOC active state tracking (category pages)
+// ===== LIVE SEARCH =====
 (function(){
-  const tocLinks=document.querySelectorAll('.tech-toc a');
-  if(!tocLinks.length)return;
-  window.addEventListener('scroll',()=>{
-    let current='';
-    const sections=document.querySelectorAll('.tech-content section');
-    sections.forEach(s=>{const t=s.getBoundingClientRect();if(t.top<=180)current=s.id});
-    tocLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
-  },{passive:true});
-})();
-</script>
-<script>
-// Node background
-(function(){
-  const canvas = document.getElementById('node-bg');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let nodes = [], w, h, accent;
-  const NODE_COUNT = 35, CONN_DIST = 180;
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
-  function getAccent() {
-    const el = document.documentElement;
-    const c = getComputedStyle(el).getPropertyValue('--accent').trim();
-    const d = document.createElement('div');
-    d.style.color = c; document.body.appendChild(d);
-    const rgb = getComputedStyle(d).color;
-    d.remove();
-    const m = rgb.match(/[\d.]+/g);
-    return m ? { r:+m[0], g:+m[1], b:+m[2] } : { r:196, g:154, b:60 };
-  }
-  class Node {
-    constructor() {
-      this.x = Math.random() * w;
-      this.y = Math.random() * h;
-      this.vx = (Math.random() - 0.5) * 0.3;
-      this.vy = (Math.random() - 0.5) * 0.3;
-      this.r = 2 + Math.random() * 3;
-    }
-    update() {
-      this.x += this.vx; this.y += this.vy;
-      if (this.x < 0 || this.x > w) this.vx *= -1;
-      if (this.y < 0 || this.y > h) this.vy *= -1;
-    }
-  }
-  function init() {
-    resize();
-    nodes = Array.from({ length: NODE_COUNT }, () => new Node());
-    accent = getAccent();
-  }
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-    accent = getAccent();
-    const { r, g, b } = accent;
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < CONN_DIST) {
-          const alpha = (1 - dist / CONN_DIST) * 0.25;
-          ctx.beginPath();
-          ctx.moveTo(nodes[i].x, nodes[i].y);
-          ctx.lineTo(nodes[j].x, nodes[j].y);
-          ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-      }
-    }
-    nodes.forEach(n => {
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
-      ctx.fill();
-      ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
-      ctx.shadowBlur = 8;
+  const input = document.getElementById('wikiSearch');
+  const grid = document.getElementById('wikiGrid');
+  const empty = document.getElementById('wikiEmpty');
+  if (!input || !grid) return;
+  const cards = grid.querySelectorAll('.wiki-card');
+  input.addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    let visible = 0;
+    cards.forEach(card => {
+      const tags = (card.dataset.tags || '').toLowerCase();
+      const title = card.querySelector('h3').textContent.toLowerCase();
+      const desc = card.querySelector('p').textContent.toLowerCase();
+      const match = !q || tags.includes(q) || title.includes(q) || desc.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
     });
-    ctx.shadowBlur = 0;
-    nodes.forEach(n => n.update());
-    requestAnimationFrame(draw);
-  }
-  window.addEventListener('resize', () => { resize(); if (nodes.length) nodes.forEach(n => { n.x = Math.min(n.x, w); n.y = Math.min(n.y, h) }) });
-  init();
-  draw();
+    empty.style.display = visible === 0 ? 'flex' : 'none';
+  });
+  // Keyboard shortcut: / to focus search
+  document.addEventListener('keydown', function(e) {
+    if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+      e.preventDefault();
+      input.focus();
+    }
+    if (e.key === 'Escape' && document.activeElement === input) {
+      input.blur();
+    }
+  });
 })();
+
+// ===== CARD TILT =====
+(function(){
+  const cards = document.querySelectorAll('.wiki-card');
+  cards.forEach(card => {
+    card.addEventListener('mousemove', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / centerY * -8;
+      const rotateY = (x - centerX) / centerX * 8;
+      this.style.setProperty('--rx', rotateX + 'deg');
+      this.style.setProperty('--ry', rotateY + 'deg');
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.setProperty('--rx', '0deg');
+      this.style.setProperty('--ry', '0deg');
+    });
+  });
+})();
+
+// ===== REVEAL ON SCROLL =====
+(function(){
+  const els = document.querySelectorAll('.wiki-card, .wiki-quick-link, .wiki-hero-content');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  els.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)';
+    observer.observe(el);
+    // Set individual delays
+    if (el.classList.contains('wiki-card')) {
+      const idx = Array.from(el.parentElement.children).indexOf(el);
+      el.style.transitionDelay = (idx * 0.08) + 's';
+    }
+  });
+  // Hero should auto-appear
+  const hero = document.querySelector('.wiki-hero-content');
+  if (hero) {
+    setTimeout(() => hero.classList.add('visible'), 100);
+  }
+})();
+
+// ===== HAMBURGER MENU =====
+document.getElementById('hamburger')?.addEventListener('click', function(){
+  this.classList.toggle('open');
+  document.getElementById('mobileMenu').classList.toggle('open');
+});
 </script>
 </body>
 </html>
