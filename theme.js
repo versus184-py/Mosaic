@@ -47,6 +47,42 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
   els.forEach(el => o.observe(el));
 })();
 
+// ===== CODE BLOCKS: language labels + copy buttons =====
+(function(){
+  const pres = document.querySelectorAll('.tech-content pre');
+  pres.forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const cls = code.className;
+    const lang = cls.replace(/^language-/, '').replace(/^syntax$/, '');
+    if (lang) pre.setAttribute('data-lang', lang);
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', () => {
+      const text = code.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    });
+    pre.appendChild(btn);
+  });
+})();
+
+// ===== TABLE WRAPPING =====
+(function(){
+  document.querySelectorAll('.tech-content table').forEach(table => {
+    if (!table.parentElement.classList.contains('table-wrap')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+    }
+  });
+})();
+
 // ===== NAV HIDE/SHOW =====
 (function(){
   let last = 0;

@@ -713,17 +713,36 @@ details[open] .faq-answer{animation:faqFade 0.4s var(--ease-out)}
   padding:2px 6px;border-radius:6px;font-size:13px;
   background:var(--glass);border:1px solid var(--glass-border);font-family:'SF Mono','Fira Code','Cascadia Code',monospace;
 }
-.tech-content pre{margin:0;overflow-x:auto;border-radius:var(--radius)}
-.tech-content pre code{display:block;padding:16px 20px;font-size:13px;line-height:1.55;white-space:pre;border:none;background:none}
+.tech-content pre{
+  position:relative;margin:16px 0;border-radius:var(--radius);
+  background:var(--bg-1);border:1px solid var(--glass-border);overflow:hidden;
+}
+.tech-content pre code{display:block;padding:20px 24px;overflow-x:auto;-webkit-overflow-scrolling:touch;font-size:13px;line-height:1.6;white-space:pre;border:none;background:none}
+.tech-content pre::before{
+  content:attr(data-lang);display:block;padding:7px 20px;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);
+  background:var(--glass);border-bottom:1px solid var(--glass-border);
+}
+.tech-content pre .copy-btn{
+  position:absolute;top:5px;right:8px;z-index:2;
+  padding:3px 10px;border:1px solid var(--glass-border);border-radius:var(--radius-sm);
+  background:var(--glass);color:var(--text-muted);font-size:11px;font-family:inherit;
+  cursor:pointer;opacity:0;transition:opacity var(--transition-fast),color var(--transition-fast),border-color var(--transition-fast);
+  -webkit-user-select:none;user-select:none;
+}
+.tech-content pre:hover .copy-btn{opacity:1}
+.tech-content pre .copy-btn:hover{color:var(--accent);border-color:var(--accent-alpha)}
+.tech-content pre .copy-btn.copied{color:var(--accent);border-color:var(--accent)}
 .tech-content .syntax .kw{color:#c084fc}
 .tech-content .syntax .str{color:#98d8a8}
 .tech-content .syntax .fn{color:#7cb8f0}
 .tech-content .syntax .cm{color:var(--text-muted)}
 .tech-content .syntax .num{color:#fbbf24}
 .tech-content .syntax .op{color:var(--text-secondary)}
+.tech-content .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tech-content table{width:100%;border-collapse:collapse;font-size:14px}
 .tech-content th{text-align:left;padding:10px 16px;border-bottom:1px solid var(--glass-border);font-weight:600;color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
-.tech-content td{padding:10px 16px;border-bottom:1px solid var(--glass-border);color:var(--text-secondary)}
+.tech-content td{padding:10px 16px;border-bottom:1px solid var(--glass-border);color:var(--text-secondary);word-break:break-word}
 
 @media(max-width:900px){
   .tech-layout{grid-template-columns:1fr}
