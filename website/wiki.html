@@ -331,7 +331,9 @@
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1 });
@@ -340,16 +342,17 @@
     el.style.transform = 'translateY(30px)';
     el.style.transition = 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)';
     observer.observe(el);
-    // Set individual delays
     if (el.classList.contains('wiki-card')) {
       const idx = Array.from(el.parentElement.children).indexOf(el);
       el.style.transitionDelay = (idx * 0.08) + 's';
     }
   });
-  // Hero should auto-appear
   const hero = document.querySelector('.wiki-hero-content');
   if (hero) {
-    setTimeout(() => hero.classList.add('visible'), 100);
+    setTimeout(() => {
+      hero.style.opacity = '1';
+      hero.style.transform = 'translateY(0)';
+    }, 100);
   }
 })();
 
