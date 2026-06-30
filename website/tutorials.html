@@ -39,12 +39,19 @@
   <a href="index.html#download" class="nav-cta">Download</a>
 </div>
 
-<section class="tech-hero">
+<section class="tech-hero" data-search-section>
   <h1>Tutorials</h1>
   <p>Step-by-step walkthroughs for branching, RAG, code execution, customization, and advanced workflows.</p>
+  <div class="wiki-search-wrapper" style="margin-top:24px">
+    <svg class="wiki-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="wiki-search" placeholder="Search all documentation..." autocomplete="off">
+    <kbd class="wiki-search-hint">/</kbd>
+  </div>
 </section>
 
-<div class="tech-layout">
+<div class="wiki-results" id="wikiResults" style="display:none"></div>
+
+<div class="tech-layout" id="techLayout">
   <aside class="tech-toc" id="toc">
     <div class="tech-toc-inner glass">
       <div class="tech-toc-title">Tutorials</div>
@@ -938,7 +945,7 @@ Be constructive and specific in your feedback.</code></pre>
 <tr><td>Ollama URL</td><td>Settings → Ollama</td><td>URL</td><td><code>http://localhost:11434</code></td></tr>
 <tr><td>System Prompt</td><td>Settings → System Prompt</td><td>Free text</td><td>Empty</td></tr>
 <tr><td>Temperature</td><td>Settings → Temperature</td><td>0.0 - 2.0</td><td>0.7</td></tr>
-<tr><td>Theme</td><td>Settings → Theme</td><td>Dusk, Sand</td><td>Auto-detected</td></tr>
+<tr><td>Theme</td><td>Settings → Theme</td><td>Void, Dusk, Sand, Snow, Sunrise</td><td>Auto-detected</td></tr>
 <tr><td>Minimap</td><td>Settings → Canvas</td><td>On/Off</td><td>On</td></tr>
 <tr><td>Confidence</td><td>Settings → Canvas</td><td>On/Off</td><td>On</td></tr>
 <tr><td>Tendrils</td><td>Settings → Canvas</td><td>On/Off</td><td>On</td></tr>
@@ -1178,6 +1185,10 @@ for (let i = 0; i &lt; 10; i++) {
 </div>
 
 <script src="theme.js"></script>
+<script src="minisearch.min.js"></script>
+<script>
+(function(){const input=document.querySelector('.wiki-search');const results=document.getElementById('wikiResults');const layout=document.getElementById('techLayout');if(!input||!results||!layout)return;let timer;input.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(function(){window.wikiSearch(input.value,results,{techLayout:layout});},150);});const params=new URLSearchParams(window.location.search);const q=params.get('q');if(q){input.value=q;window.wikiSearch(q,results,{techLayout:layout})}})();
+</script>
 <script>
 // TOC active state tracking (category pages)
 (function(){

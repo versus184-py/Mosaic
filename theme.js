@@ -113,3 +113,105 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
     });
   });
 })();
+
+// ===== WIKI SEARCH ENGINE =====
+(function(){
+  if (typeof MiniSearch === 'undefined') { window.wikiSearch = null; return; }
+
+  let miniSearch = null;
+  let searchPromise = null;
+
+  async function initSearch() {
+    if (searchPromise) return searchPromise;
+    searchPromise = (async () => {
+      const resp = await fetch('search-index.json');
+      const docs = await resp.json();
+      miniSearch = new MiniSearch({
+        fields: ['title', 'headings', 'content'],
+        storeFields: ['title', 'category', 'categoryId', 'url', 'excerpt', 'headings'],
+        searchOptions: { boost: { title: 5, headings: 3, content: 1 }, prefix: true, fuzzy: 0.2 }
+      });
+      miniSearch.addAll(docs);
+    })();
+    return searchPromise;
+  }
+
+  function highlightText(text, query) {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    let result = text;
+    terms.forEach(term => {
+      const re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      result = result.replace(re, '<mark>$1</mark>');
+    });
+    return result;
+  }
+
+  function renderResults(results, query) {
+    if (!results.length) {
+      return '<div class="wiki-empty" style="display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>No results found</h3><p>Try different keywords, or browse the categories above.</p></div>';
+    }
+    return results.map(r => {
+      const excerpt = highlightText(r.excerpt, query);
+      const headings = r.headings ? r.headings.slice(0, 4).map(h => '<span>' + h + '</span>').join('') : '';
+      const pct = Math.min(100, Math.round(r.score * 50));
+      return '<a href="' + r.url + '" class="wiki-result-card glass">' +
+        '<div class="glass-edge"></div>' +
+        '<div class="wiki-result-top">' +
+          '<span class="wiki-result-badge">' + r.category + '</span>' +
+          '<span class="wiki-result-score">' + pct + '% match</span>' +
+        '</div>' +
+        '<h3 class="wiki-result-title">' + r.title + '</h3>' +
+        '<p class="wiki-result-excerpt">' + excerpt + '</p>' +
+        (headings ? '<div class="wiki-result-headings">' + headings + '</div>' : '') +
+      '</a>';
+    }).join('');
+  }
+
+  window.wikiSearch = async function(query, resultsContainer, opts) {
+    opts = opts || {};
+    const grid = opts.grid || null;
+    const quickLinks = opts.quickLinks || null;
+    const techLayout = opts.techLayout || null;
+    const emptyEl = opts.emptyEl || null;
+
+    if (!miniSearch) await initSearch();
+    if (!miniSearch) return;
+
+    if (!query.trim()) {
+      if (grid) grid.style.display = '';
+      if (quickLinks) quickLinks.style.display = '';
+      if (techLayout) techLayout.style.display = '';
+      if (resultsContainer) { resultsContainer.style.display = 'none'; resultsContainer.innerHTML = ''; }
+      return;
+    }
+
+    const results = miniSearch.search(query, { prefix: true, fuzzy: 0.2 });
+
+    if (grid) grid.style.display = 'none';
+    if (quickLinks) quickLinks.style.display = 'none';
+    if (techLayout) techLayout.style.display = 'none';
+
+    if (resultsContainer) {
+      resultsContainer.style.display = '';
+      resultsContainer.innerHTML = renderResults(results, query);
+    }
+  };
+
+  // Keyboard shortcut: / to focus any search input
+  document.addEventListener('keydown', function(e) {
+    if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+      const input = document.querySelector('.wiki-search');
+      if (input) { e.preventDefault(); input.focus(); }
+    }
+    if (e.key === 'Escape' && document.activeElement && document.activeElement.classList.contains('wiki-search')) {
+      document.activeElement.blur();
+    }
+  });
+
+  // Auto-init search index on first interaction with any search input
+  document.addEventListener('focusin', function(e) {
+    if (e.target && e.target.classList.contains('wiki-search') && !miniSearch) {
+      initSearch();
+    }
+  });
+})();

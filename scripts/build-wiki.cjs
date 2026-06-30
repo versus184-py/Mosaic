@@ -3,6 +3,7 @@ const path = require('path');
 
 const WIKI_DIR = path.join(__dirname, '..', 'wiki');
 const OUT_DIR = path.join(__dirname, '..', 'website');
+const ROOT_DIR = path.join(__dirname, '..');
 
 const categories = [
   {
@@ -275,7 +276,60 @@ function convertMarkdown(text) {
   return out.join('');
 }
 
-function buildPageHtml(content, navTitle, pageTitle) {
+function stripMarkdown(md) {
+  let text = md;
+  text = text.replace(/```[\s\S]*?```/g, '');
+  text = text.replace(/^[-*_]{3,}\s*$/gm, '');
+  text = text.replace(/^#{1,4}\s+/gm, '');
+  text = text.replace(/^[-*+]\s+/gm, '');
+  text = text.replace(/^\d+\.\s+/gm, '');
+  text = text.replace(/^>\s+/gm, '');
+  text = text.replace(/^\|.+\|$/gm, '');
+  text = text.replace(/^[\s:|:-]+$/gm, '');
+  text = text.replace(/`([^`]+)`/g, '$1');
+  text = text.replace(/\*\*(.+?)\*\*/g, '$1');
+  text = text.replace(/__(.+?)__/g, '$1');
+  text = text.replace(/\*(.+?)\*/g, '$1');
+  text = text.replace(/_(.+?)_/g, '$1');
+  text = text.replace(/~~(.+?)~~/g, '$1');
+  text = text.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1');
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  text = text.replace(/\[\[([^\]]+)\]\]/g, '$1');
+  text = text.replace(/<[^>]+>/g, '');
+  text = text.replace(/^- \[[ x]\]\s+/gm, '');
+  text = text.replace(/^---/gm, '');
+  return text;
+}
+
+function buildSearchIndex(categories) {
+  const index = [];
+  categories.forEach(cat => {
+    cat.files.forEach(file => {
+      const filePath = path.join(WIKI_DIR, file);
+      const md = fs.readFileSync(filePath, 'utf-8');
+      const titleMatch = md.match(/^#\s+(.+)/m);
+      const title = titleMatch ? titleMatch[1].trim() : file.replace('.md', '');
+      const slug = slugify(title);
+      const headingMatches = md.matchAll(/^#{2,3}\s+(.+)/gm);
+      const headings = Array.from(headingMatches, m => escapeHtml(m[1].trim()));
+      const plainText = stripMarkdown(md).replace(/\s+/g, ' ').trim();
+      const excerpt = escapeHtml(plainText.slice(0, 200)) + (plainText.length > 200 ? '…' : '');
+      index.push({
+        id: slug,
+        title: escapeHtml(title),
+        category: cat.title,
+        categoryId: cat.id,
+        url: `${cat.id}.html#${slug}`,
+        excerpt,
+        headings,
+        content: escapeHtml(plainText.slice(0, 3000))
+      });
+    });
+  });
+  return index;
+}
+
+function buildPageHtml(content, navTitle, pageTitle, extraScripts = '') {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -336,6 +390,7 @@ ${content}
 </div>
 
 <script src="theme.js"></script>
+${extraScripts}
 <script>
 // TOC active state tracking (category pages)
 (function(){
@@ -443,16 +498,40 @@ function buildHubPage() {
 </a>`;
   }).join('\n');
 
-  const content = `<section class="tech-hero">
-  <h1>Documentation</h1>
-  <p>Comprehensive guides, tutorials, API references, and architecture deep-dives for Mosaic.</p>
+  const content = `<section class="tech-hero" data-search-section>
+  <h1>Explore the <em>Docs</em></h1>
+  <p>Everything you need to know about Mosaic — from your first conversation to architecture deep-dives, API references, and community guides.</p>
+  <div class="wiki-search-wrapper" style="margin-top:24px">
+    <svg class="wiki-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="wiki-search" id="wikiSearch" placeholder="Search documentation..." autocomplete="off">
+    <kbd class="wiki-search-hint">/</kbd>
+  </div>
 </section>
 
-<div class="wiki-grid">
+<div class="wiki-results" id="wikiResults" style="display:none"></div>
+
+<div class="wiki-grid" id="wikiGrid">
   ${cards}
 </div>`;
 
-  return buildPageHtml(content, 'Docs', 'Documentation');
+  const hubSearchInit = '<script src="minisearch.min.js"></script>\n<script>\n(function(){' +
+  'var input=document.getElementById(\'wikiSearch\');' +
+  'var results=document.getElementById(\'wikiResults\');' +
+  'var grid=document.getElementById(\'wikiGrid\');' +
+  'if(!input||!results||!grid)return;' +
+  'var timer;' +
+  'input.addEventListener(\'input\',function(){' +
+    'clearTimeout(timer);' +
+    'timer=setTimeout(function(){' +
+      'window.wikiSearch(input.value,results,{grid:grid});' +
+    '},150);' +
+  '});' +
+  'var params=new URLSearchParams(window.location.search);' +
+  'var q=params.get(\'q\');' +
+  'if(q){input.value=q;window.wikiSearch(q,results,{grid:grid})}' +
+'})();\n</script>';
+
+  return buildPageHtml(content, 'Docs', 'Documentation', hubSearchInit);
 }
 
 // Build category page
@@ -474,12 +553,19 @@ function buildCategoryPage(cat) {
     sections.push(`<section id="${id}">${html}</section>`);
   });
 
-  const content = `<section class="tech-hero">
+  const content = `<section class="tech-hero" data-search-section>
   <h1>${cat.title}</h1>
   <p>${cat.desc}</p>
+  <div class="wiki-search-wrapper" style="margin-top:24px">
+    <svg class="wiki-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="wiki-search" placeholder="Search all documentation..." autocomplete="off">
+    <kbd class="wiki-search-hint">/</kbd>
+  </div>
 </section>
 
-<div class="tech-layout">
+<div class="wiki-results" id="wikiResults" style="display:none"></div>
+
+<div class="tech-layout" id="techLayout">
   <aside class="tech-toc" id="toc">
     <div class="tech-toc-inner glass">
       <div class="tech-toc-title">${cat.title}</div>
@@ -492,11 +578,33 @@ function buildCategoryPage(cat) {
   </main>
 </div>`;
 
-  return buildPageHtml(content, cat.title, cat.title + ' — Documentation');
+  const searchInit = '<script src="minisearch.min.js"></script>\n<script>\n(function(){' +
+  'const input=document.querySelector(\'.wiki-search\');' +
+  'const results=document.getElementById(\'wikiResults\');' +
+  'const layout=document.getElementById(\'techLayout\');' +
+  'if(!input||!results||!layout)return;' +
+  'let timer;' +
+  'input.addEventListener(\'input\',function(){' +
+    'clearTimeout(timer);' +
+    'timer=setTimeout(function(){' +
+      'window.wikiSearch(input.value,results,{techLayout:layout});' +
+    '},150);' +
+  '});' +
+  'const params=new URLSearchParams(window.location.search);' +
+  'const q=params.get(\'q\');' +
+  'if(q){input.value=q;window.wikiSearch(q,results,{techLayout:layout})}' +
+'})();\n</script>';
+
+  return buildPageHtml(content, cat.title, cat.title + ' — Documentation', searchInit);
 }
 
 // Main
 console.log('Building wiki pages...');
+
+// Search index
+const searchIndex = buildSearchIndex(categories);
+fs.writeFileSync(path.join(OUT_DIR, 'search-index.json'), JSON.stringify(searchIndex));
+console.log('  ✓ search-index.json (' + searchIndex.length + ' articles)');
 
 // Hub
 const hubHtml = buildHubPage();
@@ -509,5 +617,18 @@ for (const cat of categories) {
   fs.writeFileSync(path.join(OUT_DIR, `${cat.id}.html`), html);
   console.log(`  ✓ ${cat.id}.html`);
 }
+
+// Sync to root (legacy deploy location)
+const syncFiles = ['wiki.html', 'search-index.json'];
+for (const cat of categories) syncFiles.push(cat.id + '.html');
+const extras = ['style.css', 'theme.js', 'minisearch.min.js'];
+for (const f of extras) {
+  const src = path.join(OUT_DIR, f);
+  if (fs.existsSync(src)) syncFiles.push(f);
+}
+for (const f of syncFiles) {
+  fs.copyFileSync(path.join(OUT_DIR, f), path.join(ROOT_DIR, f));
+}
+console.log('  ✓ synced ' + syncFiles.length + ' files to root');
 
 console.log('Done!');

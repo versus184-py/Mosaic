@@ -39,12 +39,19 @@
   <a href="index.html#download" class="nav-cta">Download</a>
 </div>
 
-<section class="tech-hero">
+<section class="tech-hero" data-search-section>
   <h1>API Reference</h1>
   <p>Complete reference for Zustand stores, React hooks, UI components, utilities, and TypeScript types.</p>
+  <div class="wiki-search-wrapper" style="margin-top:24px">
+    <svg class="wiki-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="wiki-search" placeholder="Search all documentation..." autocomplete="off">
+    <kbd class="wiki-search-hint">/</kbd>
+  </div>
 </section>
 
-<div class="tech-layout">
+<div class="wiki-results" id="wikiResults" style="display:none"></div>
+
+<div class="tech-layout" id="techLayout">
   <aside class="tech-toc" id="toc">
     <div class="tech-toc-inner glass">
       <div class="tech-toc-title">API Reference</div>
@@ -1093,7 +1100,7 @@ function TopBar(): JSX.Element</code></pre>
 function SettingsDrawer(): JSX.Element</code></pre>
 <p><strong>Sections</strong>:</p>
 <ul>
-<li><strong>Theme</strong>: Grid of 2 theme selectors (Dusk, Sand)</li>
+<li><strong>Theme</strong>: Grid of 5 theme selectors (Void, Dusk, Sand, Snow, Sunrise)</li>
 <li><strong>API Keys</strong>: Per-provider masked inputs for Mistral, OpenAI, Anthropic, and Gemini (using a reusable <code>ApiKeySection</code> component). Keys are XOR-encrypted before storage.</li>
 <li><strong>Ollama</strong>: URL input field, Connect button with live status indicator, auto-detected model list</li>
 <li><strong>System Prompt</strong>: Textarea (4000 character max) for custom AI instructions</li>
@@ -1554,6 +1561,10 @@ const SAVE_DEBOUNCE = 300;                    // ms</code></pre>
 </div>
 
 <script src="theme.js"></script>
+<script src="minisearch.min.js"></script>
+<script>
+(function(){const input=document.querySelector('.wiki-search');const results=document.getElementById('wikiResults');const layout=document.getElementById('techLayout');if(!input||!results||!layout)return;let timer;input.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(function(){window.wikiSearch(input.value,results,{techLayout:layout});},150);});const params=new URLSearchParams(window.location.search);const q=params.get('q');if(q){input.value=q;window.wikiSearch(q,results,{techLayout:layout})}})();
+</script>
 <script>
 // TOC active state tracking (category pages)
 (function(){

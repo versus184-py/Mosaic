@@ -39,12 +39,19 @@
   <a href="index.html#download" class="nav-cta">Download</a>
 </div>
 
-<section class="tech-hero">
+<section class="tech-hero" data-search-section>
   <h1>Community</h1>
   <p>Contributing guide, changelog and roadmap, project governance, and future ideas.</p>
+  <div class="wiki-search-wrapper" style="margin-top:24px">
+    <svg class="wiki-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="wiki-search" placeholder="Search all documentation..." autocomplete="off">
+    <kbd class="wiki-search-hint">/</kbd>
+  </div>
 </section>
 
-<div class="tech-layout">
+<div class="wiki-results" id="wikiResults" style="display:none"></div>
+
+<div class="tech-layout" id="techLayout">
   <aside class="tech-toc" id="toc">
     <div class="tech-toc-inner glass">
       <div class="tech-toc-title">Community</div>
@@ -536,7 +543,7 @@ npx vitest run --coverage</code></pre>
 <li>Infinite spatial canvas using React Flow (@xyflow/react v12)</li>
 <li>Conversation branching — fork from any message, explore paths in parallel</li>
 <li>Mistral AI integration — streaming responses, configurable temperature, model selection</li>
-<li>2 glass UI themes: Dusk, Sand</li>
+<li>5 glass UI themes: Void, Dusk, Sand, Snow, Sunrise</li>
 <li>Inline code execution:</li>
 </ul>
 <p>  - JavaScript via sandboxed Web Worker</p>
@@ -1150,7 +1157,7 @@ SOFTWARE.</code></pre>
 <ul>
 <li><a href="community.html#changelog-and-roadmap">Changelog and Roadmap</a> — What's actually planned for upcoming releases</li>
 <li><a href="community.html#contributing-guide">Contributing Guide</a> — How to help implement these ideas</li>
-<li><a href="wiki.html">Docs Home</a> — Back to the documentation hub</li>
+<li><a href="getting-started.html#home">Home</a> — Back to the wiki home</li>
 </ul>
 </section>
   </main>
@@ -1173,6 +1180,10 @@ SOFTWARE.</code></pre>
 </div>
 
 <script src="theme.js"></script>
+<script src="minisearch.min.js"></script>
+<script>
+(function(){const input=document.querySelector('.wiki-search');const results=document.getElementById('wikiResults');const layout=document.getElementById('techLayout');if(!input||!results||!layout)return;let timer;input.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(function(){window.wikiSearch(input.value,results,{techLayout:layout});},150);});const params=new URLSearchParams(window.location.search);const q=params.get('q');if(q){input.value=q;window.wikiSearch(q,results,{techLayout:layout})}})();
+</script>
 <script>
 // TOC active state tracking (category pages)
 (function(){
